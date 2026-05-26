@@ -3,6 +3,10 @@
   "version": "2.22.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "NODE_NO_WARNINGS=1 tsx watch src/server/index.ts",

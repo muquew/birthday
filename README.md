@@ -21,7 +21,7 @@
 - 农历：`lunar-javascript`。
 - 测试：Vitest。
 
-建议使用 Node 24 或更新版本。
+生产环境必须使用 Node 24 或更新版本。
 
 ## 仓库结构
 
@@ -183,6 +183,36 @@ http://127.0.0.1:3000/xingxing
 http://127.0.0.1:3000/xingxing/admin
 ```
 
+## 服务器 Node 版本
+
+生产部署前先确认服务器使用的是 Node 24 或更新版本。Node 18 即使能执行 `npm ci`，也会因为 Vite、React Router、Vitest 和后端 `node:sqlite` 的版本要求带来构建或运行风险。
+
+```bash
+node -v
+npm -v
+```
+
+如果服务器还是 Node 18，可以安装系统级 Node 24。下面方式会把 `node` 放到 systemd 默认能找到的系统路径里：
+
+```bash
+sudo npm install -g n
+sudo n 24
+hash -r
+
+node -v
+npm -v
+sudo env PATH=/usr/local/bin:/usr/bin:/bin node -v
+```
+
+确认输出是 `v24.x.x` 后，再继续执行后面的 `npm ci` 和 `npm run build`。
+
+如果已经在 Node 18 下执行过 `npm ci`，升级 Node 后重新执行：
+
+```bash
+npm ci
+npm run build
+```
+
 ## 推荐部署：单目录 + systemd + Nginx
 
 下面以 `/opt/xingxing-birthday` 为例。
@@ -203,6 +233,8 @@ sudo cp .env.example .env
 sudo install -d -o xingxing -g xingxing data
 sudo chown -R xingxing:xingxing data
 sudoedit .env
+sudo chown root:xingxing .env
+sudo chmod 640 .env
 ```
 
 至少修改 `.env` 里的这些值：
