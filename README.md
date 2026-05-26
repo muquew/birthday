@@ -45,18 +45,6 @@
 └── vite.config.ts                  # Vite 配置
 ```
 
-本地生成物不提交：
-
-```text
-node_modules/
-dist/
-dist-server/
-data/
-output/
-.playwright-cli/
-.env
-```
-
 ## 关键文件作用
 
 - `src/client/App.tsx`：前端页面、组件、状态和交互。
@@ -96,8 +84,6 @@ output/
 也就是说，环境变量和数据库都留在项目目录里，不再拆到额外的系统级配置目录或数据目录。
 
 ## 环境变量
-
-仓库里只有一个环境变量模板：
 
 ```text
 .env.example
@@ -204,7 +190,10 @@ http://127.0.0.1:3000/xingxing/admin
 首次部署：
 
 ```bash
-sudo useradd --system --home /opt/xingxing-birthday --shell /usr/sbin/nologin xingxing
+# 创建运行服务的系统用户和用户组；已有则跳过。
+sudo getent group xingxing >/dev/null || sudo groupadd --system xingxing
+sudo id -u xingxing >/dev/null 2>&1 || sudo useradd --system --gid xingxing --home-dir /opt/xingxing-birthday --shell /usr/sbin/nologin xingxing
+
 sudo git clone <你的仓库地址> /opt/xingxing-birthday
 cd /opt/xingxing-birthday
 
@@ -216,13 +205,27 @@ sudo chown -R xingxing:xingxing data
 sudoedit .env
 ```
 
-至少修改：
+至少修改 `.env` 里的这些值：
 
 ```text
 ADMIN_PASSWORD=换成强密码
 SESSION_SECRET=换成足够长的随机字符串
 SEED_SAMPLE_DATA=false
 DATABASE_PATH=./data/birthday.sqlite
+```
+
+也可以直接用命令生成并写入。执行后终端会显示生成的管理员初始密码，请保存好：
+
+```bash
+ADMIN_PASSWORD="$(openssl rand -hex 16)"
+SESSION_SECRET="$(openssl rand -hex 48)"
+
+sudo sed -i "s/^ADMIN_PASSWORD=.*/ADMIN_PASSWORD=${ADMIN_PASSWORD}/" .env
+sudo sed -i "s/^SESSION_SECRET=.*/SESSION_SECRET=${SESSION_SECRET}/" .env
+sudo sed -i "s/^SEED_SAMPLE_DATA=.*/SEED_SAMPLE_DATA=false/" .env
+sudo sed -i "s#^DATABASE_PATH=.*#DATABASE_PATH=./data/birthday.sqlite#" .env
+
+printf 'ADMIN_PASSWORD=%s\n' "$ADMIN_PASSWORD"
 ```
 
 注册 systemd。推荐用软链接，让服务文件仍然来自项目目录：
@@ -273,17 +276,6 @@ location /xingxing/ {
 sudo nginx -t
 sudo systemctl reload nginx
 ```
-
-## 为什么不推荐纯静态部署
-
-GitHub Pages、普通 Vercel 静态部署只适合纯前端静态站。当前项目需要：
-
-- Express API。
-- SQLite 持久化数据库。
-- 管理员登录会话。
-- 导入导出和后台写入。
-
-因此推荐用服务器运行 Node 服务，再由 Nginx 反代 `/xingxing/`。
 
 ## 备份
 
