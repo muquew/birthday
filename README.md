@@ -45,7 +45,7 @@
 └── vite.config.ts                  # Vite 配置
 ```
 
-不要提交这些本地生成物：
+本地生成物不提交：
 
 ```text
 node_modules/
@@ -71,7 +71,29 @@ output/
 - `src/server/routes.ts`：公开 API、后台 API、导入导出和设置接口。
 - `src/shared/birthday.ts`：公历/农历生日计算和下次生日排序。
 - `src/shared/validation.ts`：输入校验规则。
-- `deploy/xingxing-birthday.service`：推荐生产部署的 systemd 服务模板。
+- `deploy/xingxing-birthday.service`：systemd 服务模板。
+
+## 单目录原则
+
+推荐把应用相关文件都放在同一个项目目录里，例如：
+
+```text
+/opt/xingxing-birthday/
+├── .env                 # 生产环境变量，来自 .env.example
+├── data/                # SQLite 数据库目录
+├── dist/                # 前端构建产物
+├── dist-server/         # 后端构建产物
+├── deploy/              # systemd 模板
+├── src/                 # 源码
+└── package.json
+```
+
+系统外部只保留必要入口：
+
+- `/etc/systemd/system/xingxing-birthday.service`：systemd 服务注册，可用软链接指向项目里的模板。
+- Nginx 站点配置：反代 `/xingxing/` 到 Node 服务。
+
+也就是说，环境变量和数据库都留在项目目录里，不再拆到额外的系统级配置目录或数据目录。
 
 ## 环境变量
 
@@ -81,16 +103,10 @@ output/
 .env.example
 ```
 
-本地或手动部署时复制到项目根目录：
+部署时复制到项目根目录：
 
 ```bash
 cp .env.example .env
-```
-
-systemd 部署时复制到 `/etc`：
-
-```bash
-sudo cp .env.example /etc/xingxing-birthday.env
 ```
 
 变量含义：
@@ -107,7 +123,7 @@ sudo cp .env.example /etc/xingxing-birthday.env
 | `ADMIN_PASSWORD` | 数据库首次创建管理员时使用的密码，生产必须修改。 |
 | `SESSION_SECRET` | 管理员登录 Cookie 签名密钥，生产必须换成长随机字符串。 |
 | `SEED_SAMPLE_DATA` | 空数据库是否写入示例生日。生产建议 `false`。 |
-| `DATABASE_PATH` | 可选。SQLite 数据库路径。systemd 服务已经单独设置生产路径。 |
+| `DATABASE_PATH` | SQLite 数据库路径。默认 `./data/birthday.sqlite`，相对于项目根目录。 |
 
 `DATABASE_PATH` 不会和数据库冲突。它只决定 SQLite 文件放在哪里：
 
@@ -125,13 +141,15 @@ sudo cp .env.example /etc/xingxing-birthday.env
 - `site_settings`：站点设置和祝福模板。
 - `admin_operation_logs`：操作日志。
 
-仓库已清空 `data/`，并通过 `.gitignore` 忽略。生产部署建议让 systemd 使用：
+默认数据库路径：
 
 ```text
-/var/lib/xingxing-birthday/birthday.sqlite
+./data/birthday.sqlite
 ```
 
-## 构建产物是什么
+`data/` 已被 `.gitignore` 忽略，适合放在部署目录中长期保留。
+
+## 构建产物
 
 执行：
 
@@ -166,6 +184,7 @@ Express 会统一处理：
 
 ```bash
 npm ci
+cp .env.example .env
 npm test
 npm run build
 npm start
@@ -178,15 +197,9 @@ http://127.0.0.1:3000/xingxing
 http://127.0.0.1:3000/xingxing/admin
 ```
 
-## 推荐部署：Node + systemd + Nginx
+## 推荐部署：单目录 + systemd + Nginx
 
-推荐目录：
-
-```text
-/opt/xingxing-birthday                    # 项目代码
-/etc/xingxing-birthday.env                # 环境变量
-/var/lib/xingxing-birthday/birthday.sqlite # SQLite 数据库
-```
+下面以 `/opt/xingxing-birthday` 为例。
 
 首次部署：
 
@@ -194,11 +207,13 @@ http://127.0.0.1:3000/xingxing/admin
 sudo useradd --system --home /opt/xingxing-birthday --shell /usr/sbin/nologin xingxing
 sudo git clone <你的仓库地址> /opt/xingxing-birthday
 cd /opt/xingxing-birthday
+
 sudo npm ci
 sudo npm run build
-sudo cp .env.example /etc/xingxing-birthday.env
-sudo cp deploy/xingxing-birthday.service /etc/systemd/system/xingxing-birthday.service
-sudoedit /etc/xingxing-birthday.env
+sudo cp .env.example .env
+sudo install -d -o xingxing -g xingxing data
+sudo chown -R xingxing:xingxing data
+sudoedit .env
 ```
 
 至少修改：
@@ -207,11 +222,13 @@ sudoedit /etc/xingxing-birthday.env
 ADMIN_PASSWORD=换成强密码
 SESSION_SECRET=换成足够长的随机字符串
 SEED_SAMPLE_DATA=false
+DATABASE_PATH=./data/birthday.sqlite
 ```
 
-启动：
+注册 systemd。推荐用软链接，让服务文件仍然来自项目目录：
 
 ```bash
+sudo ln -sf /opt/xingxing-birthday/deploy/xingxing-birthday.service /etc/systemd/system/xingxing-birthday.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now xingxing-birthday
 sudo systemctl status xingxing-birthday
@@ -273,7 +290,8 @@ GitHub Pages、普通 Vercel 静态部署只适合纯前端静态站。当前项
 最重要的是备份 SQLite 数据库：
 
 ```bash
-sudo cp /var/lib/xingxing-birthday/birthday.sqlite ./birthday.sqlite.backup
+cd /opt/xingxing-birthday
+sudo cp data/birthday.sqlite ./birthday.sqlite.backup
 ```
 
 也可以在管理员后台导出 CSV/JSON。

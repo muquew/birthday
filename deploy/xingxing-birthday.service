@@ -7,17 +7,15 @@ Type=simple
 User=xingxing
 Group=xingxing
 WorkingDirectory=/opt/xingxing-birthday
-Environment=DATABASE_PATH=/var/lib/xingxing-birthday/birthday.sqlite
-EnvironmentFile=/etc/xingxing-birthday.env
+EnvironmentFile=/opt/xingxing-birthday/.env
 ExecStart=/usr/bin/env node dist-server/server/index.js
 Restart=always
 RestartSec=5
-StateDirectory=xingxing-birthday
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
 ProtectSystem=full
-ReadWritePaths=/var/lib/xingxing-birthday
+ReadWritePaths=/opt/xingxing-birthday/data
 
 [Install]
 WantedBy=multi-user.target
