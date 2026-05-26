@@ -194,7 +194,90 @@ location = /xingxing {
 }
 ```
 
-长期运行建议使用 systemd、pm2 或其他进程管理工具。
+## systemd 部署
+
+仓库提供了一个 systemd 模板：
+
+```text
+deploy/xingxing-birthday.service
+deploy/xingxing-birthday.env.example
+```
+
+推荐生产目录：
+
+```text
+/opt/xingxing-birthday                 # 项目代码
+/etc/xingxing-birthday.env             # 生产环境变量
+/var/lib/xingxing-birthday/birthday.sqlite  # SQLite 数据库
+```
+
+服务器首次部署：
+
+```bash
+sudo useradd --system --home /opt/xingxing-birthday --shell /usr/sbin/nologin xingxing
+sudo git clone <你的仓库地址> /opt/xingxing-birthday
+cd /opt/xingxing-birthday
+sudo npm ci
+sudo npm run build
+sudo cp deploy/xingxing-birthday.env.example /etc/xingxing-birthday.env
+sudo cp deploy/xingxing-birthday.service /etc/systemd/system/xingxing-birthday.service
+```
+
+编辑生产配置：
+
+```bash
+sudoedit /etc/xingxing-birthday.env
+```
+
+至少确认这些值：
+
+```text
+NODE_ENV=production
+BASE_PATH=/xingxing
+ADMIN_PASSWORD=换成强密码
+SESSION_SECRET=换成足够长的随机字符串
+SEED_SAMPLE_DATA=false
+```
+
+`deploy/xingxing-birthday.service` 默认把数据库放在：
+
+```text
+/var/lib/xingxing-birthday/birthday.sqlite
+```
+
+这是 systemd 的持久化数据目录，不会随代码更新被覆盖。服务启动后 systemd 会自动创建 `/var/lib/xingxing-birthday` 并交给 `xingxing` 用户使用。
+
+启用服务：
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now xingxing-birthday
+sudo systemctl status xingxing-birthday
+```
+
+查看日志：
+
+```bash
+journalctl -u xingxing-birthday -f
+```
+
+更新部署：
+
+```bash
+cd /opt/xingxing-birthday
+sudo git pull
+sudo npm ci
+sudo npm run build
+sudo systemctl restart xingxing-birthday
+```
+
+如果服务启动时报 `node` 找不到，先运行：
+
+```bash
+which node
+```
+
+然后把所在目录补到 `/etc/xingxing-birthday.env` 的 `PATH`，或者直接修改 `/etc/systemd/system/xingxing-birthday.service` 里的 `ExecStart`。
 
 ## Git 提交前检查
 
