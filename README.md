@@ -287,6 +287,32 @@ sudo systemctl restart xingxing-birthday
 
 ## Nginx 反代
 
+如果 Nginx 的站点文件是在 `http {}` 层被 include，例如 `/usr/local/nginx/conf/sites-enabled/birthday`，文件里要写完整的 `server {}`，不能只写 `location`。
+
+```nginx
+server {
+  listen 80;
+  server_name example.com;
+
+  location = /xingxing {
+    return 301 /xingxing/;
+  }
+
+  location /xingxing/ {
+    proxy_pass http://127.0.0.1:3000/xingxing/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+把 `server_name` 改成你的真实域名；如果 `.env` 里改了 `PORT`，这里的端口也要同步修改。
+
+如果你的 include 确认位于已有 `server {}` 内部，才只写 `location` 片段：
+
 ```nginx
 location = /xingxing {
   return 301 /xingxing/;
