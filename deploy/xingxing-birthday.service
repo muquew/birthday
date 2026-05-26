@@ -7,6 +7,7 @@ Type=simple
 User=xingxing
 Group=xingxing
 WorkingDirectory=/opt/xingxing-birthday
+Environment=DATABASE_PATH=/var/lib/xingxing-birthday/birthday.sqlite
 EnvironmentFile=/etc/xingxing-birthday.env
 ExecStart=/usr/bin/env node dist-server/server/index.js
 Restart=always
