@@ -1,0 +1,234 @@
+import type { Server } from "node:http";
+import type { AddressInfo } from "node:net";
+import type { Express } from "express";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+type JsonResponse<T> = {
+  status: number;
+  headers: Headers;
+  body: T;
+};
+
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "xingxing-api-test-"));
+let server: Server;
+let baseUrl = "";
+let adminCookie = "";
+
+describe.sequential("admin API integration", () => {
+  beforeAll(async () => {
+    vi.resetModules();
+    process.env.DATABASE_PATH = path.join(tempRoot, "birthday.sqlite");
+    process.env.SEED_SAMPLE_DATA = "false";
+    process.env.ADMIN_USERNAME = "admin";
+    process.env.ADMIN_PASSWORD = "admin123456";
+    process.env.SESSION_SECRET = "test-session-secret-with-enough-length";
+
+    const { createServerApp } = await import("./app.js");
+    server = await listen(createServerApp());
+    const address = server.address() as AddressInfo;
+    baseUrl = `http://127.0.0.1:${address.port}/xingxing/api`;
+
+    const login = await requestJson<{ user: { username: string } }>("/auth/login", {
+      method: "POST",
+      body: {
+        username: "admin",
+        password: "admin123456"
+      },
+      auth: false
+    });
+    expect(login.status).toBe(200);
+    expect(login.body.user.username).toBe("admin");
+    adminCookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
+    expect(adminCookie).toContain("xingxing_admin_session=");
+  });
+
+  afterAll(async () => {
+    await closeServer();
+  });
+
+  it("rejects header-only CSV and empty JSON imports with explicit preview errors", async () => {
+    const csvPreview = await requestJson<{ preview: { invalidCount: number; rows: Array<{ errors: string[] }> } }>(
+      "/admin/import/csv",
+      {
+        method: "POST",
+        body: {
+          dryRun: true,
+          csv: "name,calendarType,month,day\n"
+        }
+      }
+    );
+    expect(csvPreview.status).toBe(200);
+    expect(csvPreview.body.preview.invalidCount).toBe(1);
+    expect(csvPreview.body.preview.rows[0].errors).toContain("CSV 没有可导入的记录");
+
+    const csvImport = await requestJson<{ error: string }>("/admin/import/csv", {
+      method: "POST",
+      body: {
+        dryRun: false,
+        csv: "name,calendarType,month,day\n"
+      }
+    });
+    expect(csvImport.status).toBe(400);
+    expect(csvImport.body.error).toBe("CSV 存在错误，未导入");
+
+    const jsonPreview = await requestJson<{ preview: { invalidCount: number; rows: Array<{ errors: string[] }> } }>(
+      "/admin/import/json",
+      {
+        method: "POST",
+        body: {
+          dryRun: true,
+          json: "[]",
+          mode: "append"
+        }
+      }
+    );
+    expect(jsonPreview.status).toBe(200);
+    expect(jsonPreview.body.preview.invalidCount).toBe(1);
+    expect(jsonPreview.body.preview.rows[0].errors).toContain("JSON 没有可导入的记录");
+  });
+
+  it("keeps public birthday responses free of admin-only fields", async () => {
+    const created = await requestJson<{ birthday: { id: string } }>("/admin/birthdays", {
+      method: "POST",
+      body: {
+        name: "公开接口校验",
+        calendarType: "gregorian",
+        month: 5,
+        day: 25,
+        displayAge: false,
+        visible: true
+      }
+    });
+    expect(created.status).toBe(201);
+
+    const publicBirthdays = await requestJson<{ birthdays: Array<Record<string, unknown>> }>(
+      "/public/birthdays",
+      {
+        auth: false
+      }
+    );
+    expect(publicBirthdays.status).toBe(200);
+    const exposed = publicBirthdays.body.birthdays.find((item) => item.name === "公开接口校验");
+    expect(exposed).toBeTruthy();
+    expect(exposed).not.toHaveProperty("createdAt");
+    expect(exposed).not.toHaveProperty("updatedAt");
+    expect(exposed).not.toHaveProperty("updatedBy");
+    expect(exposed).not.toHaveProperty("searchableText");
+  });
+
+  it("records only the changed settings field and keeps millisecond log timestamps", async () => {
+    const current = await requestJson<{
+      settings: {
+        siteName: string;
+        correctionContact: string;
+        defaultUpcomingDays: number;
+        birthdayGreetingTemplates: string[];
+      };
+    }>("/admin/settings");
+    expect(current.status).toBe(200);
+
+    const updated = await requestJson<{ settings: { correctionContact: string } }>("/admin/settings", {
+      method: "PUT",
+      body: {
+        ...current.body.settings,
+        correctionContact: `${current.body.settings.correctionContact} 请联系管理员复核。`
+      }
+    });
+    expect(updated.status).toBe(200);
+
+    const logs = await requestJson<{ logs: Array<{ action: string; detail?: string; createdAt: string }> }>(
+      "/admin/operation-logs?limit=20"
+    );
+    expect(logs.status).toBe(200);
+    const settingsLog = logs.body.logs.find((log) => log.action === "update_settings");
+    expect(settingsLog).toBeTruthy();
+    expect(settingsLog?.createdAt).toMatch(/\.\d{3}Z$/);
+    expect(JSON.parse(settingsLog?.detail ?? "{}")).toEqual({
+      changedFields: ["公开纠错说明"]
+    });
+  });
+
+  it("records one JSON replace import log without a lower-level replace log", async () => {
+    const imported = await requestJson<{ created: unknown[]; mode: string }>("/admin/import/json", {
+      method: "POST",
+      body: {
+        dryRun: false,
+        mode: "replace",
+        json: JSON.stringify([
+          {
+            name: "JSON 替换一",
+            calendarType: "gregorian",
+            month: 6,
+            day: 1
+          },
+          {
+            name: "JSON 替换二",
+            calendarType: "lunar",
+            month: 8,
+            day: 15
+          }
+        ])
+      }
+    });
+    expect(imported.status).toBe(201);
+    expect(imported.body.mode).toBe("replace");
+    expect(imported.body.created).toHaveLength(2);
+
+    const logs = await requestJson<{ logs: Array<{ action: string }> }>("/admin/operation-logs?limit=50");
+    expect(logs.status).toBe(200);
+    expect(logs.body.logs.filter((log) => log.action === "import_json_replace")).toHaveLength(1);
+    expect(logs.body.logs.filter((log) => log.action === "replace_birthdays")).toHaveLength(0);
+  });
+});
+
+function listen(app: Express): Promise<Server> {
+  return new Promise((resolve) => {
+    const nextServer = app.listen(0, "127.0.0.1", () => resolve(nextServer));
+  });
+}
+
+function closeServer(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!server.listening) {
+      resolve();
+      return;
+    }
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
+async function requestJson<T>(
+  route: string,
+  options: {
+    method?: string;
+    body?: unknown;
+    auth?: boolean;
+  } = {}
+): Promise<JsonResponse<T>> {
+  const headers = new Headers();
+  if (options.body !== undefined) {
+    headers.set("content-type", "application/json");
+  }
+  if (options.auth !== false && adminCookie) {
+    headers.set("cookie", adminCookie);
+  }
+  const response = await fetch(`${baseUrl}${route}`, {
+    method: options.method ?? "GET",
+    headers,
+    body: options.body === undefined ? undefined : JSON.stringify(options.body)
+  });
+  return {
+    status: response.status,
+    headers: response.headers,
+    body: (await response.json()) as T
+  };
+}
