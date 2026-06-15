@@ -356,6 +356,7 @@ function HomePage() {
   const upcomingDays = settings.data?.defaultUpcomingDays ?? 30;
   const today = birthdays.data?.filter((item) => item.occurrence?.daysUntil === 0) ?? [];
   const nextBirthday = birthdays.data?.find((item) => (item.occurrence?.daysUntil ?? -1) > 0);
+  const totalBirthdays = birthdays.data?.length ?? 0;
   const starBirthdays = birthdays.data?.slice(0, 7) ?? [];
   const greetingTemplates =
     settings.data?.birthdayGreetingTemplates ?? DEFAULT_SITE_SETTINGS.birthdayGreetingTemplates;
@@ -438,9 +439,14 @@ function HomePage() {
           </div>
         </div>
         <div className="home-right-column">
-          <StarStageCard loading={birthdays.loading} birthdays={starBirthdays} />
+          <StarStageCard
+            loading={birthdays.loading}
+            birthdays={starBirthdays}
+            activeWindowDays={upcomingDays}
+            total={totalBirthdays}
+          />
           <StarStats
-            total={birthdays.data?.length ?? 0}
+            total={totalBirthdays}
             today={today.length}
             next={nextBirthday}
             upcomingCount={upcoming.length}
@@ -555,11 +561,15 @@ function StarStats({
 }
 
 function StarStageCard({
+  activeWindowDays,
   loading,
-  birthdays
+  birthdays,
+  total
 }: {
+  activeWindowDays: number;
   loading: boolean;
   birthdays: PublicBirthday[];
+  total: number;
 }) {
   const points = [
     { x: 128, y: 20 },
@@ -580,14 +590,29 @@ function StarStageCard({
   ];
   const next = birthdays[0];
   const nextDays = next?.occurrence?.daysUntil;
+  const displayCount = birthdays.length;
+  const isLit = (birthday?: PublicBirthday) => {
+    const daysUntil = birthday?.occurrence?.daysUntil;
+    return typeof daysUntil === "number" && daysUntil >= 0 && daysUntil <= activeWindowDays;
+  };
+  const litCount = birthdays.filter(isLit).length;
+  const scopeLabel = loading
+    ? "读取中"
+    : total > 0
+      ? `亮${litCount}/7`
+      : "暂无";
   const hint =
     loading
       ? "正在整理近期生日星序"
-      : nextDays === 0
-        ? "今天的生日已经亮起，下一份祝福也在路上"
-        : next
-          ? `下一份祝福还有 ${nextDays ?? "?"} 天，近期生日沿星线排列`
-          : "添加生日后，近期记录会沿星线出现";
+      : !next
+        ? "添加生日后，会按下次日期排出最近的生日星序"
+        : litCount === 0
+          ? `最近一位还有 ${nextDays ?? "?"} 天，进入 ${activeWindowDays} 天内后会点亮`
+          : nextDays === 0
+            ? `今天的生日已亮起，${activeWindowDays} 天内共点亮 ${litCount} 颗`
+            : total > 7
+              ? `${activeWindowDays} 天内点亮 ${litCount} 颗，最近 ${displayCount} 位生日沿星线预告`
+              : `${activeWindowDays} 天内点亮 ${litCount} 颗，近期生日沿星线排列`;
 
   return (
     <article className="star-stage-card">
@@ -595,7 +620,7 @@ function StarStageCard({
         <svg className="dipper-map" viewBox="0 0 150 94" role="img" aria-label="最近七个生日组成的北斗七星">
           {lines.map(([from, to]) => (
             <line
-              className={`dipper-line ${birthdays[from] && birthdays[to] ? "active" : ""}`}
+              className={`dipper-line ${isLit(birthdays[from]) && isLit(birthdays[to]) ? "active" : ""}`}
               key={`${from}-${to}`}
               x1={points[from].x}
               y1={points[from].y}
@@ -605,10 +630,11 @@ function StarStageCard({
           ))}
           {points.map((point, index) => {
             const birthday = birthdays[index];
+            const lit = isLit(birthday);
             return (
               <g key={`${point.x}-${point.y}`}>
                 <circle
-                  className={`dipper-star ${birthday ? "active" : "empty"} ${
+                  className={`dipper-star ${lit ? "active" : birthday ? "preview" : "empty"} ${
                     birthday?.occurrence?.daysUntil === 0 ? "today" : ""
                   }`}
                   cx={point.x}
@@ -617,7 +643,9 @@ function StarStageCard({
                 />
                 <title>
                   {birthday
-                    ? `${birthday.name}，${formatCountdown(birthday.occurrence?.daysUntil)}`
+                    ? `${birthday.name}，${formatCountdown(birthday.occurrence?.daysUntil)}${
+                        lit ? "，已点亮" : "，预告星"
+                      }`
                     : "等待生日记录"}
                 </title>
               </g>
@@ -629,7 +657,7 @@ function StarStageCard({
       <div className="stage-copy">
         <div className="stage-copy-top">
           <span>北斗星图</span>
-          <small>{loading ? "读取中" : `${birthdays.length}/7`}</small>
+          <small>{scopeLabel}</small>
         </div>
         <strong>{loading ? "读取星图" : next?.name ?? "生日星图"}</strong>
         <small>{hint}</small>

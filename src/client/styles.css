@@ -440,8 +440,8 @@ p {
 }
 
 .dipper-star {
-  fill: rgba(253, 248, 234, 0.4);
-  stroke: rgba(253, 248, 234, 0.52);
+  fill: rgba(253, 248, 234, 0.2);
+  stroke: rgba(253, 248, 234, 0.3);
   stroke-width: 0.7;
   transition:
     fill 180ms ease,
@@ -449,8 +449,14 @@ p {
     filter 180ms ease;
 }
 
+.dipper-star.preview {
+  fill: rgba(253, 248, 234, 0.38);
+  stroke: rgba(247, 216, 122, 0.42);
+}
+
 .dipper-star.active {
   fill: var(--accent-contrast);
+  stroke: rgba(255, 247, 163, 0.82);
   filter: drop-shadow(0 0 7px rgba(247, 216, 122, 0.95));
 }
 
