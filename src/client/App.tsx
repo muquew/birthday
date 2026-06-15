@@ -265,6 +265,7 @@ function RequireAdmin({ children }: { children: ReactNode }) {
 function PublicLayout() {
   const settings = usePublicSettings();
   const siteName = settings.data?.siteName ?? "星星生日墙";
+  const correctionContact = settings.data?.correctionContact?.trim();
   const publicNav = (
     <>
       <NavLink to="/">
@@ -297,6 +298,12 @@ function PublicLayout() {
       <main>
         <Outlet />
       </main>
+      {correctionContact ? (
+        <footer className="public-footer">
+          <span>纠错</span>
+          <small>{correctionContact}</small>
+        </footer>
+      ) : null}
       <nav className="mobile-tabbar" aria-label="移动端公共导航">
         {publicNav}
       </nav>

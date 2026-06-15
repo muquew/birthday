@@ -157,6 +157,32 @@ a:focus-visible {
   display: none;
 }
 
+.public-footer {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 28px;
+  padding: 18px 0 0;
+  text-align: center;
+}
+
+.public-footer span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--sage-dark);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 3px 8px;
+}
+
+.public-footer small {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
 .public-header {
   min-height: 76px;
   display: flex;
@@ -2346,6 +2372,13 @@ p {
     align-items: flex-end;
     flex-direction: column;
     gap: 8px;
+  }
+
+  .public-footer {
+    align-items: center;
+    flex-direction: column;
+    margin-top: 20px;
+    padding-bottom: 72px;
   }
 
   .theme-control.compact {
