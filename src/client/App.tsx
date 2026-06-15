@@ -22,6 +22,7 @@ import {
   Save,
   Search,
   Settings,
+  ShieldCheck,
   Sparkles,
   Tags,
   Trash2,
@@ -56,6 +57,8 @@ import type {
   BirthdayWriteOptions,
   BirthdayView,
   CalendarType,
+  DataAuditIssue,
+  DataAuditReport,
   ImportPreview,
   JsonImportMode,
   SiteSettings
@@ -158,6 +161,7 @@ export function App() {
             <Route index element={<AdminBirthdaysPage />} />
             <Route path="birthdays" element={<Navigate to="/admin" replace />} />
             <Route path="import" element={<ImportExportPage />} />
+            <Route path="audit" element={<AdminDataAuditPage />} />
             <Route path="logs" element={<AdminLogsPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
           </Route>
@@ -324,6 +328,10 @@ function AdminLayout() {
           <NavLink to="/admin/import">
             <FileUp size={18} aria-hidden />
             导入备份
+          </NavLink>
+          <NavLink to="/admin/audit">
+            <ShieldCheck size={18} aria-hidden />
+            数据巡检
           </NavLink>
           <NavLink to="/admin/logs">
             <History size={18} aria-hidden />
@@ -1477,6 +1485,115 @@ function AdminLogsPage() {
       </section>
     </div>
   );
+}
+
+function AdminDataAuditPage() {
+  const audit = useAdminDataAudit();
+  const issues = audit.data?.issues ?? [];
+  const seriousIssues = issues.filter((issue) => issue.severity !== "info");
+
+  return (
+    <div className="admin-flow">
+      <AdminTitle title="数据巡检" />
+      {audit.error ? <Notice tone="danger">{audit.error}</Notice> : null}
+      <section className="admin-section audit-overview-section">
+        <SectionTitle
+          title="巡检总览"
+          action={
+            audit.data ? (
+              <span className="log-title-note">
+                <ShieldCheck size={15} aria-hidden />
+                {formatDateTime(audit.data.generatedAt)}
+              </span>
+            ) : null
+          }
+        />
+        {audit.loading ? (
+          <InlineLoading />
+        ) : audit.data ? (
+          <div className="audit-summary-grid">
+            <AuditSummaryCard label="记录总数" value={audit.data.totalRecords} />
+            <AuditSummaryCard label="巡检项" value={audit.data.issueCount} />
+            <AuditSummaryCard label="需关注" value={audit.data.attentionCount} tone={seriousIssues.length > 0 ? "warn" : "ok"} />
+          </div>
+        ) : null}
+      </section>
+
+      {!audit.loading && audit.data && issues.length === 0 ? (
+        <Notice tone="success">当前没有发现需要关注的数据问题。</Notice>
+      ) : null}
+
+      {issues.length > 0 ? (
+        <section className="audit-issue-grid" aria-label="数据巡检结果">
+          {issues.map((issue) => (
+            <AuditIssueCard issue={issue} key={issue.id} />
+          ))}
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function AuditSummaryCard({
+  label,
+  value,
+  tone = "neutral"
+}: {
+  label: string;
+  value: number;
+  tone?: "neutral" | "ok" | "warn";
+}) {
+  return (
+    <article className={`audit-summary-card ${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </article>
+  );
+}
+
+function AuditIssueCard({ issue }: { issue: DataAuditIssue }) {
+  const visibleRecords = issue.birthdays.slice(0, 8);
+  const extraCount = issue.birthdays.length - visibleRecords.length;
+  return (
+    <article className={`audit-card ${issue.severity}`}>
+      <div className="audit-card-head">
+        <span>{auditSeverityLabel(issue.severity)}</span>
+        <strong>{issue.title}</strong>
+        <em>{issue.count} 条</em>
+      </div>
+      <p>{issue.description}</p>
+      <div className="audit-record-list">
+        {visibleRecords.map((birthday) => (
+          <div className="audit-record" key={birthday.id}>
+            <strong>{birthday.name}</strong>
+            <span>{birthdayDateText(birthday)}</span>
+            <small>{auditRecordMeta(birthday)}</small>
+          </div>
+        ))}
+        {extraCount > 0 ? <span className="audit-more">还有 {extraCount} 条</span> : null}
+      </div>
+    </article>
+  );
+}
+
+function auditSeverityLabel(severity: DataAuditIssue["severity"]): string {
+  if (severity === "bad") {
+    return "需处理";
+  }
+  if (severity === "warn") {
+    return "建议复核";
+  }
+  return "留意";
+}
+
+function auditRecordMeta(birthday: BirthdayView): string {
+  return [
+    birthday.group ?? "未分组",
+    birthday.visible ? "公开" : "隐藏",
+    birthday.tags.length > 0 ? birthday.tags.join(" / ") : undefined
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function AdminBatchToolbar({
@@ -2792,6 +2909,27 @@ function useAdminOperationLogs(limit = 80): LoadState<AdminOperationLog[]> {
       active = false;
     };
   }, [limit]);
+  return state;
+}
+
+function useAdminDataAudit(): LoadState<DataAuditReport> {
+  const [state, setState] = useState<LoadState<DataAuditReport>>({ loading: true });
+  useEffect(() => {
+    let active = true;
+    api
+      .adminDataAudit()
+      .then((result) => active && setState({ loading: false, data: result.audit }))
+      .catch((error) =>
+        active &&
+        setState({
+          loading: false,
+          error: error instanceof Error ? error.message : "读取失败"
+        })
+      );
+    return () => {
+      active = false;
+    };
+  }, []);
   return state;
 }
 

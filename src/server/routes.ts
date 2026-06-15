@@ -31,6 +31,8 @@ import type {
   BirthdayInput,
   BirthdayRecord,
   BirthdayView,
+  DataAuditIssue,
+  DataAuditReport,
   ImportPreview,
   ImportPreviewRow,
   JsonImportMode,
@@ -150,6 +152,10 @@ function createAdminRouter() {
 
   router.get("/birthdays", (_req, res) => {
     res.json({ birthdays: adminViews() });
+  });
+
+  router.get("/data-audit", (_req, res) => {
+    res.json({ audit: buildDataAuditReport(adminViews()) });
   });
 
   router.post("/birthdays/preview", (req, res, next) => {
@@ -394,6 +400,163 @@ function adminViews() {
 
 function adminView(record: BirthdayRecord) {
   return makeBirthdayView(record, todayInTimeZone());
+}
+
+function buildDataAuditReport(records: BirthdayView[]): DataAuditReport {
+  const issues = [
+    ...groupAuditIssues(
+      records,
+      "exactDuplicate",
+      "同名同日期重复",
+      "这些记录姓名和生日完全一致，建议确认是否为重复录入。",
+      "bad",
+      (record) => birthdayIdentity(record),
+      (group) => group.length > 1
+    ),
+    ...groupAuditIssues(
+      records,
+      "sameName",
+      "同名记录",
+      "同名可以保留，但建议用分组、标签或备注区分。",
+      "warn",
+      (record) => normalizePersonName(record.name),
+      (group) => group.length > 1
+    ),
+    ...groupAuditIssues(
+      records,
+      "sameDate",
+      "同生日多人",
+      "多人同一天生日是正常情况，发布前可顺手确认名单。",
+      "info",
+      birthdayDateKey,
+      (group) => group.length > 1
+    ),
+    listAuditIssue(
+      "leapMonth",
+      "农历闰月记录",
+      "闰月规则需要符合本人习惯，建议上线前复核。",
+      "warn",
+      records.filter((record) => record.calendarType === "lunar" && record.isLeapMonth)
+    ),
+    listAuditIssue(
+      "gregorianLeapDay",
+      "公历 2 月 29 日",
+      "闰日生日需要确认非闰年展示习惯。",
+      "info",
+      records.filter((record) => record.calendarType === "gregorian" && record.month === 2 && record.day === 29)
+    ),
+    listAuditIssue(
+      "displayAgeMissingYear",
+      "展示年龄但缺少年份",
+      "开启展示年龄时需要填写年份，否则公开页无法计算年龄。",
+      "bad",
+      records.filter((record) => record.displayAge && !record.year)
+    ),
+    listAuditIssue(
+      "longName",
+      "姓名较长",
+      "较长姓名可能影响手机端排版，建议确认显示效果。",
+      "warn",
+      records.filter((record) => record.name.length > 16)
+    ),
+    listAuditIssue(
+      "manyTags",
+      "标签较多",
+      "标签太多会降低后台维护效率，建议保留最有用的几个。",
+      "info",
+      records.filter((record) => record.tags.length > 5)
+    ),
+    listAuditIssue(
+      "longNote",
+      "备注较长",
+      "备注只在后台使用，过长时建议拆成更短的维护信息。",
+      "info",
+      records.filter((record) => (record.note?.length ?? 0) > 120)
+    ),
+    listAuditIssue(
+      "hidden",
+      "隐藏记录",
+      "隐藏记录不会出现在公开页面，发布前可确认是否符合预期。",
+      "info",
+      records.filter((record) => !record.visible)
+    ),
+    listAuditIssue(
+      "ungrouped",
+      "未分组记录",
+      "分组不是必填项；如果未来人数变多，分组能让后台维护更轻松。",
+      "info",
+      records.filter((record) => !record.group)
+    )
+  ].filter((issue): issue is DataAuditIssue => Boolean(issue && issue.count > 0));
+
+  return {
+    generatedAt: new Date().toISOString(),
+    totalRecords: records.length,
+    issueCount: issues.length,
+    attentionCount: issues.filter((issue) => issue.severity !== "info").length,
+    issues
+  };
+}
+
+function groupAuditIssues(
+  records: BirthdayView[],
+  kind: DataAuditIssue["kind"],
+  title: string,
+  description: string,
+  severity: DataAuditIssue["severity"],
+  keyFor: (record: BirthdayView) => string,
+  shouldInclude: (group: BirthdayView[]) => boolean
+): DataAuditIssue[] {
+  const groups = new Map<string, BirthdayView[]>();
+  for (const record of records) {
+    const key = keyFor(record);
+    groups.set(key, [...(groups.get(key) ?? []), record]);
+  }
+  return Array.from(groups.entries())
+    .filter(([, group]) => shouldInclude(group))
+    .map(([key, group]) => ({
+      id: `${kind}:${key}`,
+      kind,
+      severity,
+      title,
+      description,
+      count: group.length,
+      birthdays: group
+    }));
+}
+
+function listAuditIssue(
+  kind: DataAuditIssue["kind"],
+  title: string,
+  description: string,
+  severity: DataAuditIssue["severity"],
+  birthdays: BirthdayView[]
+): DataAuditIssue | undefined {
+  if (birthdays.length === 0) {
+    return undefined;
+  }
+  return {
+    id: kind,
+    kind,
+    severity,
+    title,
+    description,
+    count: birthdays.length,
+    birthdays
+  };
+}
+
+function normalizePersonName(value: string): string {
+  return value.trim().replace(/\s+/g, "").toLowerCase();
+}
+
+function birthdayDateKey(record: BirthdayView): string {
+  return [
+    record.calendarType,
+    record.isLeapMonth ? "leap" : "normal",
+    record.month,
+    record.day
+  ].join("|");
 }
 
 function toPublicView(view: BirthdayView) {

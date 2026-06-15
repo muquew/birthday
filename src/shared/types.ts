@@ -74,6 +74,37 @@ export type AdminSummary = {
   lunarAttentionCount: number;
 };
 
+export type DataAuditSeverity = "bad" | "warn" | "info";
+
+export type DataAuditIssue = {
+  id: string;
+  kind:
+    | "exactDuplicate"
+    | "sameName"
+    | "sameDate"
+    | "leapMonth"
+    | "gregorianLeapDay"
+    | "displayAgeMissingYear"
+    | "longName"
+    | "manyTags"
+    | "longNote"
+    | "hidden"
+    | "ungrouped";
+  severity: DataAuditSeverity;
+  title: string;
+  description: string;
+  count: number;
+  birthdays: BirthdayView[];
+};
+
+export type DataAuditReport = {
+  generatedAt: string;
+  totalRecords: number;
+  issueCount: number;
+  attentionCount: number;
+  issues: DataAuditIssue[];
+};
+
 export type ImportPreviewRow = {
   rowNumber: number;
   input: Partial<BirthdayInput> & Record<string, unknown>;

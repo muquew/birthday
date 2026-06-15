@@ -4,6 +4,7 @@ import type {
   BirthdayInput,
   BirthdayWriteOptions,
   BirthdayView,
+  DataAuditReport,
   ImportOptions,
   ImportPreview,
   JsonImportMode,
@@ -86,6 +87,8 @@ export const api = {
     request<{ birthdays: PublicBirthday[] }>("/public/birthdays"),
   adminBirthdays: () =>
     request<{ birthdays: BirthdayView[] }>("/admin/birthdays"),
+  adminDataAudit: () =>
+    request<{ audit: DataAuditReport }>("/admin/data-audit"),
   previewBirthday: (input: BirthdayInput) =>
     request<{ birthday: BirthdayView }>("/admin/birthdays/preview", {
       method: "POST",

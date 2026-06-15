@@ -211,6 +211,28 @@ describe.sequential("admin API integration", () => {
     expect(imported.body.preview.skippedCount).toBe(1);
   });
 
+  it("reports data audit issue groups for administrators", async () => {
+    const audit = await requestJson<{
+      audit: {
+        totalRecords: number;
+        issueCount: number;
+        attentionCount: number;
+        issues: Array<{ kind: string; count: number; birthdays: Array<{ name: string }> }>;
+      };
+    }>("/admin/data-audit");
+
+    expect(audit.status).toBe(200);
+    expect(audit.body.audit.totalRecords).toBeGreaterThan(0);
+    expect(audit.body.audit.issueCount).toBeGreaterThan(0);
+    expect(audit.body.audit.attentionCount).toBeGreaterThan(0);
+    const exactDuplicate = audit.body.audit.issues.find((issue) => issue.kind === "exactDuplicate");
+    expect(exactDuplicate?.count).toBe(2);
+    expect(exactDuplicate?.birthdays.map((birthday) => birthday.name)).toEqual([
+      "重复校验",
+      "重复校验"
+    ]);
+  });
+
   it("records only the changed settings field and keeps millisecond log timestamps", async () => {
     const current = await requestJson<{
       settings: {
