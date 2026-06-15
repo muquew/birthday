@@ -112,6 +112,16 @@ cp .env.example .env
 
 生产运行的 `NODE_ENV=production` 由 systemd 服务文件设置，不写进 `.env`。这样 `npm run build` 时 Vite 不会把 `.env` 里的 `NODE_ENV` 当成构建模式并输出警告。
 
+## 开发、构建和部署环境
+
+项目区分三种阶段，但不要用同一个 `.env` 里的 `NODE_ENV` 同时控制它们：
+
+- 开发环境：执行 `npm run dev`。Vite 使用开发模式，后端也不会进入生产校验，方便本地调试。
+- 构建环境：执行 `npm run build`。Vite 会自动按 production build 输出前端静态文件，不需要在 `.env` 里写 `NODE_ENV=production`。
+- 部署运行环境：由 systemd 启动 `dist-server/server/index.js`，服务文件里通过 `ExecStart=/usr/bin/env NODE_ENV=production node ...` 设置生产运行环境。
+
+因此 `.env` 只保存端口、挂载路径、数据库路径、管理员初始密码、会话密钥等稳定配置。`NODE_ENV=production` 只在真正运行服务时由 systemd 注入，用来启用后端生产校验和生产 Cookie 设置。
+
 `DATABASE_PATH` 不会和数据库冲突。它只决定 SQLite 文件放在哪里：
 
 - 文件不存在时，服务启动会自动创建数据库、表和初始管理员。
