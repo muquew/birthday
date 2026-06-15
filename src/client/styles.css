@@ -2051,10 +2051,35 @@ p {
   justify-content: start;
 }
 
+.undo-import-bar,
+.import-options-bar {
+  align-items: center;
+  background: rgba(247, 216, 122, 0.12);
+  border: 1px solid rgba(184, 135, 38, 0.24);
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.import-options-bar {
+  grid-column: 1 / -1;
+  justify-content: flex-start;
+}
+
+.undo-import-bar span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
 .import-preview-summary {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin: 12px 0;
 }
 

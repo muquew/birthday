@@ -1703,6 +1703,8 @@ function ImportExportPage() {
   const [csv, setCsv] = useState("");
   const [jsonImport, setJsonImport] = useState("");
   const [jsonMode, setJsonMode] = useState<JsonImportMode>("append");
+  const [skipDuplicates, setSkipDuplicates] = useState(true);
+  const [lastImportUndo, setLastImportUndo] = useState<{ ids: string[]; label: string } | undefined>();
   const [selectedFileName, setSelectedFileName] = useState("");
   const [preview, setPreview] = useState<ImportPreview | undefined>();
   const [jsonPreview, setJsonPreview] = useState<ImportPreview | undefined>();
@@ -1720,6 +1722,7 @@ function ImportExportPage() {
     setSelectedFileName(file.name);
     setCsv(await file.text());
     setPreview(undefined);
+    setLastImportUndo(undefined);
     setMessage("");
     setError("");
   };
@@ -1727,8 +1730,9 @@ function ImportExportPage() {
   const handlePreview = async () => {
     setError("");
     try {
-      const result = await api.previewCsv(csv);
+      const result = await api.previewCsv(csv, { skipDuplicates });
       setPreview(result.preview);
+      setLastImportUndo(undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : "CSV 校验失败");
     }
@@ -1737,9 +1741,14 @@ function ImportExportPage() {
   const handleImport = async () => {
     setError("");
     try {
-      const result = await api.importCsv(csv);
+      const result = await api.importCsv(csv, { skipDuplicates });
       setPreview(result.preview);
-      setMessage(`已导入 ${result.created.length} 条记录`);
+      setLastImportUndo(
+        result.created.length > 0
+          ? { ids: result.created.map((item) => item.id), label: "CSV 导入" }
+          : undefined
+      );
+      setMessage(importResultMessage(result.created.length, result.preview.skippedCount));
     } catch (err) {
       setError(err instanceof Error ? err.message : "导入失败");
     }
@@ -1748,8 +1757,9 @@ function ImportExportPage() {
   const handleJsonPreview = async () => {
     setError("");
     try {
-      const result = await api.previewJson(jsonImport, jsonMode);
+      const result = await api.previewJson(jsonImport, jsonMode, { skipDuplicates });
       setJsonPreview(result.preview);
+      setLastImportUndo(undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : "JSON 校验失败");
     }
@@ -1764,15 +1774,34 @@ function ImportExportPage() {
       return;
     }
     try {
-      const result = await api.importJson(jsonImport, jsonMode);
+      const result = await api.importJson(jsonImport, jsonMode, { skipDuplicates });
       setJsonPreview(result.preview);
+      setLastImportUndo(
+        result.mode === "append" && result.created.length > 0
+          ? { ids: result.created.map((item) => item.id), label: "JSON 追加" }
+          : undefined
+      );
       setMessage(
         result.mode === "replace"
           ? `已恢复 ${result.created.length} 条记录`
-          : `已导入 ${result.created.length} 条记录`
+          : importResultMessage(result.created.length, result.preview.skippedCount)
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "JSON 导入失败");
+    }
+  };
+
+  const handleUndoLastImport = async () => {
+    if (!lastImportUndo || !window.confirm(`确认撤回本次${lastImportUndo.label}的 ${lastImportUndo.ids.length} 条记录吗？`)) {
+      return;
+    }
+    setError("");
+    try {
+      const result = await api.batchBirthdays(lastImportUndo.ids, "delete");
+      setLastImportUndo(undefined);
+      setMessage(`已撤回 ${result.count} 条记录`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "撤回失败");
     }
   };
 
@@ -1781,6 +1810,15 @@ function ImportExportPage() {
       <AdminTitle title="导入备份" />
       {message ? <Notice tone="success">{message}</Notice> : null}
       {error ? <Notice tone="danger">{error}</Notice> : null}
+      {lastImportUndo ? (
+        <div className="undo-import-bar">
+          <span>{lastImportUndo.label}刚新增 {lastImportUndo.ids.length} 条记录</span>
+          <button className="secondary-button danger-text" type="button" onClick={handleUndoLastImport}>
+            <RotateCcw size={16} aria-hidden />
+            撤回本次导入
+          </button>
+        </div>
+      ) : null}
       <section className="admin-section import-grid">
         <div className="upload-box">
           <FileUp size={28} aria-hidden />
@@ -1798,13 +1836,15 @@ function ImportExportPage() {
         </div>
         <textarea
           value={csv}
-          onChange={(event) => {
-            setCsv(event.target.value);
-            setPreview(undefined);
-          }}
-          placeholder="name,calendarType,year,month,day,isLeapMonth,leapMonthPolicy,displayAge,group,tags,note,visible"
-        />
-        <div className="button-row">
+	          onChange={(event) => {
+	            setCsv(event.target.value);
+	            setPreview(undefined);
+	            setLastImportUndo(undefined);
+	          }}
+	          placeholder="name,calendarType,birthday,year,month,day,isLeapMonth,leapMonthPolicy,displayAge,group,tags,note,visible"
+	        />
+	        <ImportOptionsBar skipDuplicates={skipDuplicates} onSkipDuplicatesChange={setSkipDuplicates} />
+	        <div className="button-row">
           <button className="secondary-button" onClick={handlePreview}>
             <Check size={17} aria-hidden />
             校验
@@ -1867,16 +1907,45 @@ function ImportExportPage() {
         </div>
         <textarea
           value={jsonImport}
-          onChange={(event) => {
-            setJsonImport(event.target.value);
-            setJsonPreview(undefined);
-          }}
-          placeholder='{"birthdays":[...]}'
-        />
-      </section>
+	          onChange={(event) => {
+	            setJsonImport(event.target.value);
+	            setJsonPreview(undefined);
+	            setLastImportUndo(undefined);
+	          }}
+	          placeholder='{"birthdays":[{"name":"小玉","calendarType":"新历","birthday":"1月28日"}]}'
+	        />
+	        <ImportOptionsBar skipDuplicates={skipDuplicates} onSkipDuplicatesChange={setSkipDuplicates} />
+	      </section>
       {jsonPreview ? <ImportPreviewTable preview={jsonPreview} title="JSON 校验结果" /> : null}
     </div>
   );
+}
+
+function ImportOptionsBar({
+  skipDuplicates,
+  onSkipDuplicatesChange
+}: {
+  skipDuplicates: boolean;
+  onSkipDuplicatesChange: (value: boolean) => void;
+}) {
+  return (
+    <div className="import-options-bar">
+      <label className="check-line">
+        <input
+          type="checkbox"
+          checked={skipDuplicates}
+          onChange={(event) => onSkipDuplicatesChange(event.target.checked)}
+        />
+        跳过重复记录
+      </label>
+    </div>
+  );
+}
+
+function importResultMessage(createdCount: number, skippedCount: number): string {
+  return skippedCount > 0
+    ? `已导入 ${createdCount} 条记录，跳过 ${skippedCount} 条重复记录`
+    : `已导入 ${createdCount} 条记录`;
 }
 
 function AdminSettingsPage() {
@@ -2688,7 +2757,7 @@ function ImportPreviewTable({
 }) {
   return (
     <section className="admin-section">
-      <SectionTitle title={`${title}：${preview.validCount} 条可导入，${preview.invalidCount} 条有问题`} />
+      <SectionTitle title={`${title}：${preview.importableCount} 条将导入，${preview.skippedCount} 条会跳过`} />
       <ImportPreviewSummary preview={preview} />
       <div className="table-wrap">
         <table className="admin-table">
@@ -2720,7 +2789,8 @@ function ImportPreviewTable({
 
 function ImportPreviewSummary({ preview }: { preview: ImportPreview }) {
   const items = [
-    { label: "可导入", value: preview.validCount, tone: "ok" },
+    { label: "将导入", value: preview.importableCount, tone: "ok" },
+    { label: "会跳过", value: preview.skippedCount, tone: "warn" },
     { label: "有错误", value: preview.invalidCount, tone: "bad" },
     { label: "库内疑似重复", value: preview.duplicateExistingCount, tone: "warn" },
     { label: "文件内重复", value: preview.duplicateInImportCount, tone: "warn" }
@@ -2740,6 +2810,14 @@ function ImportPreviewSummary({ preview }: { preview: ImportPreview }) {
 function importPreviewStatus(row: ImportPreview["rows"][number]) {
   if (row.errors.length > 0) {
     return <span className="table-error">{row.errors.join("；")}</span>;
+  }
+  if (row.skipped) {
+    const reason = row.duplicateCandidate
+      ? `库内已有：${row.duplicateCandidate.name}`
+      : row.duplicateInImportRow
+        ? `与第 ${row.duplicateInImportRow} 行重复`
+        : "重复记录";
+    return <span className="table-warn">将跳过：{reason}</span>;
   }
   const warnings = [
     row.duplicateCandidate ? `可能重复：${row.duplicateCandidate.name}` : undefined,
@@ -3388,10 +3466,10 @@ function storageBoolean(value: boolean): string {
 
 function csvTemplate(): string {
   return [
-    "name,calendarType,year,month,day,isLeapMonth,leapMonthPolicy,displayAge,group,tags,note,visible",
-    "示例星星,gregorian,,12,20,false,,false,星星,北斗星|生日,示例备注,true",
-    "农历示例,lunar,,4,8,false,,false,家人,农历,农历生日示例,true",
-    "闰月示例,lunar,,6,1,true,normalMonthIfNoLeap,false,示例,闰月,无闰月时按普通月,true"
+    "name,calendarType,birthday,year,month,day,isLeapMonth,leapMonthPolicy,displayAge,group,tags,note,visible",
+    "示例星星,新历,12月20日,,,,false,,false,星星,北斗星|生日,示例备注,true",
+    "农历示例,农历,4月8日,,,,false,,false,家人,农历,农历生日示例,true",
+    "闰月示例,农历,闰6月1日,,,,true,normalMonthIfNoLeap,false,示例,闰月,无闰月时按普通月,true"
   ].join("\n");
 }
 

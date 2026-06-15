@@ -233,6 +233,59 @@ describe.sequential("admin API integration", () => {
     ]);
   });
 
+  it("normalizes legacy import calendar labels and birthday text", async () => {
+    const csvPreview = await requestJson<{
+      preview: {
+        importableCount: number;
+        rows: Array<{ input: { calendarType: string; month: number; day: number } }>;
+      };
+    }>("/admin/import/csv", {
+      method: "POST",
+      body: {
+        dryRun: true,
+        csv: ["name,calendarType,birthday", "旧CSV,新历,1月28日"].join("\n")
+      }
+    });
+    expect(csvPreview.status).toBe(200);
+    expect(csvPreview.body.preview.importableCount).toBe(1);
+    expect(csvPreview.body.preview.rows[0].input).toMatchObject({
+      calendarType: "gregorian",
+      month: 1,
+      day: 28
+    });
+
+    const jsonPreview = await requestJson<{
+      preview: {
+        importableCount: number;
+        rows: Array<{ input: { calendarType: string; month: number; day: number; isLeapMonth: boolean } }>;
+      };
+    }>("/admin/import/json", {
+      method: "POST",
+      body: {
+        dryRun: true,
+        mode: "append",
+        json: JSON.stringify({
+          birthdays: [
+            {
+              name: "旧JSON",
+              calendarType: "农历",
+              birthday: "闰6月1日",
+              leapMonthPolicy: "normalMonthIfNoLeap"
+            }
+          ]
+        })
+      }
+    });
+    expect(jsonPreview.status).toBe(200);
+    expect(jsonPreview.body.preview.importableCount).toBe(1);
+    expect(jsonPreview.body.preview.rows[0].input).toMatchObject({
+      calendarType: "lunar",
+      month: 6,
+      day: 1,
+      isLeapMonth: true
+    });
+  });
+
   it("records only the changed settings field and keeps millisecond log timestamps", async () => {
     const current = await requestJson<{
       settings: {

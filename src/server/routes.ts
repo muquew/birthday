@@ -680,7 +680,7 @@ function previewJsonImport(
     const rowNumber = index + 1;
     const input =
       typeof row === "object" && row
-        ? (row as Partial<BirthdayInput> & Record<string, unknown>)
+        ? normalizeImportInput(row as Partial<BirthdayInput> & Record<string, unknown>)
         : {};
     const parsedRow = birthdayInputSchema.safeParse(input);
     const errors = parsedRow.success
@@ -791,12 +791,11 @@ function csvRowToInput(row: Record<string, string>): {
   const isLeapMonth = parseCsvBoolean(row.isLeapMonth, "isLeapMonth", false, errors);
   const displayAge = parseCsvBoolean(row.displayAge, "displayAge", false, errors);
   const visible = parseCsvBoolean(row.visible, "visible", true, errors);
-  const input: Partial<BirthdayInput> & Record<string, unknown> = {
-    name: row.name,
-    calendarType: row.calendarType as BirthdayInput["calendarType"],
+  const rawInput: Record<string, unknown> = {
+    ...row,
     year: row.year ? Number(row.year) : undefined,
-    month: Number(row.month),
-    day: Number(row.day),
+    month: row.month,
+    day: row.day,
     isLeapMonth,
     leapMonthPolicy: row.leapMonthPolicy
       ? (row.leapMonthPolicy as BirthdayInput["leapMonthPolicy"])
@@ -807,8 +806,69 @@ function csvRowToInput(row: Record<string, string>): {
     note: row.note,
     visible
   };
+  const input = normalizeImportInput(rawInput);
 
   return { input, errors };
+}
+
+function normalizeImportInput(
+  row: Partial<BirthdayInput> & Record<string, unknown>
+): Partial<BirthdayInput> & Record<string, unknown> {
+  const birthdayParts = parseBirthdayText(row.birthday ?? row.date);
+  const normalizedCalendarType = normalizeCalendarType(row.calendarType ?? row.type);
+  return {
+    ...row,
+    calendarType: normalizedCalendarType ?? row.calendarType,
+    month: normalizeNumberField(row.month) ?? birthdayParts?.month ?? row.month,
+    day: normalizeNumberField(row.day) ?? birthdayParts?.day ?? row.day,
+    isLeapMonth: normalizeBooleanField(row.isLeapMonth) || Boolean(birthdayParts?.isLeapMonth)
+  };
+}
+
+function normalizeCalendarType(value: unknown): BirthdayInput["calendarType"] | undefined {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (["gregorian", "solar", "公历", "阳历", "新历", "新曆"].includes(normalized)) {
+    return "gregorian";
+  }
+  if (["lunar", "农历", "農曆", "阴历", "陰曆"].includes(normalized)) {
+    return "lunar";
+  }
+  return undefined;
+}
+
+function parseBirthdayText(value: unknown): { month: number; day: number; isLeapMonth: boolean } | undefined {
+  const text = String(value ?? "").trim();
+  if (!text) {
+    return undefined;
+  }
+  const match = text.match(/^(闰)?\s*(\d{1,2})\s*(?:月|[/-])\s*(\d{1,2})\s*(?:日|号)?$/);
+  if (!match) {
+    return undefined;
+  }
+  return {
+    month: Number(match[2]),
+    day: Number(match[3]),
+    isLeapMonth: Boolean(match[1])
+  };
+}
+
+function normalizeNumberField(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function normalizeBooleanField(value: unknown): boolean {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  const normalized = String(value ?? "").trim().toLowerCase();
+  return ["1", "true", "yes", "y", "是", "显示", "公开"].includes(normalized);
 }
 
 function recordToCsvRow(record: BirthdayRecord) {
