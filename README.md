@@ -99,7 +99,6 @@ cp .env.example .env
 
 | 变量 | 作用 |
 | --- | --- |
-| `NODE_ENV` | 运行环境。生产环境使用 `production`。 |
 | `NODE_NO_WARNINGS` | 隐藏 Node 对 `node:sqlite` 的实验性提示。 |
 | `PATH` | 给 systemd 查找 `node` 使用。 |
 | `PORT` | Node 服务监听端口。 |
@@ -110,6 +109,8 @@ cp .env.example .env
 | `SESSION_SECRET` | 管理员登录 Cookie 签名密钥，生产必须换成长随机字符串。 |
 | `SEED_SAMPLE_DATA` | 空数据库是否写入示例生日。生产建议 `false`。 |
 | `DATABASE_PATH` | SQLite 数据库路径。默认 `./data/birthday.sqlite`，相对于项目根目录。 |
+
+生产运行的 `NODE_ENV=production` 由 systemd 服务文件设置，不写进 `.env`。这样 `npm run build` 时 Vite 不会把 `.env` 里的 `NODE_ENV` 当成构建模式并输出警告。
 
 `DATABASE_PATH` 不会和数据库冲突。它只决定 SQLite 文件放在哪里：
 
@@ -279,9 +280,12 @@ journalctl -u xingxing-birthday -f
 
 ```bash
 cd /opt/xingxing-birthday
-sudo git pull
+sudo git fetch origin
+sudo git pull --ff-only origin main
+sudo sed -i '/^NODE_ENV=/d' .env
 sudo npm ci
 sudo npm run build
+sudo systemctl daemon-reload
 sudo systemctl restart xingxing-birthday
 ```
 

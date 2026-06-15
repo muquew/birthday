@@ -8,7 +8,7 @@ User=xingxing
 Group=xingxing
 WorkingDirectory=/opt/xingxing-birthday
 EnvironmentFile=/opt/xingxing-birthday/.env
-ExecStart=/usr/bin/env node dist-server/server/index.js
+ExecStart=/usr/bin/env NODE_ENV=production node dist-server/server/index.js
 Restart=always
 RestartSec=5
 NoNewPrivileges=true
