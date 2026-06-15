@@ -286,17 +286,35 @@ sudo systemctl status xingxing-birthday
 journalctl -u xingxing-birthday -f
 ```
 
-更新：
+更新。下面命令可以直接在服务器执行：
 
 ```bash
 cd /opt/xingxing-birthday
+
+# 可选但推荐：更新前备份数据库。
+sudo cp -a data/birthday.sqlite "data/birthday.sqlite.$(date +%Y%m%d-%H%M%S).bak" 2>/dev/null || true
+
+# 拉取最新代码。
 sudo git fetch origin
 sudo git pull --ff-only origin main
+
+# 兼容旧部署：如果旧 .env 写过 NODE_ENV=production，删掉这一行。
 sudo sed -i '/^NODE_ENV=/d' .env
+
+# 安装依赖并重新构建。
 sudo npm ci
 sudo npm run build
+
+# 如果 systemd service 是软链接，这一步会直接读取项目里的最新模板。
+# 如果不是软链接，先复制一次最新 service 文件。
+if [ "$(readlink -f /etc/systemd/system/xingxing-birthday.service)" != "/opt/xingxing-birthday/deploy/xingxing-birthday.service" ]; then
+  sudo cp /opt/xingxing-birthday/deploy/xingxing-birthday.service /etc/systemd/system/xingxing-birthday.service
+fi
+
 sudo systemctl daemon-reload
 sudo systemctl restart xingxing-birthday
+sudo systemctl status xingxing-birthday --no-pager
+curl -I http://127.0.0.1:3000/xingxing/
 ```
 
 ## Nginx 反代
