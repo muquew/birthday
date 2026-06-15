@@ -17,7 +17,6 @@
     "test:watch": "vitest --exclude 'dist/**' --exclude 'dist-server/**'"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^5.1.1",
     "bcryptjs": "^3.0.3",
     "cookie": "^1.1.1",
     "csv-parse": "^6.1.0",
@@ -36,10 +35,11 @@
     "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "concurrently": "^9.2.1",
+    "@vitejs/plugin-react": "^6.0.2",
+    "concurrently": "^10.0.3",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vite": "^7.2.7",
-    "vitest": "^4.0.15"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }

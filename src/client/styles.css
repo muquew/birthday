@@ -101,6 +101,7 @@ body {
     linear-gradient(var(--body-grid-b) 1px, transparent 1px),
     var(--paper);
   background-size: 46px 46px;
+  overflow-wrap: break-word;
 }
 
 button,
@@ -389,7 +390,7 @@ p {
 .star-stage-card {
   position: relative;
   overflow: hidden;
-  min-height: 350px;
+  min-height: 326px;
   border: 1px solid rgba(96, 197, 182, 0.34);
   border-radius: 8px;
   background:
@@ -418,9 +419,9 @@ p {
 .dipper-map {
   position: absolute;
   left: 50%;
-  top: 30px;
+  top: 24px;
   width: min(84%, 470px);
-  height: 205px;
+  height: 188px;
   filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.18));
   transform: translateX(-50%);
   overflow: visible;
@@ -2075,10 +2076,10 @@ p {
     grid-template-columns: 1fr;
     padding: 7px 0;
     position: fixed;
-    right: 6px;
+    right: 3px;
     top: 50%;
     transform: translateY(-50%);
-    width: 28px;
+    width: 24px;
     z-index: 24;
   }
 
@@ -2128,17 +2129,17 @@ p {
       height 180ms ease,
       opacity 180ms ease,
       width 180ms ease;
-    width: 14px;
+    width: 12px;
   }
 
   .month-rail a.active .month-rail-line {
     height: 3px;
     opacity: 1;
-    width: 20px;
+    width: 18px;
   }
 
   .month-board {
-    margin-right: 28px;
+    margin-right: 22px;
   }
 
   .home-hero {
@@ -2165,7 +2166,7 @@ p {
 @media (max-width: 740px) {
   .site-shell {
     width: min(100% - 20px, 1180px);
-    padding-bottom: 104px;
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
   }
 
   .public-header {
@@ -2284,7 +2285,7 @@ p {
   }
 
   .star-stage-card {
-    min-height: 220px;
+    min-height: 196px;
     margin-top: 0;
   }
 
@@ -2297,9 +2298,9 @@ p {
   }
 
   .dipper-map {
-    height: 128px;
-    top: 18px;
-    width: 92%;
+    height: 112px;
+    top: 12px;
+    width: 88%;
   }
 
   .today-panel {
@@ -2432,7 +2433,7 @@ p {
 
   .birthday-calendar-month {
     min-height: 0;
-    padding: 12px;
+    padding: 11px;
   }
 
   .calendar-days,
@@ -2442,7 +2443,7 @@ p {
 
   .calendar-day {
     border-radius: 6px;
-    min-height: 48px;
+    min-height: 46px;
     padding: 4px;
   }
 
@@ -2517,9 +2518,9 @@ p {
     box-shadow: none;
     display: grid;
     gap: 10px;
-    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-columns: 48px minmax(0, 1fr);
     min-height: 0;
-    padding: 12px;
+    padding: 11px 10px;
   }
 
   .month-lane:last-child {
@@ -2544,7 +2545,7 @@ p {
     box-shadow: none;
     display: grid;
     gap: 8px;
-    grid-template-columns: minmax(72px, 0.68fr) minmax(150px, 1.32fr);
+    grid-template-columns: minmax(62px, 0.58fr) minmax(0, 1.42fr);
     padding: 9px 0;
   }
 
@@ -2567,15 +2568,16 @@ p {
   }
 
   .compact-date {
+    min-width: 0;
     text-align: right;
   }
 
   .compact-date small {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.35;
-    overflow: visible;
-    text-overflow: clip;
-    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
   }
 
   .birthday-grid {
