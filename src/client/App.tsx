@@ -531,7 +531,7 @@ function StarStats({
       hint: "公开生日"
     },
     {
-      label: "今日点亮",
+      label: "今日生日",
       value: loading ? "..." : `${today}`,
       hint: "当天生日"
     },
@@ -599,7 +599,7 @@ function StarStageCard({
   const scopeLabel = loading
     ? "读取中"
     : total > 0
-      ? `亮${litCount}/7`
+      ? `${activeWindowDays}天内${litCount}位`
       : "暂无";
   const hint =
     loading
@@ -607,12 +607,12 @@ function StarStageCard({
       : !next
         ? "添加生日后，会按下次日期排出最近的生日星序"
         : litCount === 0
-          ? `最近一位还有 ${nextDays ?? "?"} 天，进入 ${activeWindowDays} 天内后会点亮`
+          ? `最近一位还有 ${nextDays ?? "?"} 天，进入 ${activeWindowDays} 天内后会重点标出`
           : nextDays === 0
-            ? `今天的生日已亮起，${activeWindowDays} 天内共点亮 ${litCount} 颗`
+            ? `今天有人生日，${activeWindowDays} 天内共有 ${litCount} 位`
             : total > 7
-              ? `${activeWindowDays} 天内点亮 ${litCount} 颗，最近 ${displayCount} 位生日沿星线预告`
-              : `${activeWindowDays} 天内点亮 ${litCount} 颗，近期生日沿星线排列`;
+              ? `${activeWindowDays} 天内共有 ${litCount} 位，最近 ${displayCount} 位按日期排成星图`
+              : `${activeWindowDays} 天内共有 ${litCount} 位，近期生日按日期排成星图`;
 
   return (
     <article className="star-stage-card">
@@ -644,7 +644,7 @@ function StarStageCard({
                 <title>
                   {birthday
                     ? `${birthday.name}，${formatCountdown(birthday.occurrence?.daysUntil)}${
-                        lit ? "，已点亮" : "，预告星"
+                        lit ? `，${activeWindowDays}天内` : "，稍后提醒"
                       }`
                     : "等待生日记录"}
                 </title>
