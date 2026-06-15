@@ -44,6 +44,10 @@ export type BirthdayInput = {
   visible?: boolean;
 };
 
+export type BirthdayWriteOptions = {
+  allowDuplicate?: boolean;
+};
+
 export type BirthdayOccurrence = {
   date: LocalDate;
   sourceYear: number;
@@ -76,14 +80,21 @@ export type ImportPreviewRow = {
   errors: string[];
   duplicateCandidate?: BirthdayRecord;
   duplicateInImportRow?: number;
+  skipped?: boolean;
 };
 
 export type ImportPreview = {
   validCount: number;
   invalidCount: number;
+  importableCount: number;
+  skippedCount: number;
   duplicateExistingCount: number;
   duplicateInImportCount: number;
   rows: ImportPreviewRow[];
+};
+
+export type ImportOptions = {
+  skipDuplicates?: boolean;
 };
 
 export type SiteSettings = {

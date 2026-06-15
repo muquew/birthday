@@ -13,6 +13,7 @@ import {
   getBirthday,
   listOperationLogs,
   listBirthdays,
+  DuplicateBirthdayError,
   recordOperationLog,
   replaceAllBirthdays,
   setBirthdayVisibility,
@@ -57,6 +58,13 @@ export function createApiRouter() {
     }
     if (error instanceof Error && error.message.includes("登录尝试过多")) {
       res.status(429).json({ error: error.message });
+      return;
+    }
+    if (error instanceof DuplicateBirthdayError) {
+      res.status(409).json({
+        error: error.message,
+        duplicate: adminView(error.duplicate)
+      });
       return;
     }
     console.error(error);
@@ -166,7 +174,9 @@ function createAdminRouter() {
 
   router.post("/birthdays", (req, res, next) => {
     try {
-      const birthday = createBirthday(req.body, req.adminUser);
+      const birthday = createBirthday(req.body, req.adminUser, {
+        allowDuplicate: parseBooleanOption(req.body.allowDuplicate)
+      });
       res.status(201).json({ birthday: adminView(birthday) });
     } catch (error) {
       next(error);
@@ -184,7 +194,9 @@ function createAdminRouter() {
 
   router.put("/birthdays/:id", (req, res, next) => {
     try {
-      const birthday = updateBirthday(req.params.id, req.body, req.adminUser);
+      const birthday = updateBirthday(req.params.id, req.body, req.adminUser, {
+        allowDuplicate: parseBooleanOption(req.body.allowDuplicate)
+      });
       if (!birthday) {
         res.status(404).json({ error: "记录不存在" });
         return;
@@ -246,7 +258,8 @@ function createAdminRouter() {
     try {
       const csv = String(req.body.csv ?? "");
       const dryRun = req.body.dryRun !== false;
-      const preview = previewCsvImport(csv);
+      const skipDuplicates = parseBooleanOption(req.body.skipDuplicates);
+      const preview = previewCsvImport(csv, { skipDuplicates });
       if (dryRun) {
         res.json({ preview });
         return;
@@ -255,13 +268,17 @@ function createAdminRouter() {
         res.status(400).json({ error: "CSV 存在错误，未导入", preview });
         return;
       }
-      const inputs = preview.rows.map((row) => birthdayInputSchema.parse(row.input));
-      const created = appendBirthdays(inputs, req.adminUser);
+      if (!skipDuplicates && hasDuplicateRows(preview)) {
+        res.status(409).json({ error: "CSV 存在重复记录，请先处理重复或选择跳过重复", preview });
+        return;
+      }
+      const inputs = importablePreviewInputs(preview);
+      const created = appendBirthdays(inputs, req.adminUser, { skipDuplicates });
       recordOperationLog({
         action: "import_csv_birthdays",
         entityType: "birthday_batch",
         actor: req.adminUser,
-        detail: { count: created.length }
+        detail: { count: created.length, skipped: preview.skippedCount }
       });
       res.status(201).json({ created: created.map(adminView), preview });
     } catch (error) {
@@ -274,7 +291,8 @@ function createAdminRouter() {
       const json = String(req.body.json ?? "");
       const dryRun = req.body.dryRun !== false;
       const mode = parseJsonImportMode(req.body.mode);
-      const preview = previewJsonImport(json, mode);
+      const skipDuplicates = parseBooleanOption(req.body.skipDuplicates);
+      const preview = previewJsonImport(json, mode, { skipDuplicates });
       if (dryRun) {
         res.json({ preview, mode });
         return;
@@ -283,16 +301,20 @@ function createAdminRouter() {
         res.status(400).json({ error: "JSON 存在错误，未导入", preview, mode });
         return;
       }
-      const inputs = preview.rows.map((row) => birthdayInputSchema.parse(row.input));
+      if (!skipDuplicates && hasDuplicateRows(preview)) {
+        res.status(409).json({ error: "JSON 存在重复记录，请先处理重复或选择跳过重复", preview, mode });
+        return;
+      }
+      const inputs = importablePreviewInputs(preview);
       const records =
         mode === "replace"
-          ? replaceAllBirthdays(inputs, req.adminUser, { log: false })
-          : appendBirthdays(inputs, req.adminUser);
+          ? replaceAllBirthdays(inputs, req.adminUser, { log: false, skipDuplicates })
+          : appendBirthdays(inputs, req.adminUser, { skipDuplicates });
       recordOperationLog({
         action: mode === "replace" ? "import_json_replace" : "import_json_append",
         entityType: "birthday_batch",
         actor: req.adminUser,
-        detail: { count: records.length }
+        detail: { count: records.length, skipped: preview.skippedCount }
       });
       res.status(201).json({ created: records.map(adminView), preview, mode });
     } catch (error) {
@@ -394,24 +416,12 @@ function toPublicView(view: BirthdayView) {
   };
 }
 
-function previewCsvImport(csv: string): ImportPreview {
+function previewCsvImport(csv: string, options: { skipDuplicates?: boolean } = {}): ImportPreview {
   const existing = listBirthdays(true);
   const duplicateMap = new Map(existing.map((record) => [birthdayIdentity(record), record]));
 
   if (!csv.trim()) {
-    return {
-      validCount: 0,
-      invalidCount: 1,
-      duplicateExistingCount: 0,
-      duplicateInImportCount: 0,
-      rows: [
-        {
-          rowNumber: 1,
-          input: {},
-          errors: ["CSV 内容为空"]
-        }
-      ]
-    };
+    return invalidImportPreview("CSV 内容为空");
   }
 
   let rows: Record<string, string>[];
@@ -453,52 +463,35 @@ function previewCsvImport(csv: string): ImportPreview {
       }
     }
 
+    const skipped = options.skipDuplicates && Boolean(duplicateCandidate || duplicateInImportRow);
+
     return {
       rowNumber,
       input: parsed.success ? parsed.data : normalized,
       errors,
       duplicateCandidate,
-      duplicateInImportRow
+      duplicateInImportRow,
+      skipped
     };
   });
 
   return buildImportPreview(previewRows);
 }
 
-function previewJsonImport(json: string, mode: JsonImportMode): ImportPreview {
+function previewJsonImport(
+  json: string,
+  mode: JsonImportMode,
+  options: { skipDuplicates?: boolean } = {}
+): ImportPreview {
   if (!json.trim()) {
-    return {
-      validCount: 0,
-      invalidCount: 1,
-      duplicateExistingCount: 0,
-      duplicateInImportCount: 0,
-      rows: [
-        {
-          rowNumber: 1,
-          input: {},
-          errors: ["JSON 内容为空"]
-        }
-      ]
-    };
+    return invalidImportPreview("JSON 内容为空");
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
   } catch {
-    return {
-      validCount: 0,
-      invalidCount: 1,
-      duplicateExistingCount: 0,
-      duplicateInImportCount: 0,
-      rows: [
-        {
-          rowNumber: 1,
-          input: {},
-          errors: ["JSON 解析失败，请检查格式是否完整"]
-        }
-      ]
-    };
+    return invalidImportPreview("JSON 解析失败，请检查格式是否完整");
   }
 
   const source = Array.isArray(parsed)
@@ -508,19 +501,7 @@ function previewJsonImport(json: string, mode: JsonImportMode): ImportPreview {
       : undefined;
 
   if (!Array.isArray(source)) {
-    return {
-      validCount: 0,
-      invalidCount: 1,
-      duplicateExistingCount: 0,
-      duplicateInImportCount: 0,
-      rows: [
-        {
-          rowNumber: 1,
-          input: {},
-          errors: ["JSON 需要是数组，或包含 birthdays 数组"]
-        }
-      ]
-    };
+    return invalidImportPreview("JSON 需要是数组，或包含 birthdays 数组");
   }
 
   if (source.length === 0) {
@@ -554,12 +535,14 @@ function previewJsonImport(json: string, mode: JsonImportMode): ImportPreview {
         seenInImport.set(identity, rowNumber);
       }
     }
+    const skipped = options.skipDuplicates && Boolean(duplicateCandidate || duplicateInImportRow);
     return {
       rowNumber,
       input: parsedRow.success ? parsedRow.data : input,
       errors,
       duplicateCandidate,
-      duplicateInImportRow
+      duplicateInImportRow,
+      skipped
     };
   });
 
@@ -570,6 +553,8 @@ function buildImportPreview(rows: ImportPreviewRow[]): ImportPreview {
   return {
     validCount: rows.filter((row) => row.errors.length === 0).length,
     invalidCount: rows.filter((row) => row.errors.length > 0).length,
+    importableCount: rows.filter((row) => row.errors.length === 0 && !row.skipped).length,
+    skippedCount: rows.filter((row) => row.skipped).length,
     duplicateExistingCount: rows.filter((row) => row.duplicateCandidate).length,
     duplicateInImportCount: rows.filter((row) => row.duplicateInImportRow).length,
     rows
@@ -580,6 +565,8 @@ function invalidImportPreview(message: string, rowNumber = 1): ImportPreview {
   return {
     validCount: 0,
     invalidCount: 1,
+    importableCount: 0,
+    skippedCount: 0,
     duplicateExistingCount: 0,
     duplicateInImportCount: 0,
     rows: [
@@ -590,6 +577,20 @@ function invalidImportPreview(message: string, rowNumber = 1): ImportPreview {
       }
     ]
   };
+}
+
+function hasDuplicateRows(preview: ImportPreview): boolean {
+  return preview.duplicateExistingCount + preview.duplicateInImportCount > 0;
+}
+
+function importablePreviewInputs(preview: ImportPreview): BirthdayInput[] {
+  return preview.rows
+    .filter((row) => row.errors.length === 0 && !row.skipped)
+    .map((row) => birthdayInputSchema.parse(row.input));
+}
+
+function parseBooleanOption(value: unknown): boolean {
+  return value === true || value === "true" || value === 1 || value === "1";
 }
 
 function parseJsonImportMode(value: unknown): JsonImportMode {

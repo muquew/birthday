@@ -119,6 +119,98 @@ describe.sequential("admin API integration", () => {
     expect(exposed).not.toHaveProperty("searchableText");
   });
 
+  it("rejects exact duplicate birthdays unless they are explicitly distinguished", async () => {
+    const first = await requestJson<{ birthday: { id: string; name: string } }>("/admin/birthdays", {
+      method: "POST",
+      body: {
+        name: "重复校验",
+        calendarType: "gregorian",
+        month: 3,
+        day: 14
+      }
+    });
+    expect(first.status).toBe(201);
+
+    const duplicate = await requestJson<{ error: string; duplicate: { name: string } }>("/admin/birthdays", {
+      method: "POST",
+      body: {
+        name: "重复 校验",
+        calendarType: "gregorian",
+        month: 3,
+        day: 14
+      }
+    });
+    expect(duplicate.status).toBe(409);
+    expect(duplicate.body.error).toBe("已存在同名同日期生日记录");
+    expect(duplicate.body.duplicate.name).toBe("重复校验");
+
+    const allowedWithoutDetail = await requestJson<{ error: string }>("/admin/birthdays", {
+      method: "POST",
+      body: {
+        name: "重复校验",
+        calendarType: "gregorian",
+        month: 3,
+        day: 14,
+        allowDuplicate: true
+      }
+    });
+    expect(allowedWithoutDetail.status).toBe(409);
+    expect(allowedWithoutDetail.body.error).toBe("同名同日期记录需要填写分组、标签或备注后才能保留");
+
+    const distinguished = await requestJson<{ birthday: { group: string } }>("/admin/birthdays", {
+      method: "POST",
+      body: {
+        name: "重复校验",
+        calendarType: "gregorian",
+        month: 3,
+        day: 14,
+        group: "二组",
+        allowDuplicate: true
+      }
+    });
+    expect(distinguished.status).toBe(201);
+    expect(distinguished.body.birthday.group).toBe("二组");
+  });
+
+  it("blocks duplicate imports by default and can skip duplicate rows", async () => {
+    const csv = [
+      "name,calendarType,month,day",
+      "重复校验,gregorian,3,14",
+      "导入新记录,gregorian,4,2"
+    ].join("\n");
+
+    const blocked = await requestJson<{ error: string; preview: { duplicateExistingCount: number } }>(
+      "/admin/import/csv",
+      {
+        method: "POST",
+        body: {
+          dryRun: false,
+          csv
+        }
+      }
+    );
+    expect(blocked.status).toBe(409);
+    expect(blocked.body.error).toBe("CSV 存在重复记录，请先处理重复或选择跳过重复");
+    expect(blocked.body.preview.duplicateExistingCount).toBe(1);
+
+    const imported = await requestJson<{
+      created: Array<{ name: string }>;
+      preview: { validCount: number; importableCount: number; skippedCount: number };
+    }>("/admin/import/csv", {
+      method: "POST",
+      body: {
+        dryRun: false,
+        skipDuplicates: true,
+        csv
+      }
+    });
+    expect(imported.status).toBe(201);
+    expect(imported.body.created.map((item) => item.name)).toEqual(["导入新记录"]);
+    expect(imported.body.preview.validCount).toBe(2);
+    expect(imported.body.preview.importableCount).toBe(1);
+    expect(imported.body.preview.skippedCount).toBe(1);
+  });
+
   it("records only the changed settings field and keeps millisecond log timestamps", async () => {
     const current = await requestJson<{
       settings: {

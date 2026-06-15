@@ -5,6 +5,7 @@ import type {
   BirthdayInput,
   BirthdayRecord
 } from "../shared/types.js";
+import { birthdayIdentity } from "../shared/birthday.js";
 import { birthdayInputSchema, birthdayUpdateSchema } from "../shared/validation.js";
 import { getDb } from "./db.js";
 import type { AdminUser } from "./auth.js";
@@ -51,7 +52,19 @@ type OperationLogInput = {
 
 type WriteOptions = {
   log?: boolean;
+  allowDuplicate?: boolean;
+  skipDuplicates?: boolean;
 };
+
+export class DuplicateBirthdayError extends Error {
+  duplicate: BirthdayRecord;
+
+  constructor(duplicate: BirthdayRecord, message = "已存在同名同日期生日记录") {
+    super(message);
+    this.name = "DuplicateBirthdayError";
+    this.duplicate = duplicate;
+  }
+}
 
 export function listBirthdays(includeHidden = true): BirthdayRecord[] {
   const sql = includeHidden
@@ -73,6 +86,7 @@ export function createBirthday(
   options: WriteOptions = {}
 ): BirthdayRecord {
   const parsed = birthdayInputSchema.parse(input);
+  assertDuplicatePolicy(parsed, options);
   const id = randomUUID();
   insertParsed(getDb(), parsed, actor?.username, id);
 
@@ -93,7 +107,8 @@ export function createBirthday(
 export function updateBirthday(
   id: string,
   input: Partial<BirthdayInput>,
-  actor?: AdminUser
+  actor?: AdminUser,
+  options: WriteOptions = {}
 ): BirthdayRecord | undefined {
   const existing = getBirthday(id);
   if (!existing) {
@@ -101,6 +116,7 @@ export function updateBirthday(
   }
 
   const merged = birthdayUpdateSchema.parse({ ...existing, ...input });
+  assertDuplicatePolicy(merged, options, id);
   const now = new Date().toISOString();
 
   getDb()
@@ -281,14 +297,16 @@ export function batchDeleteBirthdays(
 
 export function appendBirthdays(
   inputs: BirthdayInput[],
-  actor?: AdminUser
+  actor?: AdminUser,
+  options: WriteOptions = {}
 ): BirthdayRecord[] {
   const parsed = inputs.map((input) => birthdayInputSchema.parse(input));
-  const ids = parsed.map(() => randomUUID());
+  const importable = filterImportableBirthdays(parsed, options);
+  const ids = importable.map(() => randomUUID());
   const db = getDb();
   db.exec("BEGIN");
   try {
-    parsed.forEach((input, index) => {
+    importable.forEach((input, index) => {
       insertParsed(db, input, actor?.username, ids[index]);
     });
     db.exec("COMMIT");
@@ -307,11 +325,12 @@ export function replaceAllBirthdays(
   options: WriteOptions = {}
 ): BirthdayRecord[] {
   const parsed = inputs.map((input) => birthdayInputSchema.parse(input));
+  const importable = filterImportableBirthdays(parsed, { ...options, replaceAll: true });
   const db = getDb();
   db.exec("BEGIN");
   try {
     db.exec("DELETE FROM birthday_people");
-    for (const input of parsed) {
+    for (const input of importable) {
       insertParsed(db, input, actor?.username);
     }
     db.exec("COMMIT");
@@ -325,7 +344,7 @@ export function replaceAllBirthdays(
       action: "replace_birthdays",
       entityType: "birthday_batch",
       actor,
-      detail: { count: parsed.length }
+      detail: { count: importable.length }
     });
   }
   return listBirthdays(true);
@@ -409,6 +428,96 @@ function insertParsed(
     now,
     updatedBy ?? null
   );
+}
+
+function assertDuplicatePolicy(
+  parsed: BirthdayInput,
+  options: WriteOptions,
+  ignoreId?: string
+) {
+  const duplicate = findDuplicateBirthday(parsed, ignoreId);
+  if (!duplicate) {
+    return;
+  }
+  if (options.allowDuplicate && hasDistinguishingInfo(parsed)) {
+    return;
+  }
+  if (options.allowDuplicate) {
+    throw new DuplicateBirthdayError(
+      duplicate,
+      "同名同日期记录需要填写分组、标签或备注后才能保留"
+    );
+  }
+  throw new DuplicateBirthdayError(duplicate);
+}
+
+function filterImportableBirthdays(
+  parsed: BirthdayInput[],
+  options: WriteOptions & { replaceAll?: boolean }
+): BirthdayInput[] {
+  const existing = options.replaceAll ? [] : listBirthdays(true);
+  const seen = new Map<string, BirthdayRecord | true>();
+  for (const record of existing) {
+    seen.set(birthdayIdentity(record), record);
+  }
+
+  const importable: BirthdayInput[] = [];
+  for (const input of parsed) {
+    const identity = birthdayIdentityForInput(input);
+    const duplicate = seen.get(identity);
+    if (duplicate) {
+      if (options.skipDuplicates) {
+        continue;
+      }
+      throw new DuplicateBirthdayError(
+        duplicate === true ? materializeInputDuplicate(input) : duplicate
+      );
+    }
+    seen.set(identity, true);
+    importable.push(input);
+  }
+  return importable;
+}
+
+function findDuplicateBirthday(input: BirthdayInput, ignoreId?: string): BirthdayRecord | undefined {
+  const identity = birthdayIdentityForInput(input);
+  return listBirthdays(true).find((record) => record.id !== ignoreId && birthdayIdentity(record) === identity);
+}
+
+function birthdayIdentityForInput(input: BirthdayInput): string {
+  return birthdayIdentity({
+    ...input,
+    isLeapMonth: input.isLeapMonth ?? false
+  });
+}
+
+function hasDistinguishingInfo(input: BirthdayInput): boolean {
+  return Boolean(
+    input.group?.trim() ||
+      input.note?.trim() ||
+      (input.tags ?? []).some((tag) => tag.trim())
+  );
+}
+
+function materializeInputDuplicate(input: BirthdayInput): BirthdayRecord {
+  const now = new Date().toISOString();
+  return {
+    id: "import-duplicate",
+    name: input.name,
+    calendarType: input.calendarType,
+    year: input.year,
+    month: input.month,
+    day: input.day,
+    isLeapMonth: input.isLeapMonth ?? false,
+    leapMonthPolicy: input.leapMonthPolicy,
+    displayAge: input.displayAge ?? false,
+    group: input.group,
+    tags: input.tags ?? [],
+    note: input.note,
+    visible: input.visible ?? true,
+    createdAt: now,
+    updatedAt: now
+  };
 }
 
 function existingBirthdaysForIds(ids: string[]): BirthdayRecord[] {

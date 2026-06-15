@@ -53,6 +53,7 @@ import {
 import type {
   AdminOperationLog,
   BirthdayInput,
+  BirthdayWriteOptions,
   BirthdayView,
   CalendarType,
   ImportPreview,
@@ -1179,14 +1180,14 @@ function AdminBirthdaysPage() {
     });
   }, [records]);
 
-  const handleSave = async (input: BirthdayInput) => {
+  const handleSave = async (input: BirthdayInput, options: BirthdayWriteOptions = {}) => {
     setError("");
     setMessage("");
     try {
       if (editing) {
-        await api.updateBirthday(editing.id, input);
+        await api.updateBirthday(editing.id, input, options);
       } else {
-        await api.createBirthday(input);
+        await api.createBirthday(input, options);
       }
       setEditing(undefined);
       await refresh();
@@ -1886,7 +1887,7 @@ function BirthdayForm({
 }: {
   editing?: BirthdayView;
   records: BirthdayView[];
-  onSave: (input: BirthdayInput) => Promise<void>;
+  onSave: (input: BirthdayInput, options?: BirthdayWriteOptions) => Promise<void>;
   onCancel: () => void;
 }) {
   const [form, setForm] = useState<BirthdayFormState>(
@@ -1939,15 +1940,20 @@ function BirthdayForm({
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (
-      duplicateInfo.exact.length > 0 &&
-      !window.confirm("已有同名同日期记录，仍然保存吗？建议先确认这不是同一个人。")
-    ) {
-      return;
+    const allowDuplicate = duplicateInfo.exact.length > 0;
+    if (allowDuplicate) {
+      if (!hasDuplicateDistinguishingInfo(form)) {
+        setAdvancedOpen(true);
+        window.alert("已有同名同日期记录。若确实是不同的人，请先填写分组、标签或备注用于区分。");
+        return;
+      }
+      if (!window.confirm("已有同名同日期记录，确认作为不同的人保留吗？")) {
+        return;
+      }
     }
     setSubmitting(true);
     try {
-      await onSave(formToInput(form));
+      await onSave(formToInput(form), { allowDuplicate });
       setForm(emptyForm);
       setAdvancedOpen(false);
     } catch {
@@ -3293,6 +3299,10 @@ function hasAdvancedFormValues(form: BirthdayFormState): boolean {
       form.displayAge ||
       !form.visible
   );
+}
+
+function hasDuplicateDistinguishingInfo(form: BirthdayFormState): boolean {
+  return Boolean(form.group.trim() || form.note.trim() || form.tags.split(/[;|]/).some((tag) => tag.trim()));
 }
 
 function formToInput(form: BirthdayFormState): BirthdayInput {

@@ -2,7 +2,9 @@ import { API_BASE } from "../shared/types.js";
 import type {
   AdminOperationLog,
   BirthdayInput,
+  BirthdayWriteOptions,
   BirthdayView,
+  ImportOptions,
   ImportPreview,
   JsonImportMode,
   SiteSettings
@@ -99,15 +101,15 @@ export const api = {
       method: "POST"
     }),
   me: () => request<{ user: AdminUser | null }>("/auth/me"),
-  createBirthday: (input: BirthdayInput) =>
+  createBirthday: (input: BirthdayInput, options: BirthdayWriteOptions = {}) =>
     request<{ birthday: BirthdayView }>("/admin/birthdays", {
       method: "POST",
-      json: input
+      json: { ...input, ...options }
     }),
-  updateBirthday: (id: string, input: BirthdayInput) =>
+  updateBirthday: (id: string, input: BirthdayInput, options: BirthdayWriteOptions = {}) =>
     request<{ birthday: BirthdayView }>(`/admin/birthdays/${id}`, {
       method: "PUT",
-      json: input
+      json: { ...input, ...options }
     }),
   deleteBirthday: (id: string) =>
     request<{ ok: true }>(`/admin/birthdays/${id}`, {
@@ -125,27 +127,27 @@ export const api = {
     }),
   adminOperationLogs: (limit = 80) =>
     request<{ logs: AdminOperationLog[] }>(`/admin/operation-logs?limit=${limit}`),
-  previewCsv: (csv: string) =>
+  previewCsv: (csv: string, options: ImportOptions = {}) =>
     request<{ preview: ImportPreview }>("/admin/import/csv", {
       method: "POST",
-      json: { csv, dryRun: true }
+      json: { csv, dryRun: true, ...options }
     }),
-  importCsv: (csv: string) =>
+  importCsv: (csv: string, options: ImportOptions = {}) =>
     request<{ preview: ImportPreview; created: BirthdayView[] }>("/admin/import/csv", {
       method: "POST",
-      json: { csv, dryRun: false }
+      json: { csv, dryRun: false, ...options }
     }),
-  previewJson: (json: string, mode: JsonImportMode) =>
+  previewJson: (json: string, mode: JsonImportMode, options: ImportOptions = {}) =>
     request<{ preview: ImportPreview; mode: JsonImportMode }>("/admin/import/json", {
       method: "POST",
-      json: { json, mode, dryRun: true }
+      json: { json, mode, dryRun: true, ...options }
     }),
-  importJson: (json: string, mode: JsonImportMode) =>
+  importJson: (json: string, mode: JsonImportMode, options: ImportOptions = {}) =>
     request<{ preview: ImportPreview; created: BirthdayView[]; mode: JsonImportMode }>(
       "/admin/import/json",
       {
         method: "POST",
-        json: { json, mode, dryRun: false }
+        json: { json, mode, dryRun: false, ...options }
       }
     ),
   adminSettings: () =>
