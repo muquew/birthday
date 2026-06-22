@@ -231,11 +231,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const path = window.location.pathname;
-    if (path.endsWith("/admin/login")) {
-      setLoading(false);
-      return;
-    }
     void refresh();
   }, []);
 
