@@ -116,7 +116,6 @@ describe.sequential("admin API integration", () => {
     expect(exposed).not.toHaveProperty("createdAt");
     expect(exposed).not.toHaveProperty("updatedAt");
     expect(exposed).not.toHaveProperty("updatedBy");
-    expect(exposed).not.toHaveProperty("searchableText");
   });
 
   it("rejects exact duplicate birthdays unless they are explicitly distinguished", async () => {

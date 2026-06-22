@@ -13,7 +13,7 @@ import type {
 
 export type PublicBirthday = Omit<
   BirthdayView,
-  "visible" | "createdAt" | "updatedAt" | "updatedBy" | "searchableText"
+  "visible" | "createdAt" | "updatedAt" | "updatedBy"
 >;
 
 export type AdminUser = {

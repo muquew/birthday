@@ -31,20 +31,8 @@ export function todayInTimeZone(timeZone = getSiteTimeZone()): LocalDate {
   };
 }
 
-export function dateKey(date: LocalDate): string {
-  return `${date.year}-${pad2(date.month)}-${pad2(date.day)}`;
-}
-
 export function formatDate(date: LocalDate): string {
   return `${date.year}年${date.month}月${date.day}日`;
-}
-
-export function pad2(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-export function compareDates(a: LocalDate, b: LocalDate): number {
-  return dateToUtcDay(a) - dateToUtcDay(b);
 }
 
 export function diffDays(from: LocalDate, to: LocalDate): number {
@@ -69,14 +57,6 @@ export function daysInGregorianMonth(year: number, month: number): number {
     return 0;
   }
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
-}
-
-export function isValidGregorianDate(
-  year: number,
-  month: number,
-  day: number
-): boolean {
-  return day >= 1 && day <= daysInGregorianMonth(year, month);
 }
 
 function dateToUtcDay(date: LocalDate): number {

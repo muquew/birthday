@@ -234,16 +234,11 @@ export function batchSetBirthdayVisibility(
   const statement = db.prepare(
     "UPDATE birthday_people SET visible = ?, updated_at = ?, updated_by = ? WHERE id = ?"
   );
-  db.exec("BEGIN");
-  try {
+  transaction(db, () => {
     for (const record of records) {
       statement.run(visible ? 1 : 0, now, actor?.username ?? null, record.id);
     }
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
-  }
+  });
 
   recordOperationLog({
     action: visible ? "batch_show_birthday" : "batch_hide_birthday",
@@ -271,16 +266,11 @@ export function batchDeleteBirthdays(
 
   const db = getDb();
   const statement = db.prepare("DELETE FROM birthday_people WHERE id = ?");
-  db.exec("BEGIN");
-  try {
+  transaction(db, () => {
     for (const record of records) {
       statement.run(record.id);
     }
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
-  }
+  });
 
   recordOperationLog({
     action: "batch_delete_birthday",
@@ -304,16 +294,11 @@ export function appendBirthdays(
   const importable = filterImportableBirthdays(parsed, options);
   const ids = importable.map(() => randomUUID());
   const db = getDb();
-  db.exec("BEGIN");
-  try {
+  transaction(db, () => {
     importable.forEach((input, index) => {
       insertParsed(db, input, actor?.username, ids[index]);
     });
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
-  }
+  });
   return ids
     .map((id) => getBirthday(id))
     .filter((record): record is BirthdayRecord => Boolean(record));
@@ -327,17 +312,12 @@ export function replaceAllBirthdays(
   const parsed = inputs.map((input) => birthdayInputSchema.parse(input));
   const importable = filterImportableBirthdays(parsed, { ...options, replaceAll: true });
   const db = getDb();
-  db.exec("BEGIN");
-  try {
+  transaction(db, () => {
     db.exec("DELETE FROM birthday_people");
     for (const input of importable) {
       insertParsed(db, input, actor?.username);
     }
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
-  }
+  });
 
   if (options.log !== false) {
     recordOperationLog({
@@ -428,6 +408,17 @@ function insertParsed(
     now,
     updatedBy ?? null
   );
+}
+
+function transaction(db: DatabaseSync, run: () => void) {
+  db.exec("BEGIN");
+  try {
+    run();
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
 }
 
 function assertDuplicatePolicy(

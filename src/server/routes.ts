@@ -1,7 +1,6 @@
 import express from "express";
 import { parse as parseCsv } from "csv-parse/sync";
 import { stringify as stringifyCsv } from "csv-stringify/sync";
-import { Solar } from "lunar-javascript";
 import { z, ZodError } from "zod";
 import { login, logout, getCurrentAdmin, requireAdmin } from "./auth.js";
 import {
@@ -22,6 +21,7 @@ import {
 import { getSiteSettings, updateSiteSettings } from "./settings.js";
 import {
   birthdayIdentity,
+  formatLunarDate,
   formatOriginalBirthday,
   makeBirthdayView,
   sortBirthdayViews
@@ -39,6 +39,12 @@ import type {
   SiteSettings
 } from "../shared/types.js";
 import { birthdayInputSchema, loginSchema, siteSettingsSchema } from "../shared/validation.js";
+
+type ImportPreviewSeed = {
+  rowNumber: number;
+  input: Partial<BirthdayInput> & Record<string, unknown>;
+  errors?: string[];
+};
 
 export function createApiRouter() {
   const router = express.Router();
@@ -380,14 +386,13 @@ function publicViews() {
 function makeTodayInfo() {
   const today = todayInTimeZone();
   const date = new Date(Date.UTC(today.year, today.month - 1, today.day));
-  const lunar = Solar.fromYmd(today.year, today.month, today.day).getLunar();
   return {
     solarText: `${today.year}年${today.month}月${today.day}日`,
     weekday: new Intl.DateTimeFormat("zh-CN", {
       timeZone: "UTC",
       weekday: "long"
     }).format(date),
-    lunarText: `农历 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`
+    lunarText: formatLunarDate(today)
   };
 }
 
@@ -565,7 +570,6 @@ function toPublicView(view: BirthdayView) {
     createdAt: _createdAt,
     updatedAt: _updatedAt,
     updatedBy: _updatedBy,
-    searchableText: _searchableText,
     year,
     ...publicView
   } = view;
@@ -603,40 +607,14 @@ function previewCsvImport(csv: string, options: { skipDuplicates?: boolean } = {
     return invalidImportPreview("CSV 没有可导入的记录", 2);
   }
 
-  const seenInImport = new Map<string, number>();
-  const previewRows: ImportPreviewRow[] = rows.map((row, index) => {
-    const rowNumber = index + 2;
-    const { input, errors: csvErrors } = csvRowToInput(row);
-    const parsed = birthdayInputSchema.safeParse(input);
-    const validationErrors = parsed.success
-      ? []
-      : parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`);
-    const errors = [...csvErrors, ...validationErrors];
-    const normalized = parsed.success ? parsed.data : input;
-    const duplicateCandidate =
-      parsed.success && errors.length === 0
-        ? duplicateMap.get(birthdayIdentity(parsed.data))
-        : undefined;
-    let duplicateInImportRow: number | undefined;
-    if (parsed.success && errors.length === 0) {
-      const identity = birthdayIdentity(parsed.data);
-      duplicateInImportRow = seenInImport.get(identity);
-      if (!duplicateInImportRow) {
-        seenInImport.set(identity, rowNumber);
-      }
-    }
-
-    const skipped = options.skipDuplicates && Boolean(duplicateCandidate || duplicateInImportRow);
-
-    return {
-      rowNumber,
-      input: parsed.success ? parsed.data : normalized,
-      errors,
-      duplicateCandidate,
-      duplicateInImportRow,
-      skipped
-    };
-  });
+  const previewRows = previewImportRows(
+    rows.map((row, index) => {
+      const { input, errors: csvErrors } = csvRowToInput(row);
+      return { rowNumber: index + 2, input, errors: csvErrors };
+    }),
+    duplicateMap,
+    options
+  );
 
   return buildImportPreview(previewRows);
 }
@@ -675,41 +653,56 @@ function previewJsonImport(
     mode === "append"
       ? new Map(listBirthdays(true).map((record) => [birthdayIdentity(record), record]))
       : new Map<string, BirthdayRecord>();
+  const previewRows = previewImportRows(
+    source.map((row, index) => ({
+      rowNumber: index + 1,
+      input:
+        typeof row === "object" && row
+          ? normalizeImportInput(row as Partial<BirthdayInput> & Record<string, unknown>)
+          : {}
+    })),
+    duplicateMap,
+    options
+  );
+
+  return buildImportPreview(previewRows);
+}
+
+function previewImportRows(
+  seeds: ImportPreviewSeed[],
+  duplicateMap: Map<string, BirthdayRecord>,
+  options: { skipDuplicates?: boolean }
+): ImportPreviewRow[] {
   const seenInImport = new Map<string, number>();
-  const previewRows = source.map((row, index): ImportPreviewRow => {
-    const rowNumber = index + 1;
-    const input =
-      typeof row === "object" && row
-        ? normalizeImportInput(row as Partial<BirthdayInput> & Record<string, unknown>)
-        : {};
-    const parsedRow = birthdayInputSchema.safeParse(input);
-    const errors = parsedRow.success
-      ? []
-      : parsedRow.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`);
+  return seeds.map(({ rowNumber, input, errors: inputErrors = [] }) => {
+    const parsed = birthdayInputSchema.safeParse(input);
+    const errors = parsed.success
+      ? inputErrors
+      : [
+          ...inputErrors,
+          ...parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        ];
     const duplicateCandidate =
-      parsedRow.success && errors.length === 0
-        ? duplicateMap.get(birthdayIdentity(parsedRow.data))
+      parsed.success && errors.length === 0
+        ? duplicateMap.get(birthdayIdentity(parsed.data))
         : undefined;
     let duplicateInImportRow: number | undefined;
-    if (parsedRow.success && errors.length === 0) {
-      const identity = birthdayIdentity(parsedRow.data);
+    if (parsed.success && errors.length === 0) {
+      const identity = birthdayIdentity(parsed.data);
       duplicateInImportRow = seenInImport.get(identity);
       if (!duplicateInImportRow) {
         seenInImport.set(identity, rowNumber);
       }
     }
-    const skipped = options.skipDuplicates && Boolean(duplicateCandidate || duplicateInImportRow);
     return {
       rowNumber,
-      input: parsedRow.success ? parsedRow.data : input,
+      input: parsed.success ? parsed.data : input,
       errors,
       duplicateCandidate,
       duplicateInImportRow,
-      skipped
+      skipped: options.skipDuplicates && Boolean(duplicateCandidate || duplicateInImportRow)
     };
   });
-
-  return buildImportPreview(previewRows);
 }
 
 function buildImportPreview(rows: ImportPreviewRow[]): ImportPreview {
@@ -771,16 +764,12 @@ function siteSettingsChangeDetail(previous: SiteSettings, next: SiteSettings) {
   if (previous.defaultUpcomingDays !== next.defaultUpcomingDays) {
     changedFields.push(`默认近期天数 ${next.defaultUpcomingDays} 天`);
   }
-  if (!sameStringList(previous.birthdayGreetingTemplates, next.birthdayGreetingTemplates)) {
+  if (JSON.stringify(previous.birthdayGreetingTemplates) !== JSON.stringify(next.birthdayGreetingTemplates)) {
     changedFields.push(`祝福模板 ${next.birthdayGreetingTemplates.length} 条`);
   }
   return {
     changedFields: changedFields.length > 0 ? changedFields : ["无字段变化"]
   };
-}
-
-function sameStringList(left: string[], right: string[]): boolean {
-  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function csvRowToInput(row: Record<string, string>): {

@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import {
   createContext,
+  type DependencyList,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
@@ -103,13 +104,8 @@ type ThemeState = {
 
 type AdminBirthdaySummary = {
   total: number;
-  visible: number;
   hidden: number;
-  today: number;
-  next7: number;
-  upcoming30: number;
   lunarAttention: number;
-  duplicateKeys: Set<string>;
   duplicateKeyCount: number;
   duplicateRecordCount: number;
 };
@@ -123,6 +119,23 @@ const themeOptions: Array<SelectOption<AppTheme>> = [
   { value: "bright", label: "清透亮色" },
   { value: "dark", label: "夜间深色" }
 ];
+const DIPPER_POINTS = [
+  { x: 128, y: 20 },
+  { x: 132, y: 52 },
+  { x: 100, y: 68 },
+  { x: 88, y: 42 },
+  { x: 64, y: 48 },
+  { x: 40, y: 54 },
+  { x: 20, y: 76 }
+] as const;
+const DIPPER_LINES = [
+  [6, 5],
+  [5, 4],
+  [4, 3],
+  [3, 2],
+  [2, 1],
+  [1, 0]
+] as const;
 
 const emptyForm: BirthdayFormState = {
   name: "",
@@ -584,23 +597,6 @@ function StarStageCard({
   loading: boolean;
   birthdays: PublicBirthday[];
 }) {
-  const points = [
-    { x: 128, y: 20 },
-    { x: 132, y: 52 },
-    { x: 100, y: 68 },
-    { x: 88, y: 42 },
-    { x: 64, y: 48 },
-    { x: 40, y: 54 },
-    { x: 20, y: 76 }
-  ];
-  const lines = [
-    [6, 5],
-    [5, 4],
-    [4, 3],
-    [3, 2],
-    [2, 1],
-    [1, 0]
-  ];
   const next = birthdays[0];
   const isLit = (birthday?: PublicBirthday) => {
     const daysUntil = birthday?.occurrence?.daysUntil;
@@ -611,17 +607,17 @@ function StarStageCard({
     <article className="star-stage-card">
       <div className="stage-sky">
         <svg className="dipper-map" viewBox="0 0 150 94" role="img" aria-label="北斗七星生日图">
-          {lines.map(([from, to]) => (
+          {DIPPER_LINES.map(([from, to]) => (
             <line
               className={`dipper-line ${isLit(birthdays[from]) && isLit(birthdays[to]) ? "active" : ""}`}
               key={`${from}-${to}`}
-              x1={points[from].x}
-              y1={points[from].y}
-              x2={points[to].x}
-              y2={points[to].y}
+              x1={DIPPER_POINTS[from].x}
+              y1={DIPPER_POINTS[from].y}
+              x2={DIPPER_POINTS[to].x}
+              y2={DIPPER_POINTS[to].y}
             />
           ))}
-          {points.map((point, index) => {
+          {DIPPER_POINTS.map((point, index) => {
             const birthday = birthdays[index];
             const lit = isLit(birthday);
             return (
@@ -665,13 +661,7 @@ function BirthdaysPage() {
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return (birthdays.data ?? []).filter((item) => {
-      const matchesQuery =
-        !normalized ||
-        [item.name, item.group, item.note, item.originalDateText, item.occurrenceDateText, item.tags.join(" ")]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-          .includes(normalized);
+      const matchesQuery = matchBirthdayQuery(item, normalized);
       const matchesMonth =
         month === "all" || String(item.occurrence?.date.month) === month;
       const matchesType = calendarType === "all" || item.calendarType === calendarType;
@@ -1309,20 +1299,7 @@ function AdminBirthdaysPage() {
   const filteredRecords = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return records.filter((item) => {
-      const matchesQuery =
-        !normalized ||
-        [
-          item.name,
-          item.group,
-          item.note,
-          item.originalDateText,
-          item.occurrenceDateText,
-          item.tags.join(" ")
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-          .includes(normalized);
+      const matchesQuery = matchBirthdayQuery(item, normalized);
       const matchesType =
         calendarFilter === "all" || item.calendarType === calendarFilter;
       const matchesVisibility =
@@ -2647,7 +2624,6 @@ function MetaLine({ birthday }: { birthday: PublicBirthday }) {
 
 function AdminTable({
   birthdays,
-  compact,
   selectedIds,
   onSelect,
   onSelectAll,
@@ -2656,7 +2632,6 @@ function AdminTable({
   onVisibility
 }: {
   birthdays: BirthdayView[];
-  compact?: boolean;
   selectedIds?: Set<string>;
   onSelect?: (id: string, checked: boolean) => void;
   onSelectAll?: (ids: string[], checked: boolean) => void;
@@ -2667,7 +2642,7 @@ function AdminTable({
   if (birthdays.length === 0) {
     return <EmptyState title="暂无记录" />;
   }
-  const selectable = Boolean(selectedIds && onSelect && onSelectAll && !compact);
+  const selectable = Boolean(selectedIds && onSelect && onSelectAll);
   const visibleIds = birthdays.map((item) => item.id);
   const allSelected =
     selectable && visibleIds.length > 0 && visibleIds.every((id) => selectedIds?.has(id));
@@ -2694,7 +2669,7 @@ function AdminTable({
             <th>下次日期</th>
             <th>倒计时</th>
             <th>公开</th>
-            {!compact ? <th>操作</th> : null}
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -2716,37 +2691,33 @@ function AdminTable({
                     {item.group ?? "未分组"}
                     <span className="mobile-row-state"> · {item.visible ? "公开" : "隐藏"}</span>
                   </small>
-                  {!compact ? (
-                    <small className="updated-line">
-                      更新 {formatDateTime(item.updatedAt)}
-                      {item.updatedBy ? ` · ${item.updatedBy}` : ""}
-                    </small>
-                  ) : null}
+                  <small className="updated-line">
+                    更新 {formatDateTime(item.updatedAt)}
+                    {item.updatedBy ? ` · ${item.updatedBy}` : ""}
+                  </small>
                 </span>
               </td>
               <td data-label="生日">{birthdayDateText(item)}</td>
               <td data-label="下次日期">{item.occurrenceDateText}</td>
               <td data-label="倒计时">{formatCountdown(item.occurrence?.daysUntil)}</td>
               <td data-label="公开">{item.visible ? "显示" : "隐藏"}</td>
-              {!compact ? (
-                <td data-label="操作">
-                  <div className="table-actions">
-                    <button className="icon-button" onClick={() => onEdit?.(item)} aria-label="编辑">
-                      <Pencil size={16} aria-hidden />
-                    </button>
-                    <button
-                      className="icon-button"
-                      onClick={() => onVisibility?.(item)}
-                      aria-label={item.visible ? "隐藏" : "显示"}
-                    >
-                      {item.visible ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
-                    </button>
-                    <button className="icon-button danger" onClick={() => onDelete?.(item)} aria-label="删除">
-                      <Trash2 size={16} aria-hidden />
-                    </button>
-                  </div>
-                </td>
-              ) : null}
+              <td data-label="操作">
+                <div className="table-actions">
+                  <button className="icon-button" onClick={() => onEdit?.(item)} aria-label="编辑">
+                    <Pencil size={16} aria-hidden />
+                  </button>
+                  <button
+                    className="icon-button"
+                    onClick={() => onVisibility?.(item)}
+                    aria-label={item.visible ? "隐藏" : "显示"}
+                  >
+                    {item.visible ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
+                  </button>
+                  <button className="icon-button danger" onClick={() => onDelete?.(item)} aria-label="删除">
+                    <Trash2 size={16} aria-hidden />
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -2853,67 +2824,37 @@ function previewCalendarType(value: unknown): string {
   return previewValue(value);
 }
 
-function usePublicBirthdays(): LoadState<PublicBirthday[]> {
-  const [state, setState] = useState<LoadState<PublicBirthday[]>>({ loading: true });
+function useLoad<T>(load: () => Promise<T>, deps: DependencyList = []): LoadState<T> {
+  const [state, setState] = useState<LoadState<T>>({ loading: true });
   useEffect(() => {
     let active = true;
-    api
-      .publicBirthdays()
-      .then((result) => active && setState({ loading: false, data: result.birthdays }))
-      .catch((error) =>
-        active &&
-        setState({
-          loading: false,
-          error: error instanceof Error ? error.message : "读取失败"
-        })
+    load()
+      .then((data) => active && setState({ loading: false, data }))
+      .catch(
+        (error) =>
+          active &&
+          setState({
+            loading: false,
+            error: error instanceof Error ? error.message : "读取失败"
+          })
       );
     return () => {
       active = false;
     };
-  }, []);
+  }, deps);
   return state;
+}
+
+function usePublicBirthdays(): LoadState<PublicBirthday[]> {
+  return useLoad(() => api.publicBirthdays().then((result) => result.birthdays));
 }
 
 function useTodayInfo(): LoadState<TodayDateInfo> {
-  const [state, setState] = useState<LoadState<TodayDateInfo>>({ loading: true });
-  useEffect(() => {
-    let active = true;
-    api
-      .publicToday()
-      .then((result) => active && setState({ loading: false, data: result.today }))
-      .catch((error) =>
-        active &&
-        setState({
-          loading: false,
-          error: error instanceof Error ? error.message : "读取失败"
-        })
-      );
-    return () => {
-      active = false;
-    };
-  }, []);
-  return state;
+  return useLoad(() => api.publicToday().then((result) => result.today));
 }
 
 function usePublicSettings(): LoadState<PublicSettings> {
-  const [state, setState] = useState<LoadState<PublicSettings>>({ loading: true });
-  useEffect(() => {
-    let active = true;
-    api
-      .publicSettings()
-      .then((result) => active && setState({ loading: false, data: result }))
-      .catch((error) =>
-        active &&
-        setState({
-          loading: false,
-          error: error instanceof Error ? error.message : "读取失败"
-        })
-      );
-    return () => {
-      active = false;
-    };
-  }, []);
-  return state;
+  return useLoad(() => api.publicSettings());
 }
 
 function useAdminBirthdayData() {
@@ -2977,66 +2918,15 @@ function useAdminBirthdayData() {
 }
 
 function useAdminOperationLogs(limit = 80): LoadState<AdminOperationLog[]> {
-  const [state, setState] = useState<LoadState<AdminOperationLog[]>>({ loading: true });
-  useEffect(() => {
-    let active = true;
-    api
-      .adminOperationLogs(limit)
-      .then((result) => active && setState({ loading: false, data: result.logs }))
-      .catch((error) =>
-        active &&
-        setState({
-          loading: false,
-          error: error instanceof Error ? error.message : "读取失败"
-        })
-      );
-    return () => {
-      active = false;
-    };
-  }, [limit]);
-  return state;
+  return useLoad(() => api.adminOperationLogs(limit).then((result) => result.logs), [limit]);
 }
 
 function useAdminDataAudit(): LoadState<DataAuditReport> {
-  const [state, setState] = useState<LoadState<DataAuditReport>>({ loading: true });
-  useEffect(() => {
-    let active = true;
-    api
-      .adminDataAudit()
-      .then((result) => active && setState({ loading: false, data: result.audit }))
-      .catch((error) =>
-        active &&
-        setState({
-          loading: false,
-          error: error instanceof Error ? error.message : "读取失败"
-        })
-      );
-    return () => {
-      active = false;
-    };
-  }, []);
-  return state;
+  return useLoad(() => api.adminDataAudit().then((result) => result.audit));
 }
 
 function useAdminSettings(): LoadState<SiteSettings> {
-  const [state, setState] = useState<LoadState<SiteSettings>>({ loading: true });
-  useEffect(() => {
-    let active = true;
-    api
-      .adminSettings()
-      .then((result) => active && setState({ loading: false, data: result.settings }))
-      .catch((error) =>
-        active &&
-        setState({
-          loading: false,
-          error: error instanceof Error ? error.message : "读取失败"
-        })
-      );
-    return () => {
-      active = false;
-    };
-  }, []);
-  return state;
+  return useLoad(() => api.adminSettings().then((result) => result.settings));
 }
 
 function PageTitle({ eyebrow, title, meta }: { eyebrow?: string; title: string; meta?: string }) {
@@ -3166,14 +3056,9 @@ function summarizeAdminBirthdays(records: BirthdayView[]): AdminBirthdaySummary 
   const duplicateKeys = duplicateKeySet(records);
   return {
     total: records.length,
-    visible: records.filter((item) => item.visible).length,
     hidden: records.filter((item) => !item.visible).length,
-    today: records.filter((item) => item.occurrence?.daysUntil === 0).length,
-    next7: records.filter((item) => isWithinUpcomingDays(item, 7)).length,
-    upcoming30: records.filter((item) => isWithinUpcomingDays(item, 30)).length,
     lunarAttention: records.filter((item) => item.calendarType === "lunar" && item.isLeapMonth)
       .length,
-    duplicateKeys,
     duplicateKeyCount: duplicateKeys.size,
     duplicateRecordCount: records.filter((item) => duplicateKeys.has(birthdayDuplicateKey(item)))
       .length
@@ -3321,7 +3206,7 @@ function matchRange(item: { occurrence?: { daysUntil: number } }, range: RangeFi
     return true;
   }
   const days = item.occurrence?.daysUntil;
-  if (days === undefined) {
+  if (typeof days !== "number") {
     return false;
   }
   if (range === "today") {
@@ -3330,12 +3215,21 @@ function matchRange(item: { occurrence?: { daysUntil: number } }, range: RangeFi
   return days >= 0 && days <= Number(range);
 }
 
-function isWithinUpcomingDays(
-  item: { occurrence?: { daysUntil: number } },
-  maxDays: number
+function matchBirthdayQuery(
+  item: Pick<
+    BirthdayView,
+    "name" | "group" | "note" | "originalDateText" | "occurrenceDateText" | "tags"
+  >,
+  normalized: string
 ): boolean {
-  const days = item.occurrence?.daysUntil;
-  return typeof days === "number" && days >= 0 && days <= maxDays;
+  return (
+    !normalized ||
+    [item.name, item.group, item.note, item.originalDateText, item.occurrenceDateText, item.tags.join(" ")]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(normalized)
+  );
 }
 
 function birthdayGreetingOptions(

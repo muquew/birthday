@@ -1,7 +1,5 @@
 import { Lunar, LunarYear } from "lunar-javascript";
 import {
-  compareDates,
-  dateKey,
   daysInGregorianMonth,
   diffDays,
   formatDate,
@@ -47,27 +45,13 @@ export function makeBirthdayView(
     ? formatDate(occurrence.date)
     : "暂无下次日期";
 
-  const searchableText = [
-    record.name,
-    record.group,
-    record.note,
-    record.tags.join(" "),
-    originalDateText,
-    occurrenceDateText,
-    record.calendarType === "lunar" ? "农历 阴历" : "公历 阳历"
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
   return {
     ...record,
     calendarLabel: record.calendarType === "lunar" ? "农历" : "公历",
     originalDateText,
     occurrenceDateText,
     occurrence,
-    age,
-    searchableText
+    age
   };
 }
 
@@ -121,6 +105,11 @@ export function formatOriginalBirthday(record: BirthdayRecord): string {
   )}`;
 }
 
+export function formatLunarDate(date: LocalDate): string {
+  const lunar = Lunar.fromDate(new Date(date.year, date.month - 1, date.day));
+  return `农历 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+}
+
 export function sortBirthdayViews(views: BirthdayView[]): BirthdayView[] {
   return [...views].sort((a, b) => {
     const da = a.occurrence?.daysUntil ?? Number.MAX_SAFE_INTEGER;
@@ -130,23 +119,6 @@ export function sortBirthdayViews(views: BirthdayView[]): BirthdayView[] {
     }
     return a.name.localeCompare(b.name, "zh-CN");
   });
-}
-
-export function isTodayBirthday(view: BirthdayView): boolean {
-  return view.occurrence?.daysUntil === 0;
-}
-
-export function isUpcomingWithin(view: BirthdayView, days: number): boolean {
-  const daysUntil = view.occurrence?.daysUntil;
-  return typeof daysUntil === "number" && daysUntil >= 0 && daysUntil <= days;
-}
-
-export function monthOfOccurrence(view: BirthdayView): number | undefined {
-  return view.occurrence?.date.month;
-}
-
-export function normalizeSearch(value: string): string {
-  return value.trim().toLowerCase();
 }
 
 function gregorianOccurrenceForYear(
@@ -263,12 +235,4 @@ export function birthdayIdentity(record: Pick<BirthdayRecord, "name" | "calendar
     record.month,
     record.day
   ].join("|");
-}
-
-export function sameDate(a: LocalDate, b: LocalDate): boolean {
-  return dateKey(a) === dateKey(b);
-}
-
-export function hasPassed(date: LocalDate, today: LocalDate): boolean {
-  return compareDates(date, today) < 0;
 }

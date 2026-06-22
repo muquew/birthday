@@ -3,15 +3,10 @@ import { siteSettingsSchema } from "../shared/validation.js";
 import { DEFAULT_SITE_SETTINGS } from "../shared/settings.js";
 import { getDb } from "./db.js";
 
-type SettingRow = {
-  key: string;
-  value: string;
-};
-
 export function getSiteSettings(): SiteSettings {
   const rows = getDb()
     .prepare("SELECT key, value FROM site_settings")
-    .all() as SettingRow[];
+    .all() as Array<{ key: string; value: string }>;
   const values = new Map(rows.map((row) => [row.key, row.value]));
   return siteSettingsSchema.parse({
     siteName: values.get("siteName") ?? DEFAULT_SITE_SETTINGS.siteName,

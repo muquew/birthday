@@ -63,18 +63,7 @@ export type BirthdayView = BirthdayRecord & {
   occurrenceDateText: string;
   occurrence?: BirthdayOccurrence;
   age?: number;
-  searchableText: string;
 };
-
-export type AdminSummary = {
-  totalVisible: number;
-  totalHidden: number;
-  todayCount: number;
-  next7Count: number;
-  lunarAttentionCount: number;
-};
-
-export type DataAuditSeverity = "bad" | "warn" | "info";
 
 export type DataAuditIssue = {
   id: string;
@@ -90,7 +79,7 @@ export type DataAuditIssue = {
     | "longNote"
     | "hidden"
     | "ungrouped";
-  severity: DataAuditSeverity;
+  severity: "bad" | "warn" | "info";
   title: string;
   description: string;
   count: number;
