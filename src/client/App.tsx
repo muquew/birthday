@@ -601,6 +601,7 @@ function StarStageCard({
   birthdays: PublicBirthday[];
 }) {
   const next = birthdays[0];
+  const roster = birthdays.slice(0, 4);
   const isLit = (birthday?: PublicBirthday) => {
     const daysUntil = birthday?.occurrence?.daysUntil;
     return typeof daysUntil === "number" && daysUntil >= 0 && daysUntil <= activeWindowDays;
@@ -650,6 +651,27 @@ function StarStageCard({
         <small>
           {next?.occurrence ? `${formatCountdown(next.occurrence.daysUntil)} · ${next.occurrenceDateText}` : "等待下一次点亮"}
         </small>
+        {roster.length > 0 ? (
+          <ul className="stage-roster" aria-label="星图生日">
+            {roster.map((birthday) => {
+              const days = birthday.occurrence?.daysUntil;
+              return (
+                <li
+                  className={[
+                    isLit(birthday) ? "active" : "",
+                    days === 0 ? "today" : ""
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  key={birthday.id}
+                >
+                  <span>{birthday.name}</span>
+                  <small>{formatCountdown(days)}</small>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
       </div>
     </article>
   );
