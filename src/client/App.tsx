@@ -318,9 +318,6 @@ function PublicLayout() {
           <ThemeSelect compact />
         </div>
       </header>
-      <nav className="mobile-tabbar" aria-label="移动端公共导航">
-        {publicNav}
-      </nav>
       <main>
         <Outlet />
       </main>
@@ -330,6 +327,9 @@ function PublicLayout() {
           <small>{correctionContact}</small>
         </footer>
       ) : null}
+      <nav className="mobile-tabbar" aria-label="移动端公共导航">
+        {publicNav}
+      </nav>
     </div>
   );
 }

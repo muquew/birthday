@@ -8924,17 +8924,22 @@ body::before {
 
 @media (max-width: 740px) {
   .site-shell {
-    padding-bottom: 56px;
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
   }
 
   .site-shell .mobile-tabbar {
-    backdrop-filter: none;
-    bottom: auto;
-    left: auto;
-    margin: 10px auto 18px;
-    position: static;
-    right: auto;
-    width: 100%;
+    backdrop-filter: blur(14px);
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    margin: 0;
+    padding: 5px;
+    position: fixed;
+    right: 12px;
+    width: auto;
+  }
+
+  .site-shell .mobile-tabbar a {
+    min-height: 44px;
   }
 
   .site-shell .icon-text-button,
@@ -8949,7 +8954,212 @@ body::before {
   }
 
   .site-shell .upcoming-section {
-    padding-bottom: 8px;
+    gap: 8px;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .site-shell .upcoming-section .section-title {
+    padding-bottom: 2px;
+  }
+
+  .site-shell .upcoming-section .birthday-grid {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 0 6px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .site-shell .upcoming-section .birthday-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .site-shell .upcoming-section .birthday-grid::after {
+    content: "";
+    width: 8px;
+  }
+
+  .site-shell .upcoming-section .birthday-card {
+    align-items: center;
+    background:
+      linear-gradient(115deg, rgba(var(--surface-rgb), 0.68), rgba(var(--surface-rgb), 0.28)),
+      transparent;
+    border: 1px solid var(--public-line);
+    border-radius: 12px;
+    box-shadow: 0 10px 26px rgba(67, 48, 22, 0.08);
+    display: grid;
+    gap: 8px;
+    grid-template-areas: "name date status";
+    grid-template-columns: minmax(72px, 0.8fr) minmax(0, 1fr) auto;
+    flex: 0 0 min(74vw, 286px);
+    min-height: 58px;
+    padding: 9px 10px;
+    scroll-snap-align: start;
+  }
+
+  .site-shell .upcoming-section .birthday-card.today-birthday {
+    background:
+      linear-gradient(105deg, rgba(189, 88, 72, 0.13), rgba(var(--surface-rgb), 0.42) 72%),
+      transparent;
+    box-shadow:
+      inset 3px 0 0 var(--public-rose),
+      0 10px 26px rgba(67, 48, 22, 0.08);
+    padding-left: 12px;
+  }
+
+  .site-shell .upcoming-section .card-name {
+    grid-area: name;
+    min-width: 0;
+  }
+
+  .site-shell .upcoming-section .card-name h3 {
+    font-size: 19px;
+    line-height: 1.15;
+  }
+
+  .site-shell .upcoming-section .card-name small {
+    display: none;
+  }
+
+  .site-shell .upcoming-section .date-pair {
+    grid-area: date;
+    gap: 0;
+    line-height: 1.25;
+    min-width: 0;
+  }
+
+  .site-shell .upcoming-section .date-pair strong,
+  .site-shell .upcoming-section .date-pair span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-shell .upcoming-section .date-pair span:first-child {
+    display: block;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .site-shell .upcoming-section .date-pair span:last-child {
+    display: none;
+  }
+
+  .site-shell .upcoming-section .card-topline {
+    grid-area: status;
+    justify-content: flex-end;
+  }
+
+  .site-shell .upcoming-section .countdown {
+    font-size: 13px;
+    max-width: 54px;
+    overflow: hidden;
+    padding: 5px 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-shell .home-page-flow .quick-months {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-shell .upcoming-section .birthday-grid {
+    margin-right: -10px;
+    padding-right: 10px;
+  }
+}
+
+@media (min-width: 521px) and (max-width: 740px) {
+  .site-shell .upcoming-section .birthday-card {
+    flex-basis: min(48vw, 286px);
+  }
+}
+
+@media (max-width: 740px) {
+  .site-shell .directory-page-flow .birthday-grid {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: block;
+    overflow: visible;
+  }
+
+  .site-shell .directory-page-flow .birthday-card {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--public-line);
+    border-radius: 0;
+    box-shadow: none;
+    display: grid;
+    gap: 8px;
+    grid-template-areas: "name date status";
+    grid-template-columns: minmax(82px, 0.86fr) minmax(0, 1.2fr) auto;
+    min-height: 64px;
+    padding: 9px 0;
+  }
+
+  .site-shell .directory-page-flow .birthday-card.today-birthday {
+    background:
+      linear-gradient(90deg, rgba(189, 88, 72, 0.12), transparent 72%),
+      transparent;
+    box-shadow: inset 3px 0 0 var(--public-rose);
+    padding-left: 8px;
+  }
+
+  .site-shell .directory-page-flow .card-name {
+    grid-area: name;
+    min-width: 0;
+  }
+
+  .site-shell .directory-page-flow .card-name h3 {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  .site-shell .directory-page-flow .card-name small {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .site-shell .directory-page-flow .date-pair {
+    grid-area: date;
+    gap: 1px;
+    line-height: 1.25;
+    min-width: 0;
+  }
+
+  .site-shell .directory-page-flow .date-pair strong,
+  .site-shell .directory-page-flow .date-pair span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-shell .directory-page-flow .date-pair span {
+    font-size: 12px;
+  }
+
+  .site-shell .directory-page-flow .card-topline {
+    grid-area: status;
+    justify-content: flex-end;
+  }
+
+  .site-shell .directory-page-flow .countdown {
+    font-size: 13px;
+    max-width: 54px;
+    overflow: hidden;
+    padding: 5px 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .site-shell .upcoming-section .birthday-card-placeholder {
