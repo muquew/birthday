@@ -560,12 +560,10 @@ function StarStageCard({
   loading: boolean;
   birthdays: PublicBirthday[];
 }) {
-  const next = birthdays[0];
   const isLit = (birthday?: PublicBirthday) => {
     const daysUntil = birthday?.occurrence?.daysUntil;
     return typeof daysUntil === "number" && daysUntil >= 0 && daysUntil <= activeWindowDays;
   };
-  const roster = birthdays.slice(0, 4);
 
   return (
     <article className="star-stage-card">
@@ -588,9 +586,6 @@ function StarStageCard({
           {DIPPER_POINTS.map((point, index) => {
             const birthday = birthdays[index];
             const lit = isLit(birthday);
-            const labelX = point.x + (index <= 1 ? -6 : 5);
-            const labelY = point.y + (index === 6 ? -6 : index === 0 ? 2 : -5);
-            const labelAnchor = index <= 1 ? "end" : "start";
             return (
               <g key={`${point.x}-${point.y}`}>
                 <circle
@@ -602,18 +597,8 @@ function StarStageCard({
                   r={index === 3 ? 2.4 : 2}
                 />
                 <title>
-                  {birthday ? `${birthday.name}，${formatCountdown(birthday.occurrence?.daysUntil)}` : "等待生日记录"}
+                  {birthday ? "已点亮的生日星位" : "等待生日记录"}
                 </title>
-                {birthday ? (
-                  <text
-                    className={`dipper-label ${lit ? "active" : ""}`}
-                    textAnchor={labelAnchor}
-                    x={labelX}
-                    y={labelY}
-                  >
-                    {birthday.name}
-                  </text>
-                ) : null}
               </g>
             );
           })}
@@ -624,26 +609,7 @@ function StarStageCard({
         <div className="stage-copy-top">
           <span>北斗星图</span>
         </div>
-        <strong>{loading ? "读取星图" : next?.name ?? "生日星图"}</strong>
-        <small>
-          {next?.occurrence ? `${formatCountdown(next.occurrence.daysUntil)} · ${next.occurrenceDateText}` : "等待下一次点亮"}
-        </small>
-        {roster.length > 0 ? (
-          <ol className="stage-roster" aria-label="近期星位">
-            {roster.map((birthday) => {
-              const lit = isLit(birthday);
-              return (
-                <li
-                  className={`${lit ? "active" : ""} ${birthday.occurrence?.daysUntil === 0 ? "today" : ""}`.trim()}
-                  key={birthday.id}
-                >
-                  <span>{birthday.name}</span>
-                  <small>{formatCountdown(birthday.occurrence?.daysUntil)}</small>
-                </li>
-              );
-            })}
-          </ol>
-        ) : null}
+        <strong>{loading ? "读取星图" : "北斗七星"}</strong>
       </div>
     </article>
   );
