@@ -10456,16 +10456,91 @@ body::before {
 /* Keep the useful mobile month fix from the reverted art pass. */
 @media (max-width: 740px) {
   .site-shell .month-board {
-    padding-right: 34px;
+    padding-right: 42px;
   }
 
   .site-shell .month-rail {
-    right: 0;
-    width: 32px;
+    right: 6px;
+    width: 34px;
   }
 
   .site-shell .month-rail a {
-    min-width: 32px;
+    min-height: 32px;
+    min-width: 34px;
+  }
+
+  .site-shell .month-rail-label {
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--sage) 20%, transparent);
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(61, 42, 19, 0.12);
+    color: var(--sage-dark);
+    margin-top: 2px;
+    min-width: 28px;
+    padding: 2px 4px;
+    text-align: center;
+  }
+
+  .site-shell .upcoming-section {
+    margin-top: 0;
+  }
+
+  .site-shell .upcoming-section .section-title {
+    align-items: center;
+    padding-bottom: 8px;
+  }
+
+  .site-shell .upcoming-section .birthday-grid {
+    border-top: 1px solid var(--public-line);
+    display: grid;
+    gap: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .upcoming-section .birthday-card,
+  .site-shell .upcoming-section .birthday-card-placeholder {
+    border: 0;
+    border-bottom: 1px solid var(--public-line);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .site-shell .upcoming-section .birthday-card {
+    align-items: center;
+    background: transparent;
+    display: grid;
+    gap: 8px;
+    grid-template-areas: "name date status";
+    grid-template-columns: minmax(64px, 0.78fr) minmax(0, 1.2fr) auto;
+    min-height: 54px;
+    padding: 11px 0;
+  }
+
+  .site-shell .upcoming-section .birthday-card:nth-of-type(odd):last-of-type {
+    grid-column: auto;
+  }
+
+  .site-shell .upcoming-section .birthday-card:last-of-type {
+    border-bottom: 0;
+  }
+
+  .site-shell .upcoming-section .birthday-card.today-birthday {
+    background: linear-gradient(90deg, rgba(189, 88, 72, 0.1), transparent 72%);
+    box-shadow: none;
+    padding-left: 8px;
+  }
+
+  .site-shell .upcoming-section .card-name h3 {
+    font-size: 16px;
+  }
+
+  .site-shell .upcoming-section .date-pair span:first-child {
+    font-size: 12px;
+  }
+
+  .site-shell .upcoming-section .countdown {
+    font-size: 12px;
+    padding: 4px 7px;
   }
 
   .site-shell .months-page-flow .compact-birthday {

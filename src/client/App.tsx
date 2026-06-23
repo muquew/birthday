@@ -512,14 +512,6 @@ function HomePage() {
         <BirthdayGrid birthdays={upcoming} fillRowColumns={3} loading={birthdays.loading} />
       </section>
 
-      <section className="quick-months" aria-label="月份快速入口">
-        {Array.from({ length: 12 }, (_, index) => index + 1).map((month) => (
-          <Link key={month} to={`/months?month=${month}`}>
-            <span>{month}</span>
-            <small>月</small>
-          </Link>
-        ))}
-      </section>
     </div>
   );
 }
