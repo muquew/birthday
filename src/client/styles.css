@@ -6278,3 +6278,2508 @@ body::before {
     width: 100%;
   }
 }
+
+/* Public redesign: celestial theatre */
+.site-shell {
+  --public-page-bg: #f4ead7;
+  --public-page-bg-2: #ead7b9;
+  --public-ink: #07100f;
+  --public-muted: #5b554b;
+  --public-line: rgba(101, 77, 43, 0.24);
+  --public-glow: rgba(221, 167, 66, 0.28);
+  --public-rose: #bd5848;
+  --public-gold: #a97816;
+  --public-teal: #0c645e;
+  --public-teal-bright: #70d6c9;
+  --public-night: #061314;
+  --public-velvet: #1c1020;
+  --public-panel: rgba(255, 248, 236, 0.82);
+  --public-panel-strong: rgba(255, 250, 241, 0.95);
+  --public-shadow: 0 28px 86px rgba(38, 22, 11, 0.18);
+  --public-radius: 18px;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow-x: clip;
+  padding-bottom: 66px;
+  position: relative;
+  width: 100%;
+}
+
+:root[data-theme="bright"] .site-shell {
+  --public-page-bg: #eff9f6;
+  --public-page-bg-2: #d9eee8;
+  --public-ink: #071614;
+  --public-muted: #53665f;
+  --public-line: rgba(29, 107, 99, 0.2);
+  --public-glow: rgba(55, 157, 145, 0.22);
+  --public-rose: #c45d4c;
+  --public-gold: #9a721e;
+  --public-teal: #15746c;
+  --public-panel: rgba(251, 255, 253, 0.84);
+  --public-panel-strong: rgba(251, 255, 253, 0.96);
+  --public-shadow: 0 28px 82px rgba(20, 82, 71, 0.15);
+}
+
+:root[data-theme="dark"] .site-shell {
+  --public-page-bg: #07100f;
+  --public-page-bg-2: #0e1817;
+  --public-ink: #f7ecdc;
+  --public-muted: #c1b8a9;
+  --public-line: rgba(136, 217, 204, 0.18);
+  --public-glow: rgba(112, 214, 201, 0.2);
+  --public-rose: #e77a62;
+  --public-gold: #e0b85f;
+  --public-teal: #70d6c9;
+  --public-panel: rgba(18, 29, 29, 0.78);
+  --public-panel-strong: rgba(22, 35, 34, 0.9);
+  --public-shadow: 0 34px 90px rgba(0, 0, 0, 0.38);
+}
+
+.site-shell::before,
+.site-shell::after {
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+}
+
+.site-shell::before {
+  z-index: -2;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(189, 88, 72, 0.18), transparent 22%),
+    radial-gradient(circle at 78% 8%, var(--public-glow), transparent 28%),
+    radial-gradient(circle at 64% 76%, rgba(12, 100, 94, 0.16), transparent 34%),
+    linear-gradient(135deg, var(--public-page-bg), var(--public-page-bg-2) 52%, var(--public-page-bg));
+}
+
+.site-shell::after {
+  z-index: -1;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.36) 0 1px, transparent 1.4px) 16px 20px / 72px 72px,
+    repeating-linear-gradient(112deg, rgba(101, 77, 43, 0.075) 0 1px, transparent 1px 34px),
+    linear-gradient(90deg, transparent, rgba(6, 19, 20, 0.06) 58%, transparent);
+  opacity: 0.74;
+}
+
+:root[data-theme="dark"] .site-shell::after {
+  background:
+    radial-gradient(circle, rgba(255, 241, 184, 0.48) 0 1px, transparent 1.5px) 16px 20px / 78px 78px,
+    repeating-linear-gradient(112deg, rgba(112, 214, 201, 0.075) 0 1px, transparent 1px 34px),
+    linear-gradient(90deg, transparent, rgba(224, 184, 95, 0.06) 58%, transparent);
+  opacity: 0.55;
+}
+
+.site-shell > header,
+.site-shell > main,
+.site-shell > footer {
+  position: relative;
+  z-index: 1;
+}
+
+.site-shell > main {
+  margin-inline: auto;
+  width: min(1280px, calc(100% - 44px));
+}
+
+.site-shell .public-header {
+  border: 1px solid var(--public-line);
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 18px 70px rgba(39, 24, 13, 0.12);
+  margin: 0 auto;
+  min-height: 74px;
+  padding: 0 clamp(14px, 2vw, 24px);
+  width: min(1320px, calc(100% - 32px));
+  background:
+    linear-gradient(180deg, rgba(255, 250, 241, 0.88), rgba(255, 243, 223, 0.58)),
+    rgba(255, 248, 236, 0.78);
+  backdrop-filter: blur(18px) saturate(128%);
+}
+
+:root[data-theme="dark"] .site-shell .public-header {
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.34);
+  background:
+    linear-gradient(180deg, rgba(18, 29, 29, 0.86), rgba(7, 16, 15, 0.58)),
+    rgba(18, 29, 29, 0.72);
+}
+
+.site-shell .brand {
+  color: var(--public-ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  font-size: clamp(20px, 2vw, 26px);
+  letter-spacing: 0;
+}
+
+.site-shell .brand svg {
+  color: var(--public-gold);
+  filter: drop-shadow(0 4px 10px rgba(169, 120, 22, 0.25));
+}
+
+.site-shell .nav-tabs,
+.site-shell .public-header-actions {
+  min-width: 0;
+}
+
+.site-shell .nav-tabs {
+  background: rgba(255, 250, 241, 0.4);
+  border: 1px solid var(--public-line);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  padding: 4px;
+}
+
+:root[data-theme="dark"] .site-shell .nav-tabs {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.site-shell .nav-tabs a {
+  border: 0;
+  border-radius: 999px;
+  color: var(--public-muted);
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 13px;
+}
+
+.site-shell .nav-tabs a.active,
+.site-shell .nav-tabs a:hover {
+  background:
+    linear-gradient(135deg, rgba(12, 100, 94, 0.12), rgba(169, 120, 22, 0.14)),
+    rgba(255, 250, 241, 0.72);
+  box-shadow: none;
+  color: var(--public-teal);
+  transform: none;
+}
+
+:root[data-theme="dark"] .site-shell .nav-tabs a.active,
+:root[data-theme="dark"] .site-shell .nav-tabs a:hover {
+  background: rgba(112, 214, 201, 0.12);
+  color: var(--public-teal);
+}
+
+.site-shell .theme-control.compact {
+  min-width: 158px;
+  width: 158px;
+}
+
+.site-shell .home-page-flow,
+.site-shell .directory-page-flow,
+.site-shell .months-page-flow {
+  gap: clamp(26px, 4vw, 48px);
+}
+
+.site-shell .home-hero {
+  align-items: stretch;
+  border: 0;
+  display: grid;
+  gap: clamp(22px, 4vw, 54px);
+  grid-template-columns: minmax(0, 1.04fr) minmax(390px, 0.76fr);
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(28px, 4vw, 48px) 0 clamp(24px, 3vw, 36px);
+  position: relative;
+}
+
+.site-shell .home-hero::before {
+  inset: clamp(24px, 5vw, 58px) clamp(-56px, -4vw, -18px) clamp(18px, 4vw, 42px);
+  border: 1px solid var(--public-line);
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 250, 241, 0.58), rgba(255, 250, 241, 0.12) 54%, rgba(6, 19, 20, 0.08)),
+    repeating-linear-gradient(90deg, rgba(101, 77, 43, 0.08) 0 1px, transparent 1px 118px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.44),
+    inset 0 -1px 0 rgba(6, 19, 20, 0.08);
+  z-index: -1;
+}
+
+:root[data-theme="dark"] .site-shell .home-hero::before {
+  background:
+    linear-gradient(90deg, rgba(22, 35, 34, 0.62), rgba(22, 35, 34, 0.12) 54%, rgba(224, 184, 95, 0.06)),
+    repeating-linear-gradient(90deg, rgba(112, 214, 201, 0.07) 0 1px, transparent 1px 118px);
+}
+
+.site-shell .home-hero::after {
+  display: none;
+}
+
+.hero-theatre {
+  bottom: 4%;
+  left: 32%;
+  pointer-events: none;
+  position: absolute;
+  right: -8%;
+  top: 6%;
+  z-index: -1;
+}
+
+.theatre-orbit {
+  border: 1px solid rgba(169, 120, 22, 0.24);
+  border-radius: 50%;
+  position: absolute;
+  transform: rotate(-16deg);
+}
+
+.orbit-one {
+  height: min(44vw, 560px);
+  right: 0;
+  top: 2%;
+  width: min(44vw, 560px);
+}
+
+.orbit-two {
+  height: min(34vw, 440px);
+  right: 8%;
+  top: 13%;
+  width: min(34vw, 440px);
+}
+
+.orbit-three {
+  border-color: rgba(12, 100, 94, 0.2);
+  height: min(26vw, 330px);
+  right: 16%;
+  top: 24%;
+  width: min(26vw, 330px);
+}
+
+.theatre-star {
+  background: var(--public-gold);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 5px rgba(169, 120, 22, 0.12),
+    0 0 24px rgba(169, 120, 22, 0.46);
+  height: 6px;
+  position: absolute;
+  width: 6px;
+}
+
+.star-one {
+  right: 22%;
+  top: 18%;
+}
+
+.star-two {
+  background: var(--public-teal-bright);
+  right: 38%;
+  top: 44%;
+}
+
+.star-three {
+  background: var(--public-rose);
+  right: 14%;
+  top: 66%;
+}
+
+.site-shell .home-left-column {
+  align-content: stretch;
+  display: grid;
+  gap: clamp(18px, 3vw, 28px);
+  min-width: 0;
+}
+
+.site-shell .hero-copy {
+  border: 0;
+  justify-content: center;
+  min-height: 0;
+  padding: clamp(12px, 2vw, 24px) 0 0;
+}
+
+.site-shell .hero-copy::before {
+  display: none;
+}
+
+.site-shell .star-hero-copy {
+  padding-left: 0;
+}
+
+.site-shell .hero-kicker {
+  color: var(--public-gold);
+  display: flex;
+  font-size: 13px;
+  font-weight: 950;
+  gap: 12px;
+  margin-bottom: clamp(14px, 2vw, 24px);
+}
+
+.site-shell .hero-kicker span,
+.site-shell .hero-kicker small {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
+.site-shell .hero-kicker span {
+  border-bottom: 1px solid rgba(169, 120, 22, 0.38);
+  padding-bottom: 6px;
+}
+
+.site-shell .hero-kicker small {
+  color: var(--public-muted);
+}
+
+.site-shell .hero-copy h1 {
+  color: var(--public-ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  font-size: clamp(42px, 5.6vw, 68px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 0.98;
+  margin-bottom: 18px;
+  max-width: 800px;
+  text-wrap: balance;
+}
+
+.site-shell .hero-subtitle {
+  color: color-mix(in srgb, var(--public-ink) 86%, var(--public-muted));
+  font-size: clamp(16px, 1.36vw, 18px);
+  line-height: 1.68;
+  max-width: 640px;
+  text-wrap: pretty;
+}
+
+.site-shell .star-hero-copy::after {
+  background:
+    linear-gradient(90deg, var(--public-gold), var(--public-teal), transparent),
+    radial-gradient(circle at 0 50%, var(--public-gold) 0 3px, transparent 4px);
+  height: 2px;
+  margin-top: clamp(20px, 3vw, 30px);
+  width: min(640px, 82%);
+}
+
+.site-shell .today-panel {
+  background:
+    linear-gradient(110deg, rgba(255, 250, 241, 0.54), rgba(255, 250, 241, 0.18)),
+    transparent;
+  border: 1px solid var(--public-line);
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 0;
+  grid-template-columns: minmax(245px, 0.86fr) minmax(280px, 1fr);
+  min-height: 190px;
+  overflow: visible;
+  padding: 0;
+}
+
+:root[data-theme="dark"] .site-shell .today-panel {
+  background:
+    linear-gradient(110deg, rgba(22, 35, 34, 0.52), rgba(22, 35, 34, 0.18)),
+    transparent;
+}
+
+.site-shell .today-panel::before {
+  background: linear-gradient(90deg, var(--public-gold), var(--public-teal), transparent 72%);
+  height: 1px;
+  opacity: 0.72;
+}
+
+.site-shell .today-summary,
+.site-shell .today-birthday-panel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 18px;
+  min-height: 100%;
+  padding: clamp(16px, 1.8vw, 22px);
+}
+
+.site-shell .today-summary {
+  border-right: 1px solid var(--public-line);
+}
+
+.site-shell .today-date-head,
+.site-shell .panel-heading {
+  align-items: center;
+  color: var(--public-teal);
+  display: flex;
+  font-size: 14px;
+  font-weight: 950;
+  justify-content: space-between;
+}
+
+.site-shell .date-chip {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: var(--public-teal);
+  gap: 7px;
+  padding: 0;
+}
+
+.site-shell .today-date-head small {
+  color: var(--public-muted);
+}
+
+.site-shell .today-date-main {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 18px;
+}
+
+.site-shell .today-date-main strong {
+  color: var(--public-ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  font-size: clamp(26px, 2.4vw, 34px);
+  line-height: 1.08;
+}
+
+.site-shell .today-date-main span {
+  border-left: 1px solid var(--public-line);
+  color: var(--public-muted);
+  padding-left: 14px;
+}
+
+.site-shell .today-birthday-panel .empty-state,
+.site-shell .today-birthday-panel .today-list {
+  min-height: 76px;
+}
+
+.site-shell .spotlight-card {
+  background: rgba(255, 250, 241, 0.38);
+  border: 1px solid var(--public-line);
+  border-radius: 16px;
+  box-shadow: none;
+  padding: 16px 18px;
+}
+
+:root[data-theme="dark"] .site-shell .spotlight-card {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.site-shell .spotlight-card strong {
+  color: var(--public-ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  font-size: 28px;
+}
+
+.site-shell .greeting-box {
+  background:
+    linear-gradient(135deg, rgba(169, 120, 22, 0.12), rgba(12, 100, 94, 0.08)),
+    rgba(255, 250, 241, 0.34);
+  border: 1px solid var(--public-line);
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .site-shell .greeting-box {
+  background:
+    linear-gradient(135deg, rgba(224, 184, 95, 0.12), rgba(112, 214, 201, 0.08)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.site-shell .home-right-column {
+  align-content: stretch;
+  display: grid;
+  min-height: 0;
+}
+
+.site-shell .star-stage-card {
+  background:
+    radial-gradient(circle at 32% 22%, rgba(112, 214, 201, 0.22), transparent 22%),
+    radial-gradient(circle at 78% 18%, rgba(224, 184, 95, 0.18), transparent 24%),
+    linear-gradient(145deg, var(--public-night) 0%, #0d2a2d 47%, var(--public-velvet) 100%);
+  border: 1px solid rgba(224, 184, 95, 0.28);
+  border-radius: 26px;
+  box-shadow:
+    0 38px 110px rgba(6, 19, 20, 0.36),
+    inset 0 0 0 1px rgba(255, 250, 241, 0.05);
+  clip-path: none;
+  color: #fff8e8;
+  min-height: clamp(420px, 48vw, 560px);
+  overflow: hidden;
+}
+
+.site-shell .star-stage-card::before {
+  background:
+    radial-gradient(circle, rgba(255, 244, 186, 0.5) 0 0.8px, transparent 1.3px) 12px 18px / 54px 54px,
+    repeating-linear-gradient(116deg, rgba(224, 184, 95, 0.08) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(24deg, rgba(112, 214, 201, 0.055) 0 1px, transparent 1px 38px),
+    linear-gradient(180deg, rgba(255, 250, 241, 0.06), transparent 42%);
+}
+
+.site-shell .star-stage-card::after {
+  border: 1px solid rgba(224, 184, 95, 0.18);
+  border-radius: 20px;
+  inset: 16px;
+  clip-path: none;
+}
+
+.site-shell .stage-rings {
+  opacity: 0.68;
+  right: -52px;
+  top: -72px;
+  width: min(74%, 380px);
+}
+
+.stage-comet {
+  background: linear-gradient(90deg, transparent, rgba(255, 245, 192, 0.8), transparent);
+  height: 1px;
+  left: 14%;
+  opacity: 0.72;
+  position: absolute;
+  top: 28%;
+  transform: rotate(-18deg);
+  width: 42%;
+}
+
+.stage-depth-dust {
+  background:
+    radial-gradient(circle, rgba(255, 245, 192, 0.72) 0 1px, transparent 1.4px) 0 0 / 34px 34px,
+    radial-gradient(circle, rgba(112, 214, 201, 0.48) 0 1px, transparent 1.5px) 17px 15px / 58px 58px;
+  inset: 0;
+  opacity: 0.36;
+  position: absolute;
+}
+
+.site-shell .stage-horizon,
+.site-shell .stage-glow {
+  background: linear-gradient(90deg, transparent, rgba(224, 184, 95, 0.65), rgba(112, 214, 201, 0.36), transparent);
+}
+
+.site-shell .stage-horizon {
+  bottom: 152px;
+}
+
+.site-shell .stage-glow {
+  bottom: 110px;
+  display: block;
+}
+
+.site-shell .dipper-map {
+  height: clamp(218px, 24vw, 320px);
+  left: 50%;
+  top: clamp(30px, 4vw, 48px);
+  transform: translateX(-50%) rotate(-2deg);
+  width: min(92%, 640px);
+}
+
+.site-shell .dipper-line {
+  stroke: rgba(224, 184, 95, 0.34);
+  stroke-dasharray: 3 2;
+  stroke-width: 1.08;
+}
+
+.site-shell .dipper-line.active {
+  stroke: rgba(255, 224, 136, 0.92);
+  stroke-dasharray: 0;
+}
+
+.site-shell .dipper-star {
+  fill: rgba(255, 250, 241, 0.18);
+  stroke: rgba(255, 250, 241, 0.46);
+  stroke-width: 0.76;
+}
+
+.site-shell .dipper-star.preview {
+  fill: rgba(255, 250, 241, 0.46);
+  stroke: rgba(224, 184, 95, 0.42);
+}
+
+.site-shell .dipper-star.active {
+  fill: #f8d77d;
+  stroke: rgba(255, 242, 171, 0.98);
+}
+
+.site-shell .dipper-star.today {
+  fill: #fff4b5;
+  stroke: #fff7d0;
+}
+
+.site-shell .dipper-label {
+  fill: rgba(255, 248, 226, 0.72);
+  font-size: 4px;
+  font-weight: 900;
+  paint-order: stroke;
+  stroke: rgba(6, 19, 20, 0.82);
+  stroke-width: 1.8px;
+}
+
+.site-shell .dipper-label.active {
+  fill: #fff8e8;
+}
+
+.site-shell .stage-copy {
+  background: linear-gradient(180deg, transparent 20%, rgba(6, 19, 20, 0.88) 72%);
+  display: flex;
+  height: 100%;
+  justify-content: flex-end;
+  padding: clamp(24px, 3vw, 36px);
+}
+
+.site-shell .stage-copy-top span {
+  border: 1px solid rgba(224, 184, 95, 0.22);
+  border-radius: 999px;
+  color: #f4d58b;
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+.site-shell .stage-copy strong {
+  color: #fff8e8;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  font-size: clamp(32px, 3.8vw, 54px);
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 9px 0;
+}
+
+.site-shell .stage-copy small {
+  color: rgba(255, 248, 226, 0.72);
+  font-weight: 800;
+}
+
+.site-shell .stage-roster {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.site-shell .stage-roster li {
+  align-items: center;
+  background: rgba(255, 250, 241, 0.07);
+  border: 1px solid rgba(255, 250, 241, 0.12);
+  border-radius: 999px;
+  color: rgba(255, 248, 226, 0.78);
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 8px 10px 8px 12px;
+}
+
+.site-shell .stage-roster li.active {
+  background: rgba(224, 184, 95, 0.14);
+  border-color: rgba(224, 184, 95, 0.28);
+  color: #fff8e8;
+}
+
+.site-shell .stage-roster li.today {
+  background: rgba(231, 122, 98, 0.2);
+  border-color: rgba(231, 122, 98, 0.42);
+}
+
+.site-shell .stage-roster span {
+  font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-shell .stage-roster small {
+  color: inherit;
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
+.site-shell .section-title h2,
+.site-shell .page-title h1 {
+  color: var(--public-ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  letter-spacing: 0;
+}
+
+.site-shell .section-title {
+  align-items: center;
+  border-bottom: 1px solid var(--public-line);
+  padding-bottom: 18px;
+}
+
+.site-shell .section-title h2 {
+  font-size: clamp(26px, 3vw, 40px);
+  line-height: 1.08;
+}
+
+.site-shell .text-link {
+  color: var(--public-teal);
+}
+
+.site-shell .upcoming-section {
+  border: 0;
+  padding-top: 0;
+}
+
+.site-shell .upcoming-section .birthday-grid {
+  background:
+    linear-gradient(120deg, rgba(255, 250, 241, 0.42), rgba(255, 250, 241, 0.1)),
+    transparent;
+  border: 1px solid var(--public-line);
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+:root[data-theme="dark"] .site-shell .upcoming-section .birthday-grid {
+  background:
+    linear-gradient(120deg, rgba(22, 35, 34, 0.44), rgba(22, 35, 34, 0.08)),
+    transparent;
+}
+
+.site-shell .upcoming-section .birthday-card,
+.site-shell .upcoming-section .birthday-card-placeholder {
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--public-line);
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 136px;
+  padding: 20px;
+}
+
+.site-shell .upcoming-section .birthday-card:nth-child(3n),
+.site-shell .upcoming-section .birthday-card-placeholder:nth-child(3n),
+.site-shell .upcoming-section .birthday-card:last-child,
+.site-shell .upcoming-section .birthday-card-placeholder:last-child {
+  border-right: 0;
+}
+
+.site-shell .upcoming-section .birthday-card:hover {
+  background: rgba(255, 250, 241, 0.34);
+  box-shadow: none;
+  transform: none;
+}
+
+:root[data-theme="dark"] .site-shell .upcoming-section .birthday-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.site-shell .upcoming-section .birthday-card.today-birthday,
+.site-shell .directory-page-flow .birthday-card.today-birthday,
+.site-shell .months-page-flow .compact-birthday.today-birthday {
+  background:
+    linear-gradient(90deg, rgba(189, 88, 72, 0.14), transparent 72%),
+    transparent;
+  box-shadow: inset 3px 0 0 var(--public-rose);
+}
+
+.site-shell .birthday-card {
+  color: var(--public-ink);
+}
+
+.site-shell .card-name h3 {
+  color: var(--public-ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  letter-spacing: 0;
+}
+
+.site-shell .date-pair,
+.site-shell .note-line,
+.site-shell .compact-birthday span,
+.site-shell .compact-birthday small,
+.site-shell .muted {
+  color: var(--public-muted);
+}
+
+.site-shell .date-pair span:first-child,
+.site-shell .compact-date span {
+  color: var(--public-ink);
+}
+
+.site-shell .countdown {
+  background: rgba(189, 88, 72, 0.08);
+  border: 1px solid rgba(189, 88, 72, 0.22);
+  border-radius: 999px;
+  color: var(--public-rose);
+  padding: 5px 10px;
+}
+
+.site-shell .quick-months {
+  background: rgba(255, 250, 241, 0.18);
+  border: 1px solid var(--public-line);
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  padding: 0;
+}
+
+:root[data-theme="dark"] .site-shell .quick-months {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.site-shell .quick-months a {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-right: 1px solid var(--public-line);
+  color: var(--public-muted);
+  min-height: 72px;
+}
+
+.site-shell .quick-months a:last-child {
+  border-right: 0;
+}
+
+.site-shell .quick-months a:hover {
+  background: rgba(255, 250, 241, 0.36);
+  color: var(--public-teal);
+  transform: none;
+}
+
+:root[data-theme="dark"] .site-shell .quick-months a:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.site-shell .page-title {
+  border-bottom: 1px solid var(--public-line);
+  padding: clamp(28px, 5vw, 54px) 0 22px;
+}
+
+.site-shell .page-title h1 {
+  font-size: clamp(38px, 5vw, 70px);
+  line-height: 1;
+}
+
+.site-shell .page-title-meta {
+  color: var(--public-teal);
+}
+
+.site-shell .directory-controls {
+  background:
+    linear-gradient(135deg, rgba(255, 250, 241, 0.78), rgba(255, 250, 241, 0.38)),
+    var(--public-panel);
+  border: 1px solid var(--public-line);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  overflow: visible;
+  padding: 18px;
+}
+
+:root[data-theme="dark"] .site-shell .directory-controls {
+  background:
+    linear-gradient(135deg, rgba(22, 35, 34, 0.9), rgba(22, 35, 34, 0.46)),
+    var(--public-panel);
+}
+
+.site-shell .directory-controls::before {
+  background: linear-gradient(90deg, var(--public-gold), var(--public-teal), transparent 72%);
+  height: 2px;
+}
+
+.site-shell .directory-controls .public-filter-head,
+.site-shell .directory-controls .filter-drawer {
+  grid-column: 1;
+}
+
+.site-shell .directory-controls .public-view-switch {
+  align-self: start;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 188px;
+}
+
+.site-shell .range-tabs,
+.site-shell .public-view-switch {
+  background: rgba(255, 250, 241, 0.54);
+  border: 1px solid var(--public-line);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+:root[data-theme="dark"] .site-shell .range-tabs,
+:root[data-theme="dark"] .site-shell .public-view-switch {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.site-shell .range-tabs button,
+.site-shell .public-view-switch button {
+  border-radius: 999px;
+  color: var(--public-muted);
+  font-weight: 900;
+}
+
+.site-shell .range-tabs button.active,
+.site-shell .public-view-switch button.active {
+  background: var(--public-night);
+  color: #f8d77d;
+}
+
+:root[data-theme="dark"] .site-shell .range-tabs button.active,
+:root[data-theme="dark"] .site-shell .public-view-switch button.active {
+  background: rgba(112, 214, 201, 0.14);
+  color: var(--public-teal);
+}
+
+.site-shell .directory-page-flow .birthday-grid {
+  background:
+    linear-gradient(90deg, rgba(255, 250, 241, 0.6), rgba(255, 250, 241, 0.18)),
+    transparent;
+  border: 1px solid var(--public-line);
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  box-shadow: none;
+  display: block;
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .site-shell .directory-page-flow .birthday-grid {
+  background:
+    linear-gradient(90deg, rgba(22, 35, 34, 0.6), rgba(22, 35, 34, 0.18)),
+    transparent;
+}
+
+.site-shell .directory-page-flow .birthday-card {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--public-line);
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 56px;
+  padding: 9px 14px;
+}
+
+.site-shell .directory-page-flow .birthday-card:last-child {
+  border-bottom: 0;
+}
+
+.site-shell .directory-page-flow .birthday-card:hover {
+  background: rgba(255, 250, 241, 0.42);
+  box-shadow: none;
+  transform: none;
+}
+
+:root[data-theme="dark"] .site-shell .directory-page-flow .birthday-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.site-shell .birthday-calendar-board {
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+
+.site-shell .birthday-calendar-month {
+  background:
+    linear-gradient(145deg, rgba(255, 250, 241, 0.82), rgba(255, 250, 241, 0.42)),
+    var(--public-panel);
+  border: 1px solid var(--public-line);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+  min-height: 362px;
+  padding: 18px;
+}
+
+:root[data-theme="dark"] .site-shell .birthday-calendar-month {
+  background:
+    linear-gradient(145deg, rgba(22, 35, 34, 0.88), rgba(22, 35, 34, 0.42)),
+    var(--public-panel);
+}
+
+.site-shell .birthday-calendar-month header {
+  border-bottom: 1px solid var(--public-line);
+}
+
+.site-shell .birthday-calendar-month header strong {
+  color: var(--public-ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  font-size: 32px;
+}
+
+.site-shell .calendar-day {
+  background: rgba(255, 250, 241, 0.4);
+  border: 1px solid rgba(101, 77, 43, 0.14);
+  border-radius: 12px;
+}
+
+:root[data-theme="dark"] .site-shell .calendar-day {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(112, 214, 201, 0.11);
+}
+
+.site-shell .calendar-day.has-birthday {
+  background:
+    radial-gradient(circle at 16% 16%, rgba(12, 100, 94, 0.16), transparent 42%),
+    rgba(255, 250, 241, 0.54);
+  border-color: rgba(12, 100, 94, 0.24);
+}
+
+:root[data-theme="dark"] .site-shell .calendar-day.has-birthday {
+  background:
+    radial-gradient(circle at 16% 16%, rgba(112, 214, 201, 0.16), transparent 42%),
+    rgba(255, 255, 255, 0.05);
+}
+
+.site-shell .calendar-day.is-today {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(169, 120, 22, 0.24), transparent 40%),
+    rgba(255, 250, 241, 0.7);
+  border-color: rgba(169, 120, 22, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(169, 120, 22, 0.28),
+    0 0 0 2px rgba(169, 120, 22, 0.07);
+}
+
+:root[data-theme="dark"] .site-shell .calendar-day.is-today {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(224, 184, 95, 0.24), transparent 40%),
+    rgba(255, 255, 255, 0.07);
+  border-color: rgba(224, 184, 95, 0.56);
+}
+
+.site-shell .calendar-day.today-birthday {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(189, 88, 72, 0.2), transparent 42%),
+    rgba(255, 250, 241, 0.7);
+  border-color: rgba(189, 88, 72, 0.5);
+}
+
+.site-shell .calendar-day small,
+.site-shell .calendar-day em {
+  color: var(--public-teal);
+}
+
+.site-shell .months-layout {
+  align-items: start;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
+.site-shell .month-rail {
+  gap: 7px;
+  position: sticky;
+  top: 94px;
+}
+
+.site-shell .month-rail a {
+  border-radius: 999px;
+  color: var(--public-muted);
+  grid-template-columns: 26px auto;
+  min-height: 32px;
+}
+
+.site-shell .month-rail a.active,
+.site-shell .month-rail a:hover,
+.site-shell .month-rail a:focus-visible {
+  background: rgba(255, 250, 241, 0.48);
+  color: var(--public-teal);
+}
+
+:root[data-theme="dark"] .site-shell .month-rail a.active,
+:root[data-theme="dark"] .site-shell .month-rail a:hover,
+:root[data-theme="dark"] .site-shell .month-rail a:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.site-shell .month-rail-line {
+  height: 3px;
+  width: 22px;
+}
+
+.site-shell .month-board {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.site-shell .month-lane {
+  background:
+    linear-gradient(150deg, rgba(255, 250, 241, 0.78), rgba(255, 250, 241, 0.36)),
+    var(--public-panel);
+  border: 1px solid var(--public-line);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+}
+
+:root[data-theme="dark"] .site-shell .month-lane {
+  background:
+    linear-gradient(150deg, rgba(22, 35, 34, 0.86), rgba(22, 35, 34, 0.38)),
+    var(--public-panel);
+}
+
+.site-shell .month-lane header {
+  border-bottom: 1px solid var(--public-line);
+}
+
+.site-shell .month-lane header span,
+.site-shell .month-lane header small {
+  color: var(--public-ink);
+}
+
+.site-shell .months-page-flow .compact-birthday {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--public-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.site-shell .months-page-flow .compact-birthday:last-child {
+  border-bottom: 0;
+}
+
+.site-shell input,
+.site-shell textarea,
+.site-shell .custom-select-trigger {
+  background: rgba(255, 250, 241, 0.76);
+  border-color: var(--public-line);
+  border-radius: 999px;
+  color: var(--public-ink);
+}
+
+:root[data-theme="dark"] .site-shell input,
+:root[data-theme="dark"] .site-shell textarea,
+:root[data-theme="dark"] .site-shell .custom-select-trigger {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.site-shell .custom-select-menu {
+  background: var(--public-panel-strong);
+  border-color: var(--public-line);
+  border-radius: 18px;
+  box-shadow: var(--public-shadow);
+  overflow: hidden auto;
+}
+
+.site-shell .custom-select-option {
+  border-radius: 12px;
+  color: var(--public-ink);
+}
+
+.site-shell .custom-select-option[aria-selected="true"],
+.site-shell .custom-select-option:hover {
+  background: rgba(12, 100, 94, 0.1);
+  color: var(--public-teal);
+}
+
+.site-shell .secondary-button,
+.site-shell .ghost-button,
+.site-shell .icon-text-button,
+.site-shell .filter-reset-button {
+  border-radius: 999px;
+}
+
+.site-shell .secondary-button,
+.site-shell .filter-reset-button,
+.site-shell .icon-text-button {
+  background: rgba(255, 250, 241, 0.62);
+  border-color: var(--public-line);
+  color: var(--public-teal);
+}
+
+:root[data-theme="dark"] .site-shell .secondary-button,
+:root[data-theme="dark"] .site-shell .filter-reset-button,
+:root[data-theme="dark"] .site-shell .icon-text-button {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.site-shell .secondary-button:hover,
+.site-shell .filter-reset-button:hover,
+.site-shell .icon-text-button:hover,
+.site-shell .custom-select-trigger:hover {
+  background: rgba(255, 250, 241, 0.86);
+  border-color: rgba(12, 100, 94, 0.28);
+  transform: translateY(-1px);
+}
+
+:root[data-theme="dark"] .site-shell .secondary-button:hover,
+:root[data-theme="dark"] .site-shell .filter-reset-button:hover,
+:root[data-theme="dark"] .site-shell .icon-text-button:hover,
+:root[data-theme="dark"] .site-shell .custom-select-trigger:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.site-shell .empty-state {
+  background: rgba(255, 250, 241, 0.3);
+  border: 1px dashed var(--public-line);
+  border-radius: 16px;
+  color: var(--public-muted);
+  min-height: 86px;
+}
+
+:root[data-theme="dark"] .site-shell .empty-state {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.site-shell .public-footer {
+  border-color: var(--public-line);
+  color: var(--public-muted);
+  margin-inline: auto;
+  width: min(1280px, calc(100% - 44px));
+}
+
+.site-shell .public-footer span {
+  border-color: var(--public-line);
+  color: var(--public-teal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .theatre-orbit {
+    animation: orbit-drift 18s linear infinite;
+  }
+
+  .orbit-two {
+    animation-duration: 26s;
+    animation-direction: reverse;
+  }
+
+  .orbit-three {
+    animation-duration: 32s;
+  }
+
+  .theatre-star,
+  .site-shell .dipper-star.active {
+    animation: star-pulse 3.8s ease-in-out infinite;
+  }
+
+  .stage-comet {
+    animation: comet-pass 7.5s ease-in-out infinite;
+  }
+
+  .site-shell .home-hero,
+  .site-shell .upcoming-section,
+  .site-shell .quick-months,
+  .site-shell .directory-controls,
+  .site-shell .birthday-calendar-month,
+  .site-shell .month-lane {
+    animation: public-rise 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .site-shell .upcoming-section {
+    animation-delay: 90ms;
+  }
+
+  .site-shell .quick-months {
+    animation-delay: 140ms;
+  }
+}
+
+@keyframes orbit-drift {
+  from {
+    transform: rotate(-16deg);
+  }
+
+  to {
+    transform: rotate(344deg);
+  }
+}
+
+@keyframes star-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(248, 215, 125, 0.42));
+    opacity: 0.78;
+  }
+
+  50% {
+    filter: drop-shadow(0 0 16px rgba(248, 215, 125, 0.82));
+    opacity: 1;
+  }
+}
+
+@keyframes comet-pass {
+  0%,
+  62%,
+  100% {
+    opacity: 0;
+    transform: translateX(-22%) rotate(-18deg);
+  }
+
+  74% {
+    opacity: 0.78;
+  }
+
+  88% {
+    opacity: 0;
+    transform: translateX(74%) rotate(-18deg);
+  }
+}
+
+@keyframes public-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1120px) {
+  .site-shell .home-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .hero-theatre {
+    left: 12%;
+    opacity: 0.7;
+  }
+
+  .site-shell .home-right-column .star-stage-card {
+    min-height: 390px;
+  }
+
+  .site-shell .upcoming-section .birthday-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-shell .upcoming-section .birthday-card:nth-child(3n),
+  .site-shell .upcoming-section .birthday-card-placeholder:nth-child(3n) {
+    border-right: 1px solid var(--public-line);
+  }
+
+  .site-shell .upcoming-section .birthday-card:nth-child(2n),
+  .site-shell .upcoming-section .birthday-card-placeholder:nth-child(2n),
+  .site-shell .upcoming-section .birthday-card:last-child,
+  .site-shell .upcoming-section .birthday-card-placeholder:last-child {
+    border-right: 0;
+  }
+
+  .site-shell .month-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .site-shell > main,
+  .site-shell .public-footer {
+    width: min(100% - 28px, 1280px);
+  }
+
+  .site-shell .public-header {
+    border-radius: 0 0 18px 18px;
+    min-height: 66px;
+    width: min(100% - 20px, 1320px);
+  }
+
+  .site-shell .theme-control.compact {
+    grid-template-columns: auto 42px;
+    min-width: 76px;
+    width: 76px;
+  }
+
+  .site-shell .theme-control.compact .custom-select-trigger {
+    justify-content: center;
+    min-height: 38px;
+    padding: 0;
+  }
+
+  .site-shell .theme-control.compact .custom-select-trigger span {
+    display: none;
+  }
+
+  .site-shell .home-hero {
+    padding-top: 28px;
+  }
+
+  .site-shell .today-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .today-summary {
+    border-bottom: 1px solid var(--public-line);
+    border-right: 0;
+  }
+
+  .site-shell .directory-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .directory-controls .public-filter-head,
+  .site-shell .directory-controls .filter-drawer,
+  .site-shell .directory-controls .public-view-switch {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .site-shell .directory-controls .public-view-switch {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 740px) {
+  .site-shell {
+    padding-bottom: 94px;
+  }
+
+  .site-shell::before {
+    background:
+      radial-gradient(circle at 32% 0%, rgba(189, 88, 72, 0.16), transparent 25%),
+      linear-gradient(135deg, var(--public-page-bg), var(--public-page-bg-2));
+  }
+
+  .site-shell::after {
+    opacity: 0.45;
+  }
+
+  .site-shell .public-header {
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .site-shell .brand {
+    font-size: 20px;
+    gap: 7px;
+  }
+
+  .site-shell .public-header-actions {
+    gap: 6px;
+  }
+
+  .site-shell .nav-tabs {
+    display: none;
+  }
+
+  .site-shell .home-page-flow,
+  .site-shell .directory-page-flow,
+  .site-shell .months-page-flow {
+    gap: 24px;
+  }
+
+  .site-shell .home-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow: visible;
+    padding: 24px 0 16px;
+  }
+
+  .site-shell .home-hero::before {
+    inset: 8px -14px 10px;
+    opacity: 0.68;
+  }
+
+  .hero-theatre {
+    bottom: auto;
+    height: 240px;
+    left: auto;
+    opacity: 0.42;
+    right: -40%;
+    top: -18px;
+    width: 320px;
+  }
+
+  .orbit-one,
+  .orbit-two,
+  .orbit-three {
+    height: 260px;
+    width: 260px;
+  }
+
+  .site-shell .home-left-column {
+    display: contents;
+  }
+
+  .site-shell .hero-copy {
+    order: 1;
+    padding: 6px 0 0;
+  }
+
+  .site-shell .hero-kicker {
+    margin-bottom: 12px;
+  }
+
+  .site-shell .hero-copy h1 {
+    font-size: 38px;
+    line-height: 1.06;
+    margin-bottom: 12px;
+  }
+
+  .site-shell .hero-subtitle {
+    font-size: 15px;
+    line-height: 1.64;
+  }
+
+  .site-shell .star-hero-copy::after {
+    margin-top: 18px;
+    width: 100%;
+  }
+
+  .site-shell .home-right-column {
+    display: block;
+    order: 2;
+  }
+
+  .site-shell .home-right-column .star-stage-card {
+    min-height: 210px;
+  }
+
+  .site-shell .star-stage-card {
+    border-radius: 20px;
+  }
+
+  .site-shell .star-stage-card::after {
+    border-radius: 15px;
+    inset: 10px;
+  }
+
+  .site-shell .stage-rings {
+    right: -78px;
+    top: -86px;
+    width: 240px;
+  }
+
+  .site-shell .dipper-map {
+    height: 138px;
+    top: 16px;
+    width: 96%;
+  }
+
+  .site-shell .dipper-label {
+    display: none;
+  }
+
+  .site-shell .stage-horizon {
+    bottom: 74px;
+  }
+
+  .site-shell .stage-glow {
+    bottom: 58px;
+  }
+
+  .site-shell .stage-copy {
+    padding: 16px;
+  }
+
+  .site-shell .stage-copy-top {
+    display: none;
+  }
+
+  .site-shell .stage-copy strong {
+    font-size: 28px;
+    margin: 0 0 5px;
+  }
+
+  .site-shell .stage-copy small {
+    font-size: 12px;
+  }
+
+  .site-shell .stage-roster {
+    display: none;
+  }
+
+  .site-shell .today-panel {
+    order: 3;
+  }
+
+  .site-shell .today-summary,
+  .site-shell .today-birthday-panel {
+    padding: 14px 0;
+  }
+
+  .site-shell .today-date-main {
+    align-items: center;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .site-shell .today-date-main strong {
+    flex: 0 0 auto;
+    font-size: 20px;
+    white-space: nowrap;
+  }
+
+  .site-shell .today-date-main span {
+    border-left: 1px solid var(--public-line);
+    flex: 1 1 auto;
+    font-size: 13px;
+    min-width: 0;
+    overflow: hidden;
+    padding-left: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-shell .spotlight-card,
+  .site-shell .greeting-box {
+    border-radius: 14px;
+  }
+
+  .site-shell .upcoming-section .section-title {
+    align-items: center;
+    padding-bottom: 14px;
+  }
+
+  .site-shell .upcoming-section .birthday-grid,
+  .site-shell .directory-page-flow .birthday-grid {
+    background: transparent;
+    border-left: 0;
+    border-radius: 0;
+    border-right: 0;
+    box-shadow: none;
+    display: block;
+  }
+
+  .site-shell .upcoming-section .birthday-card,
+  .site-shell .upcoming-section .birthday-card-placeholder,
+  .site-shell .directory-page-flow .birthday-card {
+    border-right: 0;
+    min-height: 0;
+    padding: 12px 0;
+  }
+
+  .site-shell .upcoming-section .birthday-card-placeholder {
+    display: none;
+  }
+
+  .site-shell .birthday-card {
+    display: grid;
+    grid-template-areas: "name date status";
+    grid-template-columns: minmax(76px, 0.82fr) minmax(0, 1.42fr) auto;
+    gap: 8px;
+  }
+
+  .site-shell .birthday-card .card-name {
+    grid-area: name;
+    min-width: 0;
+  }
+
+  .site-shell .birthday-card .card-name h3 {
+    font-size: 20px;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-shell .birthday-card .card-name small {
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-shell .birthday-card .date-pair {
+    grid-area: date;
+    font-size: 12px;
+    gap: 2px;
+    line-height: 1.32;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .site-shell .birthday-card .date-pair span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-shell .birthday-card .card-topline {
+    grid-area: status;
+  }
+
+  .site-shell .birthday-card .note-line,
+  .site-shell .birthday-card .meta-line,
+  .site-shell .birthday-card::after {
+    display: none;
+  }
+
+  .site-shell .countdown {
+    font-size: 12px;
+    padding: 4px 7px;
+    white-space: nowrap;
+  }
+
+  .site-shell .quick-months {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .site-shell .quick-months a {
+    min-height: 52px;
+  }
+
+  .site-shell .directory-controls {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .site-shell .public-filter-head,
+  .site-shell .filter-drawer,
+  .site-shell .filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .range-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .site-shell .page-title h1 {
+    font-size: 38px;
+  }
+
+  .site-shell .birthday-calendar-board {
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .birthday-calendar-month {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .site-shell .calendar-day {
+    border-radius: 10px;
+    min-height: 52px;
+    padding: 5px;
+  }
+
+  .site-shell .calendar-day small,
+  .site-shell .calendar-day em {
+    font-size: 10px;
+  }
+
+  .site-shell .months-layout {
+    display: block;
+  }
+
+  .site-shell .month-rail {
+    align-items: center;
+    bottom: 112px;
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+    left: auto;
+    position: fixed;
+    right: 7px;
+    top: auto;
+    transform: none;
+    z-index: 18;
+  }
+
+  .site-shell .month-rail a {
+    background: transparent;
+    display: grid;
+    gap: 0;
+    grid-template-columns: 1fr;
+    min-height: 13px;
+    padding: 0;
+  }
+
+  .site-shell .month-rail a.active,
+  .site-shell .month-rail a:hover,
+  .site-shell .month-rail a:focus-visible {
+    background: transparent;
+  }
+
+  .site-shell .month-rail-line {
+    height: 2px;
+    width: 16px;
+  }
+
+  .site-shell .month-rail-label {
+    display: none;
+    font-size: 11px;
+    line-height: 1;
+    margin-top: 3px;
+  }
+
+  .site-shell .month-rail a.active .month-rail-label {
+    display: block;
+  }
+
+  .site-shell .month-board {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr;
+    padding-right: 22px;
+  }
+
+  .site-shell .month-lane {
+    border-radius: 18px;
+    box-shadow: none;
+    min-height: 0;
+  }
+
+  .site-shell .months-page-flow .compact-birthday {
+    padding: 9px 0;
+  }
+
+  .site-shell .mobile-tabbar {
+    background: rgba(255, 250, 241, 0.92);
+    border: 1px solid var(--public-line);
+    border-radius: 22px;
+    box-shadow: 0 14px 60px rgba(38, 22, 11, 0.18);
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+
+  :root[data-theme="dark"] .site-shell .mobile-tabbar {
+    background: rgba(18, 29, 29, 0.92);
+    box-shadow: 0 16px 62px rgba(0, 0, 0, 0.36);
+  }
+
+  .site-shell .mobile-tabbar a {
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-shell > main,
+  .site-shell .public-footer {
+    width: min(100% - 20px, 1280px);
+  }
+
+  .site-shell .hero-copy h1,
+  .site-shell .page-title h1 {
+    font-size: 34px;
+  }
+
+  .site-shell .today-date-main {
+    flex-wrap: wrap;
+  }
+
+  .site-shell .today-date-main span {
+    border-left: 0;
+    flex-basis: 100%;
+    padding-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theatre-orbit,
+  .theatre-star,
+  .stage-comet,
+  .site-shell .dipper-star.active,
+  .site-shell .home-hero,
+  .site-shell .upcoming-section,
+  .site-shell .quick-months,
+  .site-shell .directory-controls,
+  .site-shell .birthday-calendar-month,
+  .site-shell .month-lane {
+    animation: none;
+  }
+}
+
+/* Public refinement: cleaner warm observatory */
+.site-shell {
+  --public-page-bg: #f6edde;
+  --public-page-bg-2: #efe0c8;
+  --public-ink: #101714;
+  --public-muted: #625b50;
+  --public-line: rgba(96, 74, 45, 0.2);
+  --public-panel: rgba(255, 250, 241, 0.78);
+  --public-panel-strong: rgba(255, 250, 241, 0.94);
+  --public-shadow: 0 18px 48px rgba(44, 32, 18, 0.1);
+  --public-radius: 14px;
+  background: transparent;
+}
+
+:root[data-theme="bright"] .site-shell {
+  --public-page-bg: #f2faf7;
+  --public-page-bg-2: #e2f0eb;
+  --public-line: rgba(35, 109, 97, 0.17);
+  --public-panel: rgba(251, 255, 253, 0.78);
+  --public-panel-strong: rgba(251, 255, 253, 0.96);
+}
+
+:root[data-theme="dark"] .site-shell {
+  --public-page-bg: #091211;
+  --public-page-bg-2: #101a18;
+  --public-panel: rgba(18, 29, 29, 0.78);
+  --public-panel-strong: rgba(21, 35, 33, 0.94);
+  --public-shadow: 0 20px 54px rgba(0, 0, 0, 0.28);
+}
+
+.site-shell::before {
+  background:
+    radial-gradient(circle at 80% 0%, rgba(169, 120, 22, 0.14), transparent 28%),
+    linear-gradient(135deg, var(--public-page-bg), var(--public-page-bg-2));
+}
+
+.site-shell::after {
+  background:
+    linear-gradient(90deg, rgba(96, 74, 45, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(96, 74, 45, 0.04) 1px, transparent 1px);
+  background-size: 96px 96px;
+  opacity: 0.42;
+}
+
+:root[data-theme="dark"] .site-shell::after {
+  background:
+    linear-gradient(90deg, rgba(112, 214, 201, 0.04) 1px, transparent 1px),
+    linear-gradient(rgba(224, 184, 95, 0.035) 1px, transparent 1px);
+  background-size: 96px 96px;
+  opacity: 0.35;
+}
+
+.site-shell > main,
+.site-shell .public-footer {
+  width: min(1180px, calc(100% - 40px));
+}
+
+.site-shell .public-header {
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 10px 32px rgba(44, 32, 18, 0.08);
+  min-height: 68px;
+  width: min(1220px, calc(100% - 28px));
+}
+
+.site-shell .brand {
+  font-size: clamp(20px, 1.8vw, 24px);
+}
+
+.site-shell .nav-tabs {
+  background: rgba(255, 250, 241, 0.58);
+  border-radius: 14px;
+  padding: 3px;
+}
+
+.site-shell .nav-tabs a {
+  border-radius: 11px;
+  min-height: 34px;
+  padding: 0 11px;
+}
+
+.site-shell .home-page-flow {
+  gap: 30px;
+}
+
+.site-shell .home-hero {
+  gap: clamp(22px, 3vw, 36px);
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+  overflow: visible;
+  padding: 34px 0 22px;
+}
+
+.site-shell .home-hero::before,
+.site-shell .home-hero::after,
+.hero-theatre,
+.theatre-orbit,
+.theatre-star,
+.stage-comet,
+.stage-depth-dust {
+  display: none;
+}
+
+.site-shell .home-left-column {
+  gap: 20px;
+}
+
+.site-shell .hero-copy {
+  padding: 8px 0 0;
+}
+
+.site-shell .hero-kicker {
+  margin-bottom: 14px;
+}
+
+.site-shell .hero-kicker span {
+  border-bottom-color: rgba(169, 120, 22, 0.28);
+}
+
+.site-shell .hero-copy h1 {
+  font-size: clamp(42px, 4.6vw, 62px);
+  line-height: 1.04;
+  margin-bottom: 14px;
+}
+
+.site-shell .hero-subtitle {
+  font-size: 17px;
+  line-height: 1.66;
+  max-width: 620px;
+}
+
+.site-shell .star-hero-copy::after {
+  margin-top: 22px;
+  width: min(520px, 84%);
+}
+
+.site-shell .today-panel {
+  background: var(--public-panel);
+  border: 1px solid var(--public-line);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.site-shell .today-panel::before {
+  height: 2px;
+}
+
+.site-shell .today-summary,
+.site-shell .today-birthday-panel {
+  gap: 11px;
+  padding: 16px;
+}
+
+.site-shell .today-date-main {
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.site-shell .today-date-main strong {
+  font-size: clamp(22px, 2vw, 28px);
+}
+
+.site-shell .spotlight-card,
+.site-shell .greeting-box,
+.site-shell .today-birthday-panel .empty-state {
+  border-radius: 12px;
+}
+
+.site-shell .spotlight-card {
+  padding: 12px 14px;
+}
+
+.site-shell .spotlight-card strong {
+  font-size: 22px;
+}
+
+.site-shell .greeting-box {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 11px 12px;
+}
+
+.site-shell .greeting-box p {
+  font-size: 15px;
+  line-height: 1.52;
+}
+
+.site-shell .today-birthday-panel .today-list,
+.site-shell .today-birthday-panel .empty-state {
+  min-height: 0;
+}
+
+.site-shell .star-stage-card {
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(6, 19, 20, 0.24);
+  min-height: 360px;
+}
+
+.site-shell .star-stage-card::after {
+  border-radius: 14px;
+  inset: 12px;
+}
+
+.site-shell .stage-rings {
+  opacity: 0.28;
+  width: 260px;
+}
+
+.site-shell .stage-horizon {
+  bottom: 112px;
+}
+
+.site-shell .stage-glow {
+  bottom: 84px;
+}
+
+.site-shell .dipper-map {
+  height: 205px;
+  top: 28px;
+  width: min(88%, 460px);
+}
+
+.site-shell .stage-copy {
+  padding: 24px;
+}
+
+.site-shell .stage-copy-top span {
+  border-radius: 10px;
+  padding: 4px 8px;
+}
+
+.site-shell .stage-copy strong {
+  font-size: clamp(30px, 3vw, 40px);
+}
+
+.site-shell .stage-roster {
+  display: none;
+}
+
+.site-shell .section-title {
+  padding-bottom: 12px;
+}
+
+.site-shell .section-title h2 {
+  font-size: clamp(24px, 2.4vw, 32px);
+}
+
+.site-shell .upcoming-section .birthday-grid {
+  background: var(--public-panel);
+  border: 1px solid var(--public-line);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+  overflow: hidden;
+}
+
+.site-shell .upcoming-section .birthday-card,
+.site-shell .upcoming-section .birthday-card-placeholder {
+  min-height: 116px;
+  padding: 16px;
+}
+
+.site-shell .upcoming-section .card-name h3 {
+  font-size: 22px;
+}
+
+.site-shell .quick-months {
+  background: var(--public-panel);
+  border: 1px solid var(--public-line);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+  overflow: hidden;
+}
+
+.site-shell .quick-months a {
+  min-height: 56px;
+}
+
+.site-shell .page-title {
+  padding: 36px 0 16px;
+}
+
+.site-shell .page-title h1 {
+  font-size: clamp(38px, 4vw, 58px);
+}
+
+.site-shell .directory-page-flow,
+.site-shell .months-page-flow {
+  gap: 22px;
+}
+
+.site-shell .directory-controls {
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+  gap: 12px;
+  padding: 14px;
+}
+
+.site-shell .directory-controls::before {
+  height: 2px;
+}
+
+.site-shell .public-filter-head {
+  grid-template-columns: minmax(280px, 1fr) auto;
+}
+
+.site-shell .filter-drawer {
+  grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
+}
+
+.site-shell .range-tabs,
+.site-shell .public-view-switch {
+  border-radius: 13px;
+}
+
+.site-shell .range-tabs button,
+.site-shell .public-view-switch button {
+  border-radius: 10px;
+  min-height: 34px;
+}
+
+.site-shell .directory-page-flow .birthday-grid {
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+}
+
+.site-shell .directory-page-flow .birthday-card {
+  min-height: 52px;
+  padding: 8px 14px;
+}
+
+.site-shell .birthday-calendar-month,
+.site-shell .month-lane {
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+}
+
+.site-shell .calendar-day {
+  border-radius: 8px;
+}
+
+.site-shell .months-layout {
+  gap: 18px;
+  grid-template-columns: 62px minmax(0, 1fr);
+}
+
+.site-shell .month-board {
+  gap: 14px;
+}
+
+.site-shell .month-lane {
+  min-height: 190px;
+  padding: 14px;
+}
+
+.site-shell .month-lane header span {
+  font-size: 28px;
+}
+
+.site-shell input,
+.site-shell textarea,
+.site-shell .custom-select-trigger {
+  border-radius: 12px;
+}
+
+.site-shell .secondary-button,
+.site-shell .ghost-button,
+.site-shell .icon-text-button,
+.site-shell .filter-reset-button {
+  border-radius: 12px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-shell .home-hero,
+  .site-shell .upcoming-section,
+  .site-shell .quick-months,
+  .site-shell .directory-controls,
+  .site-shell .birthday-calendar-month,
+  .site-shell .month-lane {
+    animation: none;
+  }
+}
+
+@media (max-width: 1120px) {
+  .site-shell .home-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .home-right-column .star-stage-card {
+    min-height: 300px;
+  }
+
+  .site-shell .dipper-map {
+    height: 180px;
+  }
+}
+
+@media (max-width: 740px) {
+  .site-shell > main,
+  .site-shell .public-footer {
+    width: min(100% - 20px, 1180px);
+  }
+
+  .site-shell .public-header {
+    min-height: 62px;
+    width: min(100% - 16px, 1220px);
+  }
+
+  .site-shell .home-page-flow,
+  .site-shell .directory-page-flow,
+  .site-shell .months-page-flow {
+    gap: 18px;
+  }
+
+  .site-shell .home-hero {
+    gap: 12px;
+    padding: 18px 0 12px;
+  }
+
+  .site-shell .hero-copy {
+    order: 1;
+    padding: 0;
+  }
+
+  .site-shell .hero-kicker {
+    margin-bottom: 10px;
+  }
+
+  .site-shell .hero-copy h1 {
+    font-size: 34px;
+    margin-bottom: 10px;
+  }
+
+  .site-shell .hero-subtitle {
+    font-size: 14px;
+    line-height: 1.58;
+  }
+
+  .site-shell .star-hero-copy::after {
+    margin-top: 14px;
+  }
+
+  .site-shell .today-panel {
+    order: 2;
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .today-summary,
+  .site-shell .today-birthday-panel {
+    padding: 12px;
+  }
+
+  .site-shell .today-date-main {
+    flex-wrap: nowrap;
+  }
+
+  .site-shell .today-date-main strong {
+    font-size: 19px;
+  }
+
+  .site-shell .today-date-main span {
+    border-left: 1px solid var(--public-line);
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-left: 10px;
+  }
+
+  .site-shell .home-right-column {
+    display: none;
+  }
+
+  .site-shell .home-right-column .star-stage-card {
+    min-height: 168px;
+  }
+
+  .site-shell .stage-rings,
+  .site-shell .stage-horizon,
+  .site-shell .stage-glow,
+  .site-shell .stage-copy-top {
+    display: none;
+  }
+
+  .site-shell .dipper-map {
+    height: 112px;
+    top: 10px;
+    width: 92%;
+  }
+
+  .site-shell .stage-copy {
+    padding: 14px;
+  }
+
+  .site-shell .stage-copy strong {
+    font-size: 24px;
+  }
+
+  .site-shell .upcoming-section .birthday-grid,
+  .site-shell .directory-page-flow .birthday-grid,
+  .site-shell .quick-months {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .site-shell .upcoming-section .birthday-card,
+  .site-shell .directory-page-flow .birthday-card {
+    padding: 10px 0;
+  }
+
+  .site-shell .page-title {
+    padding: 24px 0 12px;
+  }
+
+  .site-shell .page-title h1 {
+    font-size: 34px;
+  }
+
+  .site-shell .directory-controls {
+    border-radius: 14px;
+    box-shadow: none;
+    padding: 12px;
+  }
+
+  .site-shell .month-board {
+    padding-right: 18px;
+  }
+
+  .site-shell .month-lane {
+    border-radius: 14px;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .site-shell .month-lane-list {
+    min-height: 0;
+  }
+}
+
+/* Public review pass: rhythm and mobile bounds */
+@media (max-width: 1120px) {
+  .site-shell .home-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .site-shell .home-right-column {
+    display: none;
+  }
+}
+
+@media (max-width: 740px) {
+  .site-shell {
+    overflow-x: hidden;
+  }
+
+  .site-shell > main,
+  .site-shell .public-footer {
+    max-width: calc(100vw - 20px);
+    width: calc(100% - 20px);
+  }
+
+  .site-shell .home-page-flow {
+    gap: 14px;
+  }
+
+  .site-shell .upcoming-section {
+    margin-top: 0;
+  }
+
+  .site-shell .upcoming-section .section-title {
+    min-height: 0;
+    padding-bottom: 10px;
+  }
+
+  .site-shell .upcoming-section .section-title h2 {
+    font-size: 25px;
+  }
+
+  .site-shell .directory-controls,
+  .site-shell .directory-page-flow .birthday-grid,
+  .site-shell .quick-months,
+  .site-shell .birthday-calendar-board,
+  .site-shell .birthday-calendar-month,
+  .site-shell .months-layout,
+  .site-shell .month-board {
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .site-shell .public-filter-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .site-shell .search-field {
+    min-width: 0;
+  }
+
+  .site-shell .filter-toggle {
+    min-width: 66px;
+    padding-inline: 10px;
+  }
+
+  .site-shell .directory-page-flow .birthday-card {
+    grid-template-columns: minmax(78px, 0.74fr) minmax(0, 1fr) auto;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .site-shell .directory-page-flow .birthday-card .card-topline {
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .site-shell .directory-page-flow .birthday-card .countdown {
+    max-width: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

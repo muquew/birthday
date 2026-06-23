@@ -500,7 +500,7 @@ function HomePage() {
             </Link>
           }
         />
-        <BirthdayGrid birthdays={upcoming} fillRowColumns={4} loading={birthdays.loading} />
+        <BirthdayGrid birthdays={upcoming} fillRowColumns={3} loading={birthdays.loading} />
       </section>
 
       <section className="quick-months" aria-label="月份快速入口">
