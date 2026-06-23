@@ -9567,7 +9567,7 @@ body::before {
     var(--exhibit-paper);
   border-color: rgba(77, 61, 35, 0.18);
   box-shadow: 0 18px 50px rgba(61, 42, 19, 0.11);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .site-shell .public-header::after {
@@ -9578,6 +9578,27 @@ body::before {
   left: 20px;
   position: absolute;
   right: 20px;
+}
+
+.site-shell .public-header-actions,
+.site-shell .theme-control,
+.site-shell .custom-select {
+  position: relative;
+  z-index: 90;
+}
+
+.site-shell .custom-select-menu {
+  z-index: 120;
+}
+
+.site-shell .theme-control.compact .custom-select-menu {
+  left: auto;
+  min-width: 136px;
+  right: 0;
+}
+
+.site-shell .theme-control.compact .custom-select-option span {
+  white-space: nowrap;
 }
 
 :root[data-theme="dark"] .site-shell .public-header {
