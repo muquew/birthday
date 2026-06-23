@@ -21,7 +21,7 @@ export type SelectOption<T extends string> = {
   value: T;
   label: string;
 };
-export type AppTheme = "classic" | "bright" | "dark";
+export type AppTheme = "classic" | "bright" | "jade" | "rose" | "dark";
 
 export type ThemeState = {
   theme: AppTheme;
@@ -82,8 +82,10 @@ export type BirthdayFormState = {
 export const THEME_STORAGE_KEY = "xingxing-theme";
 export const themeOptions: Array<SelectOption<AppTheme>> = [
   { value: "classic", label: "经典暖色" },
-  { value: "bright", label: "清透亮色" },
-  { value: "dark", label: "夜间深色" }
+  { value: "bright", label: "月白清透" },
+  { value: "jade", label: "青玉静谧" },
+  { value: "rose", label: "晨光玫瑰" },
+  { value: "dark", label: "星夜深色" }
 ];
 
 export const DIPPER_POINTS = [

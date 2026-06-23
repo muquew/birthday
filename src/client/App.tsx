@@ -182,7 +182,7 @@ function useTheme() {
 }
 
 function isAppTheme(value: string | null): value is AppTheme {
-  return value === "classic" || value === "bright" || value === "dark";
+  return themeOptions.some((option) => option.value === value);
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
