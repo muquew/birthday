@@ -10408,3 +10408,47 @@ body::before {
     animation: none;
   }
 }
+
+/* List rhythm cleanup: one structural divider is enough. */
+.site-shell .star-trail-section {
+  background: none;
+  padding-top: 10px;
+}
+
+.site-shell .star-trail-section::before,
+.site-shell .directory-controls::before,
+.site-shell .upcoming-section .birthday-card::before,
+.site-shell .directory-page-flow .birthday-card::before {
+  content: none;
+}
+
+.site-shell .upcoming-section .birthday-grid,
+.site-shell .directory-page-flow .birthday-grid {
+  background: var(--public-panel);
+}
+
+.site-shell .star-trail-section .birthday-grid {
+  border-top: 0;
+  border-radius: 0 0 var(--public-radius) var(--public-radius);
+}
+
+.site-shell .star-trail-section .section-title {
+  border-bottom-color: rgba(77, 61, 35, 0.18);
+  margin-bottom: 0;
+}
+
+.site-shell .star-trail-section .birthday-card::after {
+  opacity: 0.46;
+  top: 16px;
+}
+
+@media (max-width: 740px) {
+  .site-shell .star-trail-section {
+    padding-top: 0;
+  }
+
+  .site-shell .upcoming-section .birthday-grid,
+  .site-shell .directory-page-flow .birthday-grid {
+    background: transparent;
+  }
+}
