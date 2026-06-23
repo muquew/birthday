@@ -1358,22 +1358,15 @@ p {
   gap: 6px;
 }
 
-.admin-record-scope {
+.admin-record-count {
   align-items: center;
-  color: var(--muted);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 13px;
-  font-weight: 900;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.admin-record-scope span {
   background: rgba(47, 111, 103, 0.07);
   border: 1px solid rgba(47, 111, 103, 0.12);
   border-radius: 999px;
   color: var(--sage-dark);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
   padding: 5px 9px;
 }
 
@@ -1541,7 +1534,7 @@ p {
   border-radius: 8px;
   display: grid;
   gap: 2px 10px;
-  grid-template-columns: minmax(92px, 0.7fr) minmax(110px, 0.8fr) minmax(0, 1fr);
+  grid-template-columns: minmax(92px, 0.7fr) minmax(110px, 0.8fr) minmax(0, 1fr) auto;
   min-width: 0;
   padding: 9px 10px;
 }
@@ -1564,6 +1557,14 @@ p {
 
 .audit-more {
   font-weight: 900;
+}
+
+.audit-record-action {
+  color: var(--sage-dark);
+  font-size: 12px;
+  font-weight: 900;
+  justify-self: end;
+  white-space: nowrap;
 }
 
 .admin-section {
@@ -2222,11 +2223,11 @@ p {
 }
 
 .settings-form .settings-grid,
-.settings-form button {
+.settings-form > button {
   grid-column: 1 / -1;
 }
 
-.settings-form button {
+.settings-form > button {
   justify-self: start;
 }
 
@@ -2235,6 +2236,10 @@ p {
   display: flex;
   gap: 10px;
   justify-content: space-between;
+}
+
+.field-heading label {
+  font-weight: 800;
 }
 
 .template-field .ghost-button {
@@ -3728,7 +3733,7 @@ textarea {
 
 .admin-status-rail {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
   overflow: hidden;
   border: 1px solid var(--hairline);
@@ -3882,7 +3887,7 @@ textarea {
   }
 
   .admin-status-rail {
-    grid-template-columns: repeat(5, minmax(86px, 1fr));
+    grid-template-columns: repeat(4, minmax(86px, 1fr));
     overflow-x: auto;
   }
 }
@@ -4105,7 +4110,7 @@ textarea {
   }
 
   .admin-status-rail {
-    grid-template-columns: repeat(5, 92px);
+    grid-template-columns: repeat(4, 92px);
   }
 
   .admin-status-rail div {

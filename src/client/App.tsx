@@ -50,7 +50,8 @@ import {
   Outlet,
   Route,
   Routes,
-  useNavigate
+  useNavigate,
+  useSearchParams
 } from "react-router-dom";
 import type {
   AdminOperationLog,
@@ -1113,9 +1114,11 @@ function LoginPage() {
 function AdminBirthdaysPage() {
   const birthdays = useAdminBirthdayData();
   const { records, refresh, summary } = birthdays;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const routeQuery = searchParams.get("q") ?? "";
   const [editing, setEditing] = useState<BirthdayView | undefined>();
   const [error, setError] = useState("");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(routeQuery);
   const [calendarFilter, setCalendarFilter] = useState<"all" | CalendarType>("all");
   const [visibilityFilter, setVisibilityFilter] = useState<"all" | "visible" | "hidden">("all");
   const [rangeFilter, setRangeFilter] = useState<RangeFilter>("all");
@@ -1123,6 +1126,13 @@ function AdminBirthdaysPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [message, setMessage] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setQuery(routeQuery);
+    if (routeQuery) {
+      setViewMode("records");
+    }
+  }, [routeQuery]);
 
   useEffect(() => {
     const existingIds = new Set(records.map((item) => item.id));
@@ -1242,6 +1252,7 @@ function AdminBirthdaysPage() {
     setCalendarFilter("all");
     setVisibilityFilter("all");
     setRangeFilter("all");
+    setSearchParams({});
   };
 
   const filteredRecords = useMemo(() => {
@@ -1300,14 +1311,13 @@ function AdminBirthdaysPage() {
       ) : null}
       <AdminStatusRail
         summary={summary}
-        filtered={filteredRecords.length}
         loading={birthdays.loading}
       />
       <div className="admin-workspace">
         <section className="admin-section table-section">
           <SectionTitle
             title="记录列表"
-            action={<AdminRecordScope summary={summary} visible={filteredRecords.length} />}
+            action={<span className="admin-record-count">当前 {filteredRecords.length} 条</span>}
           />
           <div className="admin-filter-bar">
             <label className="search-field">
@@ -1515,6 +1525,9 @@ function AuditIssueCard({ issue }: { issue: DataAuditIssue }) {
             <strong>{birthday.name}</strong>
             <span>{birthdayDateText(birthday)}</span>
             <small>{auditRecordMeta(birthday)}</small>
+            <Link className="audit-record-action" to={`/admin?q=${encodeURIComponent(birthday.name)}`}>
+              处理
+            </Link>
           </div>
         ))}
         {extraCount > 0 ? <span className="audit-more">还有 {extraCount} 条</span> : null}
@@ -1924,6 +1937,7 @@ function ImportExportPage() {
             id="birthday-csv-upload"
             type="file"
             accept=".csv,text/csv"
+            hidden
             onChange={(event) => void handleFile(event.target.files?.[0])}
           />
           <span className="file-name">{selectedFileName || "未选择文件"}</span>
@@ -2111,9 +2125,9 @@ function AdminSettingsPage() {
             }
           />
         </label>
-        <label className="wide-field template-field">
+        <div className="wide-field template-field">
           <span className="field-heading">
-            <span>生日祝福模板</span>
+            <label htmlFor="birthday-greeting-templates">生日祝福模板</label>
             <button
               className="ghost-button"
               type="button"
@@ -2131,6 +2145,7 @@ function AdminSettingsPage() {
             </button>
           </span>
           <textarea
+            id="birthday-greeting-templates"
             value={form.birthdayGreetingTemplates.join("\n")}
             onChange={(event) =>
               setForm((current) => ({
@@ -2143,7 +2158,7 @@ function AdminSettingsPage() {
           <small className="field-hint">
             当前 {form.birthdayGreetingTemplates.length} / 30 条，每行一条。
           </small>
-        </label>
+        </div>
         <div className="settings-grid">
           <SettingLine label="访问路径" value="/xingxing" />
           <SettingLine label="后台路径" value="/xingxing/admin" />
@@ -3089,44 +3104,16 @@ function SectionTitle({ title, action }: { title: string; action?: ReactNode }) 
   );
 }
 
-function AdminRecordScope({
-  summary,
-  visible
-}: {
-  summary: AdminBirthdaySummary;
-  visible: number;
-}) {
-  const items = [
-    `库内 ${summary.total} 条`,
-    visible !== summary.total ? `当前 ${visible} 条` : undefined,
-    summary.hidden > 0 ? `隐藏 ${summary.hidden}` : undefined,
-    summary.duplicateRecordCount > 0
-      ? `疑似重复 ${summary.duplicateRecordCount} 条 / ${summary.duplicateKeyCount} 组`
-      : undefined,
-    summary.lunarAttention > 0 ? `闰月 ${summary.lunarAttention}` : undefined
-  ].filter(Boolean);
-  return (
-    <div className="admin-record-scope" aria-label="记录库摘要">
-      {items.map((item) => (
-        <span key={item}>{item}</span>
-      ))}
-    </div>
-  );
-}
-
 function AdminStatusRail({
   summary,
-  filtered,
   loading
 }: {
   summary: AdminBirthdaySummary;
-  filtered: number;
   loading: boolean;
 }) {
   const items = [
     { label: "库内", value: loading ? "..." : summary.total },
     { label: "公开", value: loading ? "..." : summary.total - summary.hidden },
-    { label: "当前", value: loading ? "..." : filtered },
     { label: "隐藏", value: loading ? "..." : summary.hidden },
     { label: "复核", value: loading ? "..." : summary.duplicateRecordCount + summary.lunarAttention }
   ];
