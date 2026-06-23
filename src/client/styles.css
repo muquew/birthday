@@ -1538,6 +1538,16 @@ a:focus-visible {
   justify-self: start;
 }
 
+.template-field textarea {
+  line-height: 1.7;
+  min-height: 220px;
+}
+
+.import-text-field textarea {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .edit-context,
 .duplicate-notice,
 .record-storage-panel,
