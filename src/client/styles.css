@@ -10485,3 +10485,127 @@ body::before {
     font-size: 10.5px;
   }
 }
+
+/* Mobile refinements: upcoming birthdays read as a vertical scroll, months lose the bottom-board layer. */
+@media (max-width: 740px) {
+  .site-shell .upcoming-section {
+    padding-bottom: 18px;
+  }
+
+  .site-shell .upcoming-section .birthday-grid {
+    background:
+      linear-gradient(90deg, rgba(158, 113, 37, 0.1), transparent 18px),
+      linear-gradient(180deg, rgba(var(--surface-rgb), 0.78), rgba(var(--surface-soft-rgb), 0.42));
+    border: 1px solid var(--public-line);
+    border-radius: 14px;
+    box-shadow: 0 16px 42px rgba(67, 48, 22, 0.1);
+    display: block;
+    overflow: hidden;
+    padding: 8px 12px 8px 18px;
+    position: relative;
+  }
+
+  .site-shell .upcoming-section .birthday-grid::before {
+    background: linear-gradient(180deg, transparent, rgba(158, 113, 37, 0.28) 14%, rgba(158, 113, 37, 0.22) 86%, transparent);
+    content: "";
+    inset: 16px auto 16px 10px;
+    position: absolute;
+    width: 1px;
+  }
+
+  .site-shell .upcoming-section .birthday-grid::after {
+    content: none;
+  }
+
+  .site-shell .upcoming-section .birthday-card,
+  .site-shell .upcoming-section .birthday-card:nth-of-type(odd):last-of-type {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(77, 61, 35, 0.14);
+    border-radius: 0;
+    box-shadow: none;
+    display: grid;
+    gap: 5px 10px;
+    grid-template-areas:
+      "name status"
+      "date date";
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 0;
+    padding: 13px 2px 13px 14px;
+    position: relative;
+    width: 100%;
+  }
+
+  .site-shell .upcoming-section .birthday-card::before {
+    background: var(--sage-dark);
+    border: 2px solid var(--public-panel);
+    border-radius: 999px;
+    box-shadow: 0 0 0 3px rgba(47, 111, 103, 0.1);
+    content: "";
+    height: 7px;
+    left: -11px;
+    position: absolute;
+    top: 20px;
+    width: 7px;
+  }
+
+  .site-shell .upcoming-section .birthday-card:last-of-type {
+    border-bottom: 0;
+  }
+
+  .site-shell .upcoming-section .birthday-card.today-birthday {
+    background: linear-gradient(90deg, rgba(189, 88, 72, 0.1), transparent 68%);
+    box-shadow: none;
+    padding-left: 14px;
+  }
+
+  .site-shell .upcoming-section .birthday-card.today-birthday::before {
+    background: var(--public-rose);
+    box-shadow: 0 0 0 4px rgba(189, 88, 72, 0.12);
+  }
+
+  .site-shell .upcoming-section .birthday-card-placeholder {
+    display: none;
+  }
+
+  .site-shell .upcoming-section .card-name h3 {
+    font-size: 18px;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .site-shell .upcoming-section .date-pair {
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    line-height: 1.35;
+  }
+
+  .site-shell .upcoming-section .countdown {
+    white-space: nowrap;
+  }
+
+  .site-shell .months-page-flow .month-board {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin-right: 0;
+    overflow: visible;
+    padding-right: 34px;
+  }
+
+  .site-shell .months-page-flow .month-lane {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(77, 61, 35, 0.14);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 13px 6px 13px 0;
+  }
+
+  .site-shell .months-page-flow .month-lane:last-child {
+    border-bottom: 0;
+  }
+}
