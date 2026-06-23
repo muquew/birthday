@@ -435,6 +435,14 @@ function HomePage() {
   return (
     <div className="page-flow home-page-flow">
       <section className="home-hero">
+        <div className="hero-theatre" aria-hidden="true">
+          <span className="theatre-orbit orbit-one" />
+          <span className="theatre-orbit orbit-two" />
+          <span className="theatre-orbit orbit-three" />
+          <span className="theatre-star star-one" />
+          <span className="theatre-star star-two" />
+          <span className="theatre-star star-three" />
+        </div>
         <div className="home-left-column">
           <div className="hero-copy star-hero-copy">
             <div className="hero-kicker">
@@ -449,6 +457,7 @@ function HomePage() {
           <div className="today-panel">
             <TodaySummary dateInfo={todayInfo.data} dateLoading={todayInfo.loading} />
             <section className="today-birthday-panel" aria-label="今日生日">
+              <span className="today-light-orbit" aria-hidden="true" />
               <div className="panel-heading">
                 <span>今日生日</span>
                 {today.length > 0 ? (
@@ -491,7 +500,7 @@ function HomePage() {
 
       {birthdays.error ? <Notice tone="danger">{birthdays.error}</Notice> : null}
 
-      <section className="section-block upcoming-section">
+      <section className="section-block upcoming-section star-trail-section">
         <SectionTitle
           title={`接下来 ${upcomingDays} 天`}
           action={
@@ -556,11 +565,14 @@ function StarStageCard({
     const daysUntil = birthday?.occurrence?.daysUntil;
     return typeof daysUntil === "number" && daysUntil >= 0 && daysUntil <= activeWindowDays;
   };
+  const roster = birthdays.slice(0, 4);
 
   return (
     <article className="star-stage-card">
       <div className="stage-sky">
         <span className="stage-rings" aria-hidden="true" />
+        <span className="stage-depth-dust" aria-hidden="true" />
+        <span className="stage-comet" aria-hidden="true" />
         <span className="stage-horizon" aria-hidden="true" />
         <svg className="dipper-map" viewBox="0 0 150 94" role="img" aria-label="北斗七星生日图">
           {DIPPER_LINES.map(([from, to]) => (
@@ -616,6 +628,22 @@ function StarStageCard({
         <small>
           {next?.occurrence ? `${formatCountdown(next.occurrence.daysUntil)} · ${next.occurrenceDateText}` : "等待下一次点亮"}
         </small>
+        {roster.length > 0 ? (
+          <ol className="stage-roster" aria-label="近期星位">
+            {roster.map((birthday) => {
+              const lit = isLit(birthday);
+              return (
+                <li
+                  className={`${lit ? "active" : ""} ${birthday.occurrence?.daysUntil === 0 ? "today" : ""}`.trim()}
+                  key={birthday.id}
+                >
+                  <span>{birthday.name}</span>
+                  <small>{formatCountdown(birthday.occurrence?.daysUntil)}</small>
+                </li>
+              );
+            })}
+          </ol>
+        ) : null}
       </div>
     </article>
   );
@@ -2667,8 +2695,11 @@ function BirthdayCard({ birthday }: { birthday: PublicBirthday }) {
 function BirthdaySpotlight({ birthday }: { birthday: PublicBirthday }) {
   return (
     <article className="spotlight-card today-birthday">
-      <strong>{birthday.name}</strong>
-      <small>{birthdayDateText(birthday)}</small>
+      <span className="spotlight-star" aria-hidden="true" />
+      <div className="spotlight-copy">
+        <strong>{birthday.name}</strong>
+        <small>{birthdayDateText(birthday)}</small>
+      </div>
     </article>
   );
 }
