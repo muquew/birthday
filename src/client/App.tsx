@@ -88,13 +88,10 @@ import {
 import {
   DIPPER_LINES,
   DIPPER_POINTS,
-  THEME_STORAGE_KEY,
   emptyForm,
-  themeOptions,
   type AdminBatchRequest,
   type AdminBirthdaySummary,
   type AdminListView,
-  type AppTheme,
   type BatchTagMode,
   type BirthdayCalendarCell,
   type BirthdayCalendarMonth,
@@ -103,8 +100,13 @@ import {
   type FacetRow,
   type PublicBirthdayViewMode,
   type RangeFilter,
-  type ThemeState
 } from "./model.js";
+import {
+  THEME_STORAGE_KEY,
+  themeOptions,
+  type AppTheme,
+  type ThemeState
+} from "./theme.js";
 import {
   birthdayDuplicateKey,
   duplicateKeySet,
