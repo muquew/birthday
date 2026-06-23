@@ -10452,3 +10452,36 @@ body::before {
     background: transparent;
   }
 }
+
+/* Keep the useful mobile month fix from the reverted art pass. */
+@media (max-width: 740px) {
+  .site-shell .month-board {
+    padding-right: 34px;
+  }
+
+  .site-shell .month-rail {
+    right: 0;
+    width: 32px;
+  }
+
+  .site-shell .month-rail a {
+    min-width: 32px;
+  }
+
+  .site-shell .months-page-flow .compact-birthday {
+    gap: 8px;
+    grid-template-columns: minmax(54px, 0.56fr) minmax(0, 1.44fr);
+  }
+
+  .site-shell .months-page-flow .compact-birthday strong {
+    font-size: 14px;
+  }
+
+  .site-shell .months-page-flow .compact-date span {
+    font-size: 12px;
+  }
+
+  .site-shell .months-page-flow .compact-birthday small {
+    font-size: 10.5px;
+  }
+}

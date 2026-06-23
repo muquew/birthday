@@ -1,33 +1,199 @@
-# Product
+# 星星生日墙产品基准
+
+## 产品定位
+
+星星生日墙是一个给共同社群使用的公共生日网站。它不是社交平台，也不是复杂 CRM，而是一个温暖、可靠、方便维护的生日信息墙：访客可以快速看到今天生日、近期提醒、全部生日和月份视图；管理员可以准确录入、纠错、导入、导出、隐藏、分组、打标签并追踪操作记录。
+
+产品的核心价值是“把生日这件小事认真放好”。公开端要让大家愿意看、看得懂、愿意转发祝福；后台端要让管理员愿意长期维护，不害怕改错、导错或找不到记录。
 
 ## Register
 
 product
 
-## Users
+设计服务于产品。公开端可以有星星、生日日历、北斗和温暖纸张感；后台端必须是清楚、稳定、可重复操作的工作台。装饰不能压过信息，动效不能干扰维护，视觉变化不能让管理员怀疑哪个按钮才是真的。
 
-Administrators who maintain a public birthday wall for a shared community. They use the admin area to add and correct birthday records, organize people by group and tag, import or restore data, review data quality, adjust public settings, and trace recent changes.
+## 用户
 
-## Product Purpose
+### 公开访客
 
-Xingxing Birthday Wall keeps public birthday information accurate, readable, and easy to maintain. Success means the public site feels warm and trustworthy while the admin interface stays efficient, predictable, and safe for repeated data work.
+公开访客通常是社群成员。他们不登录，只关心三件事：
 
-## Brand Personality
+- 今天有没有人生日。
+- 最近谁要过生日。
+- 想查某个人生日时能不能很快找到。
 
-Warm, orderly, careful. The public surface may carry the star and almanac feeling; the admin surface should feel like a calm workbench rather than a decorative landing page.
+他们可能在手机上访问，因此公开端移动端体验是一级需求。
 
-## Anti-references
+### 管理员
 
-Avoid cluttered dashboards, repeated metric blocks, card-only layouts, oversized typography inside tool panels, decorative effects that slow down maintenance, and duplicate controls that make administrators wonder which action is canonical.
+管理员负责维护生日数据。他们需要：
 
-## Design Principles
+- 新增、编辑、隐藏、删除生日。
+- 同时管理公历和农历生日，包含闰月规则。
+- 通过搜索、筛选、分组、标签快速定位记录。
+- 批量公开、隐藏、删除、设置分组、添加或移除标签。
+- 导入 CSV/JSON，导出备份。
+- 查看数据巡检和操作日志。
+- 修改站点名称、纠错说明、近期天数、祝福模板。
 
-- Put maintenance work before decoration.
-- Prefer one clear place to inspect and manage records.
-- Make destructive or overwriting actions explicit.
-- Keep mobile administration usable, not merely shrunken desktop UI.
-- Reuse component vocabulary across forms, filters, tables, imports, logs, and settings.
+管理员的主要目标不是“探索界面”，而是“少出错、少重复劳动、改完放心”。
 
-## Accessibility & Inclusion
+### 部署维护者
 
-Target practical WCAG AA behavior: visible focus states, readable contrast, semantic buttons and forms, responsive layouts from mobile to desktop, and no interaction that depends on color alone.
+部署维护者负责服务器、域名、Nginx、systemd、环境变量、数据库文件和更新流程。他们需要 README 提供准确、可复制、少歧义的命令。
+
+## 核心场景
+
+### 场景 1：今天有人生日
+
+访客进入首页后，第一屏应该看到今日日期和今日生日。如果有人生日，可以复制祝福语；如果无人生日，也应该明确显示“今天暂时没有记录”，不能让用户误以为页面没加载出来。
+
+### 场景 2：查看未来提醒
+
+首页展示默认近期范围，目前为 30 天。近期提醒应保持清楚，不与北斗星图或其他视觉组件重复解释同一件事。
+
+### 场景 3：查找某个人
+
+访客进入“全部生日”，可以通过搜索、生日类型、月份和范围筛选，并在列表视图或日历视图之间切换。移动端列表应优先保持一人一行、信息紧凑、文字不截断。
+
+### 场景 4：按月份浏览
+
+访客进入“月份”，按下次发生日期分组浏览。移动端右侧月份导航用于快速跳转；导航应节省空间，当前月份可以显示月份文字，其余只显示短横线。
+
+### 场景 5：管理员维护记录
+
+管理员登录后应在同一个工作台完成记录查看和管理，不需要在“仪表盘”和“生日管理”之间重复看同一份记录。工作台重点是列表、筛选、批量操作和表单。
+
+### 场景 6：导入与备份
+
+管理员可以预览 CSV/JSON 导入结果，了解有效、错误、重复、跳过数量，再决定追加或替换。导出 JSON/CSV 是当前轻量备份方案。
+
+### 场景 7：数据巡检
+
+系统提供数据巡检视图，用来发现疑似重复、同名、同日、闰月、2 月 29 日、隐藏记录、未分组、长姓名、多标签、长备注等情况。巡检是辅助工具，不替代新增/编辑时的校验。
+
+## 功能范围
+
+### 公开端必须有
+
+- 首页：今日星历、今日生日、生日祝福、近期提醒、北斗七星视觉。
+- 全部生日：列表视图、日历视图、搜索和筛选。
+- 月份视图：按下次发生月份分组，移动端右侧快速导航。
+- 主题：经典暖色、清透亮色、夜间深色。
+- 纠错说明：由管理员配置。
+
+### 后台端必须有
+
+- 管理员登录、退出和会话。
+- 生日记录新增、编辑、删除、隐藏/公开。
+- 批量操作：公开、隐藏、删除、设置/清空分组、添加/移除/清空标签。
+- 搜索、筛选、视图切换。
+- CSV/JSON 导入预览、导入、导出。
+- 数据巡检。
+- 操作日志，时间精确到毫秒。
+- 站点设置和祝福模板管理。
+
+### 数据能力必须有
+
+- 公历生日计算。
+- 农历生日计算。
+- 农历闰月生日和闰月缺失策略。
+- 下次生日日期、倒计时和年龄显示。
+- 重复记录识别。
+- SQLite 持久化。
+
+## 非目标
+
+当前版本不做：
+
+- 访客注册、评论、点赞、私信。
+- 每个人自己修改自己的生日。
+- 多管理员权限分级。
+- 邮件、短信、微信或系统通知。
+- 复杂社群 CRM、积分、活动管理。
+- 纯静态 GitHub Pages 部署。
+- 为了视觉炫技引入重型 3D、复杂滚动叙事或大动画。
+
+这些能力以后可以讨论，但不能影响当前产品的轻量、稳定和易维护。
+
+## 数据口径
+
+生日记录的核心字段是：
+
+- 姓名。
+- 生日类型：公历或农历。
+- 月、日。
+- 可选年份，用于显示年龄；不需要时不展示。
+- 是否闰月、闰月策略。
+- 分组、标签、备注。
+- 是否公开。
+- 创建/更新时间、最后修改人。
+
+公开端只展示公开记录。管理员端默认可以看到全部记录，包括隐藏记录。
+
+## 农历和公历规则
+
+公历生日直接按阳历月日计算下次发生日期。
+
+农历生日通过 `lunar-javascript` 将农历月日换算为对应年份的公历日期。闰月生日需要记录 `isLeapMonth`。如果某一年没有对应闰月，按 `leapMonthPolicy` 决定是否跳过该年，或按普通同月展示。
+
+页面展示时，生日类型与日期应该放在一起，例如“农历 六月初一”“公历 9月30日”，不要把“公历/农历”和日期拆成远离的两个信息块。
+
+## 成功标准
+
+### 公开端
+
+- 手机端第一屏能清楚看到站点名、今日日期、今日生日。
+- 访客不用说明也能找到全部生日、月份和日历。
+- 近期提醒不拥挤、不重复、不遮挡。
+- 日期、姓名、倒计时在移动端不横向溢出。
+- 空状态明确，不像加载失败。
+
+### 管理端
+
+- 管理员能在一个工作台里完成大部分记录维护。
+- 批量操作清楚、可撤前确认，危险操作不误触。
+- 导入前能看清新增、错误、重复、跳过数量。
+- 操作日志能解释“谁在什么时候改了什么”。
+- 设置页不和记录管理混在一起。
+
+### 工程与部署
+
+- `npm ci`、`npm test`、`npm run build` 可重复执行。
+- Node 24+ 环境下构建和运行稳定。
+- `/xingxing`、`/xingxing/admin`、`/xingxing/api` 挂载路径一致。
+- 数据库文件位于项目目录 `data/`，可备份、可迁移。
+- README 中部署和更新命令可以直接复制执行。
+
+## 产品原则
+
+- 维护优先于装饰。
+- 公开端温暖，后台端冷静。
+- 一份记录只应有一个主要管理入口。
+- 同一类操作只保留一个 canonical 控件。
+- 危险操作必须显式确认。
+- 移动端不是桌面端的缩小版。
+- 设计应减少解释文字，而不是靠说明补救界面。
+
+## 反例
+
+避免：
+
+- 混乱仪表盘和重复指标。
+- 卡片套卡片。
+- 首页堆过多无关模块。
+- 后台使用营销页式大标题、大插画和装饰动效。
+- 重复按钮，例如同一筛选区同时出现“重置”和“清除筛选”。
+- 把公历/农历和日期拆散。
+- 让北斗星图解释近期提醒的全部逻辑。
+- 在移动端牺牲可读性换取视觉效果。
+
+## 后续评价方式
+
+后续任何产品评价、设计评价或代码重构，都应先问：
+
+1. 是否服务于“公开端温暖可信、后台端高效可靠”。
+2. 是否减少管理员维护成本。
+3. 是否提升手机端可读性。
+4. 是否让数据更准确、更可追溯。
+5. 是否避免了本文件列出的反例。
