@@ -1942,17 +1942,21 @@ function ImportExportPage() {
           />
           <span className="file-name">{selectedFileName || "未选择文件"}</span>
         </div>
-        <textarea
-          value={csv}
-	          onChange={(event) => {
-	            setCsv(event.target.value);
-	            setPreview(undefined);
-	            setLastImportUndo(undefined);
-	          }}
-	          placeholder="name,calendarType,birthday,year,month,day,isLeapMonth,leapMonthPolicy,displayAge,group,tags,note,visible"
-	        />
-	        <ImportOptionsBar skipDuplicates={skipDuplicates} onSkipDuplicatesChange={setSkipDuplicates} />
-	        <div className="button-row">
+        <label className="import-text-field" htmlFor="csv-import-textarea">
+          <span>CSV 内容</span>
+          <textarea
+            id="csv-import-textarea"
+            value={csv}
+            onChange={(event) => {
+              setCsv(event.target.value);
+              setPreview(undefined);
+              setLastImportUndo(undefined);
+            }}
+            placeholder="name,calendarType,birthday,year,month,day,isLeapMonth,leapMonthPolicy,displayAge,group,tags,note,visible"
+          />
+        </label>
+        <ImportOptionsBar skipDuplicates={skipDuplicates} onSkipDuplicatesChange={setSkipDuplicates} />
+        <div className="button-row">
           <button className="secondary-button" onClick={handlePreview}>
             <Check size={17} aria-hidden />
             校验
@@ -2013,17 +2017,21 @@ function ImportExportPage() {
             执行恢复
           </button>
         </div>
-        <textarea
-          value={jsonImport}
-	          onChange={(event) => {
-	            setJsonImport(event.target.value);
-	            setJsonPreview(undefined);
-	            setLastImportUndo(undefined);
-	          }}
-	          placeholder='{"birthdays":[{"name":"小玉","calendarType":"新历","birthday":"1月28日"}]}'
-	        />
-	        <ImportOptionsBar skipDuplicates={skipDuplicates} onSkipDuplicatesChange={setSkipDuplicates} />
-	      </section>
+        <label className="import-text-field" htmlFor="json-import-textarea">
+          <span>JSON 内容</span>
+          <textarea
+            id="json-import-textarea"
+            value={jsonImport}
+            onChange={(event) => {
+              setJsonImport(event.target.value);
+              setJsonPreview(undefined);
+              setLastImportUndo(undefined);
+            }}
+            placeholder='{"birthdays":[{"name":"小玉","calendarType":"新历","birthday":"1月28日"}]}'
+          />
+        </label>
+        <ImportOptionsBar skipDuplicates={skipDuplicates} onSkipDuplicatesChange={setSkipDuplicates} />
+      </section>
       {jsonPreview ? <ImportPreviewTable preview={jsonPreview} title="JSON 校验结果" /> : null}
     </div>
   );
@@ -2816,13 +2824,16 @@ function AdminTable({
             <tr key={item.id}>
               <td className={selectable ? "person-cell selectable-person-cell" : "person-cell"} data-label="姓名">
                 {selectable ? (
-                  <input
-                    aria-label={`选择 ${item.name}`}
-                    className="row-select-checkbox"
-                    type="checkbox"
-                    checked={selectedIds?.has(item.id) ?? false}
-                    onChange={(event) => onSelect?.(item.id, event.target.checked)}
-                  />
+                  <label className="row-select-control">
+                    <input
+                      aria-label={`选择 ${item.name}`}
+                      className="row-select-checkbox"
+                      type="checkbox"
+                      checked={selectedIds?.has(item.id) ?? false}
+                      onChange={(event) => onSelect?.(item.id, event.target.checked)}
+                    />
+                    <span className="row-select-mark" aria-hidden />
+                  </label>
                 ) : null}
                 <span className="person-cell-body">
                   <strong>{item.name}</strong>

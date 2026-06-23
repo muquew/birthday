@@ -103,7 +103,7 @@ cp .env.example .env
 | `PATH` | 给 systemd 查找 `node` 使用。 |
 | `PORT` | Node 服务监听端口。 |
 | `HOST` | Node 服务监听地址。Nginx 反代时推荐 `127.0.0.1`。 |
-| `BASE_PATH` | 网站挂载路径。当前代码固定按 `/xingxing` 使用。 |
+| `BASE_PATH` | 网站挂载路径。必须保持 `/xingxing`，前端构建和服务端启动校验都按这个路径工作。 |
 | `ADMIN_USERNAME` | 数据库首次创建管理员时使用的用户名。 |
 | `ADMIN_PASSWORD` | 数据库首次创建管理员时使用的密码，生产必须修改。 |
 | `SESSION_SECRET` | 管理员登录 Cookie 签名密钥，生产必须换成长随机字符串。 |

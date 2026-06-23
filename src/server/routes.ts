@@ -3,6 +3,7 @@ import { parse as parseCsv } from "csv-parse/sync";
 import { stringify as stringifyCsv } from "csv-stringify/sync";
 import { z, ZodError } from "zod";
 import { login, logout, getCurrentAdmin, requireAdmin } from "./auth.js";
+import { config } from "./config.js";
 import {
   batchDeleteBirthdays,
   batchSetBirthdayGroup,
@@ -152,7 +153,7 @@ function createPublicRouter() {
 
   router.get("/settings", (_req, res) => {
     res.json({
-      basePath: "/xingxing",
+      basePath: config.basePath,
       ...getSiteSettings()
     });
   });

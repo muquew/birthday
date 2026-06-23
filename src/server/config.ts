@@ -3,11 +3,16 @@ import path from "node:path";
 import { BASE_PATH } from "../shared/types.js";
 
 const root = process.cwd();
+const configuredBasePath = normalizeBasePath(process.env.BASE_PATH ?? BASE_PATH);
+
+if (configuredBasePath !== BASE_PATH) {
+  throw new Error(`BASE_PATH must be ${BASE_PATH}; the frontend is built for that mount path`);
+}
 
 export const config = {
   host: process.env.HOST ?? "0.0.0.0",
   port: Number(process.env.PORT ?? 3000),
-  basePath: normalizeBasePath(process.env.BASE_PATH ?? BASE_PATH),
+  basePath: configuredBasePath,
   databasePath: path.resolve(root, process.env.DATABASE_PATH ?? "data/birthday.sqlite"),
   sessionSecret: process.env.SESSION_SECRET ?? "dev-session-secret-change-me",
   adminUsername: process.env.ADMIN_USERNAME ?? "admin",

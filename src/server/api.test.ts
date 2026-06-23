@@ -118,6 +118,15 @@ describe.sequential("admin API integration", () => {
     expect(exposed).not.toHaveProperty("updatedBy");
   });
 
+  it("returns the configured public base path from settings", async () => {
+    const settings = await requestJson<{ basePath: string }>("/public/settings", {
+      auth: false
+    });
+
+    expect(settings.status).toBe(200);
+    expect(settings.body.basePath).toBe("/xingxing");
+  });
+
   it("rejects exact duplicate birthdays unless they are explicitly distinguished", async () => {
     const first = await requestJson<{ birthday: { id: string; name: string } }>("/admin/birthdays", {
       method: "POST",
