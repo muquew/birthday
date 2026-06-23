@@ -3059,3 +3059,972 @@ p {
     white-space: normal;
   }
 }
+
+/* Premium redesign layer */
+:root,
+:root[data-theme="classic"] {
+  --paper: #f7f1e7;
+  --paper-strong: #ece2d2;
+  --surface: #fffdf8;
+  --surface-rgb: 255, 253, 248;
+  --surface-soft: #fcf8ef;
+  --surface-soft-rgb: 252, 248, 239;
+  --ink: #171b18;
+  --muted: #686b61;
+  --line: #d8cbb5;
+  --sage: #1d6b63;
+  --sage-dark: #124a46;
+  --coral: #b94d3d;
+  --gold: #a9781c;
+  --blue: #294f68;
+  --night: #0d2429;
+  --aqua: #66c7ba;
+  --plum: #573b55;
+  --danger: #a53831;
+  --success: #2e6f4b;
+  --accent-contrast: #f0cf73;
+  --body-grid-a: rgba(18, 74, 70, 0.07);
+  --body-grid-b: rgba(169, 120, 28, 0.08);
+  --nav-active-bg: rgba(18, 74, 70, 0.08);
+  --focus-ring: rgba(29, 107, 99, 0.24);
+  --panel: rgba(var(--surface-rgb), 0.82);
+  --panel-strong: rgba(var(--surface-rgb), 0.94);
+  --hairline: rgba(115, 93, 58, 0.18);
+  --shadow: 0 28px 70px rgba(46, 36, 22, 0.12);
+  --shadow-soft: 0 10px 30px rgba(46, 36, 22, 0.08);
+  font-family: "Avenir Next", "Gill Sans", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+:root[data-theme="bright"] {
+  --paper: #f4f8f5;
+  --paper-strong: #e6f0eb;
+  --surface: #ffffff;
+  --surface-rgb: 255, 255, 255;
+  --surface-soft: #fbfefd;
+  --surface-soft-rgb: 251, 254, 253;
+  --ink: #16201d;
+  --muted: #637169;
+  --line: #ceded5;
+  --sage: #1e766b;
+  --sage-dark: #124f49;
+  --coral: #c35a47;
+  --gold: #9d711c;
+  --blue: #2d6480;
+  --night: #0f3034;
+  --panel: rgba(var(--surface-rgb), 0.86);
+  --panel-strong: rgba(var(--surface-rgb), 0.96);
+  --hairline: rgba(38, 125, 114, 0.17);
+  --shadow: 0 24px 64px rgba(34, 75, 64, 0.11);
+  --shadow-soft: 0 10px 28px rgba(34, 75, 64, 0.08);
+}
+
+:root[data-theme="dark"] {
+  --paper: #0b1112;
+  --paper-strong: #10191a;
+  --surface: #151f20;
+  --surface-rgb: 21, 31, 32;
+  --surface-soft: #192627;
+  --surface-soft-rgb: 25, 38, 39;
+  --ink: #f5efe3;
+  --muted: #aaa99e;
+  --line: #334140;
+  --sage: #74cfc2;
+  --sage-dark: #9de0d5;
+  --coral: #e77a62;
+  --gold: #ddb458;
+  --blue: #86b6d3;
+  --night: #050b0d;
+  --panel: rgba(var(--surface-rgb), 0.78);
+  --panel-strong: rgba(var(--surface-rgb), 0.9);
+  --hairline: rgba(157, 224, 213, 0.16);
+  --shadow: 0 32px 74px rgba(0, 0, 0, 0.34);
+  --shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+body {
+  background:
+    linear-gradient(180deg, rgba(var(--surface-rgb), 0.32), transparent 280px),
+    repeating-linear-gradient(90deg, var(--body-grid-a) 0 1px, transparent 1px 84px),
+    repeating-linear-gradient(0deg, var(--body-grid-b) 0 1px, transparent 1px 84px),
+    var(--paper);
+  letter-spacing: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(var(--surface-rgb), 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--surface-rgb), 0.12) 1px, transparent 1px);
+  background-size: 11px 11px;
+  opacity: 0.34;
+  pointer-events: none;
+}
+
+input,
+select,
+textarea {
+  border-color: var(--hairline);
+  background: rgba(var(--surface-rgb), 0.72);
+  box-shadow: inset 0 1px 0 rgba(var(--surface-rgb), 0.68);
+}
+
+.site-shell {
+  width: min(1240px, calc(100% - 40px));
+}
+
+.public-header {
+  position: sticky;
+  top: 0;
+  z-index: 26;
+  min-height: 84px;
+  border-bottom: 1px solid var(--hairline);
+  background: linear-gradient(180deg, rgba(var(--surface-soft-rgb), 0.9), rgba(var(--surface-soft-rgb), 0.72));
+  backdrop-filter: blur(18px);
+}
+
+.brand,
+.admin-brand {
+  color: var(--ink);
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.brand svg,
+.admin-brand svg {
+  color: var(--gold);
+}
+
+.nav-tabs,
+.admin-nav {
+  gap: 4px;
+}
+
+.nav-tabs a,
+.admin-nav a {
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+  min-height: 40px;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.nav-tabs a.active,
+.nav-tabs a:hover,
+.admin-nav a.active,
+.admin-nav a:hover {
+  border-color: var(--hairline);
+  color: var(--sage-dark);
+  transform: translateY(-1px);
+}
+
+.page-flow,
+.admin-flow {
+  gap: 28px;
+}
+
+.home-hero {
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.74fr);
+  gap: 28px;
+  min-height: 520px;
+  padding: 34px 0 30px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.hero-copy {
+  position: relative;
+  border-left: 0;
+  justify-content: center;
+  min-height: 288px;
+  padding: 20px 0 22px;
+}
+
+.hero-copy::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20px;
+  bottom: 22px;
+  width: 3px;
+  background: linear-gradient(180deg, var(--gold), var(--coral), var(--sage));
+}
+
+.star-hero-copy {
+  padding-left: 30px;
+}
+
+.star-hero-copy::after {
+  width: min(420px, 62vw);
+  margin-top: 24px;
+  background: linear-gradient(90deg, var(--gold), var(--sage), transparent);
+}
+
+.hero-kicker {
+  align-items: center;
+  color: var(--gold);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+.hero-kicker span {
+  border: 1px solid rgba(169, 120, 28, 0.28);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.hero-kicker small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.hero-copy h1,
+.page-title h1 {
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: clamp(42px, 6.2vw, 84px);
+  font-weight: 800;
+  line-height: 0.98;
+}
+
+.hero-subtitle {
+  color: color-mix(in srgb, var(--ink) 74%, var(--muted));
+  font-size: 19px;
+  line-height: 1.85;
+  max-width: 620px;
+}
+
+.hero-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.hero-meta-row span {
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 18px 8px 0;
+}
+
+.today-panel,
+.admin-section,
+.login-panel,
+.birthday-card,
+.month-lane,
+.spotlight-card,
+.compact-birthday {
+  border-color: var(--hairline);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.today-panel {
+  position: relative;
+  gap: 18px;
+  padding: 22px;
+  overflow: hidden;
+}
+
+.today-panel::before,
+.directory-controls::before,
+.admin-section::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--sage), transparent);
+  opacity: 0.84;
+}
+
+.today-summary {
+  border: 0;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(169, 120, 28, 0.12), transparent 65%),
+    rgba(var(--surface-rgb), 0.48);
+}
+
+.date-chip {
+  background: var(--ink);
+  color: var(--accent-contrast);
+}
+
+.today-date-main strong {
+  font-size: clamp(21px, 2.4vw, 30px);
+}
+
+.panel-heading,
+.section-title,
+.admin-title {
+  align-items: end;
+}
+
+.panel-heading,
+.section-title h2,
+.admin-title h1 {
+  color: var(--ink);
+}
+
+.section-title h2,
+.admin-title h1 {
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: 30px;
+}
+
+.star-stage-card {
+  min-height: 344px;
+  border-color: rgba(240, 207, 115, 0.22);
+  background:
+    linear-gradient(145deg, rgba(13, 36, 41, 0.98), rgba(21, 44, 47, 0.96) 54%, rgba(42, 34, 48, 0.98)),
+    var(--night);
+  box-shadow: 0 30px 80px rgba(13, 36, 41, 0.24);
+}
+
+.star-stage-card::before {
+  background:
+    repeating-linear-gradient(116deg, rgba(240, 207, 115, 0.08) 0 1px, transparent 1px 26px),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.06), transparent 42%);
+}
+
+.star-stage-card::after {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border: 1px solid rgba(240, 207, 115, 0.16);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.dipper-map {
+  top: 20px;
+  width: min(88%, 520px);
+  height: 202px;
+}
+
+.dipper-line {
+  stroke-width: 1.35;
+}
+
+.stage-glow {
+  display: none;
+}
+
+.stage-copy {
+  background: linear-gradient(180deg, transparent 28%, rgba(5, 11, 13, 0.72));
+  padding: 28px;
+}
+
+.stage-copy-top span {
+  color: rgba(240, 207, 115, 0.9);
+  font-size: 13px;
+}
+
+.stage-copy strong {
+  color: #fff9e8;
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.stage-copy small {
+  color: rgba(255, 249, 232, 0.7);
+  font-weight: 800;
+}
+
+.star-stats {
+  gap: 12px;
+}
+
+.star-stats article {
+  background: rgba(var(--surface-rgb), 0.58);
+  border-color: var(--hairline);
+  box-shadow: none;
+  min-height: 112px;
+}
+
+.star-stats strong {
+  color: var(--ink);
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: 34px;
+}
+
+.birthday-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 286px), 1fr));
+  gap: 16px;
+}
+
+.birthday-card {
+  min-height: 216px;
+  padding: 18px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.birthday-card:hover {
+  border-color: rgba(169, 120, 28, 0.34);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.birthday-card.today-birthday {
+  border-left: 0;
+  box-shadow:
+    inset 4px 0 0 var(--coral),
+    var(--shadow-soft);
+}
+
+.card-name h3 {
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: 32px;
+}
+
+.countdown {
+  border: 1px solid rgba(185, 77, 61, 0.2);
+  border-radius: 999px;
+  color: var(--coral);
+  padding: 5px 9px;
+}
+
+.quick-months {
+  border-top: 1px solid var(--hairline);
+  padding-top: 16px;
+}
+
+.quick-months a {
+  background: transparent;
+  border-color: var(--hairline);
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.quick-months a:hover {
+  background: rgba(var(--surface-rgb), 0.58);
+  color: var(--sage-dark);
+  transform: translateY(-2px);
+}
+
+.page-title {
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 18px;
+  padding-top: 30px;
+}
+
+.page-title-meta {
+  color: var(--gold);
+}
+
+.directory-controls {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  overflow: visible;
+  padding: 18px;
+}
+
+.public-filter-head {
+  grid-template-columns: minmax(260px, 1fr) auto;
+}
+
+.filter-drawer {
+  grid-template-columns: minmax(300px, 480px) minmax(0, 1fr);
+}
+
+.filter-bar {
+  grid-template-columns: minmax(134px, 160px) minmax(134px, 160px) auto;
+}
+
+.range-tabs,
+.public-view-switch,
+.admin-view-tabs {
+  border-color: var(--hairline);
+  background: rgba(var(--surface-rgb), 0.55);
+}
+
+.range-tabs button.active,
+.public-view-switch button.active,
+.admin-view-tabs button.active {
+  background: var(--ink);
+  color: var(--accent-contrast);
+}
+
+.custom-select-trigger,
+.custom-select-menu,
+.custom-select-option {
+  background: rgba(var(--surface-rgb), 0.82);
+}
+
+.custom-select-menu {
+  box-shadow: var(--shadow);
+}
+
+.birthday-calendar-board {
+  gap: 18px;
+}
+
+.birthday-calendar-month {
+  background: var(--panel);
+  border-color: var(--hairline);
+  box-shadow: var(--shadow-soft);
+}
+
+.birthday-calendar-month header strong {
+  color: var(--ink);
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: 36px;
+}
+
+.calendar-day {
+  border-color: rgba(115, 93, 58, 0.12);
+  background: rgba(var(--surface-rgb), 0.46);
+}
+
+.calendar-day.has-birthday {
+  border-color: rgba(29, 107, 99, 0.24);
+  background: rgba(29, 107, 99, 0.08);
+}
+
+.calendar-day.today-birthday {
+  border-color: rgba(185, 77, 61, 0.38);
+  background: rgba(185, 77, 61, 0.1);
+}
+
+.admin-shell {
+  grid-template-columns: 264px minmax(0, 1fr);
+  background:
+    linear-gradient(90deg, rgba(13, 36, 41, 0.08), transparent 320px),
+    var(--paper-strong);
+}
+
+.admin-sidebar {
+  border-right-color: var(--hairline);
+  background:
+    linear-gradient(180deg, rgba(var(--surface-rgb), 0.94), rgba(var(--surface-soft-rgb), 0.76)),
+    var(--surface-soft);
+  box-shadow: 16px 0 44px rgba(13, 36, 41, 0.06);
+}
+
+.admin-main {
+  padding: 32px;
+}
+
+.admin-title {
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 18px;
+}
+
+.admin-status-rail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--hairline);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-status-rail div {
+  display: grid;
+  gap: 5px;
+  background: var(--panel-strong);
+  padding: 14px;
+}
+
+.admin-status-rail span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-status-rail strong {
+  color: var(--ink);
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.admin-section {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  background: var(--panel-strong);
+}
+
+.admin-workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 410px);
+  gap: 22px;
+}
+
+.admin-filter-bar {
+  grid-template-columns: minmax(220px, 1fr) 138px 138px 138px auto;
+  margin: 16px 0;
+}
+
+.filter-summary {
+  border-top: 1px solid var(--hairline);
+  padding-top: 10px;
+}
+
+.batch-toolbar {
+  background: rgba(169, 120, 28, 0.08);
+  border-color: rgba(169, 120, 28, 0.22);
+}
+
+.admin-table {
+  min-width: 620px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+.admin-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-table td {
+  background: transparent;
+}
+
+.admin-table tbody tr {
+  transition: background 160ms ease;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(29, 107, 99, 0.05);
+}
+
+.table-actions {
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.birthday-admin-table .icon-button {
+  height: 32px;
+  width: 32px;
+}
+
+.birthday-form {
+  background:
+    linear-gradient(180deg, rgba(169, 120, 28, 0.08), transparent 130px),
+    var(--panel-strong);
+}
+
+.form-preview,
+.duplicate-notice,
+.edit-context,
+.record-storage-panel {
+  border-color: var(--hairline);
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.icon-button,
+.icon-text-button,
+.file-picker {
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+  box-shadow: 0 12px 28px rgba(18, 74, 70, 0.18);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.icon-text-button:hover,
+.file-picker:hover {
+  transform: translateY(-1px);
+}
+
+.secondary-button,
+.icon-button {
+  background: rgba(var(--surface-rgb), 0.76);
+  border-color: var(--hairline);
+}
+
+.empty-state {
+  border-color: var(--hairline);
+  background: rgba(var(--surface-rgb), 0.42);
+}
+
+@media (max-width: 960px) {
+  .site-shell {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .home-hero {
+    min-height: unset;
+    grid-template-columns: 1fr;
+  }
+
+  .filter-drawer {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-status-rail {
+    grid-template-columns: repeat(5, minmax(86px, 1fr));
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 740px) {
+  .site-shell {
+    width: min(100% - 20px, 1180px);
+  }
+
+  .public-header {
+    min-height: 66px;
+  }
+
+  .brand,
+  .admin-brand {
+    font-size: 20px;
+  }
+
+  .home-hero {
+    gap: 12px;
+    padding: 14px 0 20px;
+  }
+
+  .hero-copy {
+    min-height: auto;
+    padding: 10px 0 10px 18px;
+  }
+
+  .hero-copy::before {
+    top: 10px;
+    bottom: 10px;
+  }
+
+  .star-hero-copy {
+    padding-left: 18px;
+  }
+
+  .hero-kicker {
+    margin-bottom: 10px;
+  }
+
+  .hero-copy h1,
+  .page-title h1 {
+    font-size: 38px;
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+    line-height: 1.62;
+  }
+
+  .hero-meta-row {
+    gap: 6px;
+  }
+
+  .hero-meta-row span {
+    font-size: 12px;
+    padding: 0 12px 6px 0;
+  }
+
+  .today-panel,
+  .directory-controls,
+  .admin-section {
+    padding: 14px;
+  }
+
+  .today-date-main strong {
+    font-size: 18px;
+  }
+
+  .star-stage-card {
+    min-height: 176px;
+  }
+
+  .dipper-map {
+    height: 106px;
+    top: 12px;
+    width: 90%;
+  }
+
+  .stage-copy {
+    padding: 16px;
+  }
+
+  .stage-copy strong {
+    font-size: 28px;
+  }
+
+  .star-stats,
+  .home-right-column .star-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .star-stats article {
+    min-height: 92px;
+    padding: 12px;
+  }
+
+  .birthday-grid {
+    display: block;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .birthday-card {
+    min-height: 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    display: grid;
+    grid-template-areas: "name date status";
+    grid-template-columns: minmax(74px, 0.82fr) minmax(0, 1.38fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .birthday-card:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .birthday-card.today-birthday {
+    background:
+      linear-gradient(90deg, rgba(185, 77, 61, 0.09), transparent 72%),
+      transparent;
+    box-shadow: inset 4px 0 0 var(--coral);
+    padding-left: 10px;
+  }
+
+  .birthday-card:last-child {
+    border-bottom: 0;
+  }
+
+  .birthday-card .card-topline {
+    grid-area: status;
+    justify-content: end;
+  }
+
+  .birthday-card .card-name {
+    grid-area: name;
+    min-width: 0;
+  }
+
+  .birthday-card .card-name h3 {
+    font-size: 21px;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .birthday-card .card-name small {
+    display: block;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .birthday-card .date-pair {
+    grid-area: date;
+    display: grid;
+    font-size: 12px;
+    gap: 1px;
+    line-height: 1.35;
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  .birthday-card .date-pair span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .birthday-card .note-line,
+  .birthday-card .meta-line {
+    display: none;
+  }
+
+  .countdown {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .directory-controls {
+    gap: 10px;
+  }
+
+  .public-view-switch {
+    width: 100%;
+  }
+
+  .public-filter-head,
+  .filter-bar,
+  .admin-filter-bar,
+  .json-import-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: static;
+    height: auto;
+    padding: 14px;
+  }
+
+  .admin-main {
+    padding: 16px;
+  }
+
+  .admin-status-rail {
+    grid-template-columns: repeat(5, 92px);
+  }
+
+  .admin-status-rail div {
+    padding: 12px;
+  }
+
+  .admin-workspace {
+    grid-template-columns: 1fr;
+  }
+}

@@ -424,11 +424,19 @@ function HomePage() {
       <section className="home-hero">
         <div className="home-left-column">
           <div className="hero-copy star-hero-copy">
-            <p className="eyebrow">星星生日日历</p>
+            <div className="hero-kicker">
+              <span>星星生日日历</span>
+              <small>{todayInfo.data?.weekday ?? "Today"}</small>
+            </div>
             <h1>{siteName}</h1>
             <p className="hero-subtitle">
-              把大家的生日收进一面星墙，让今天的祝福和下一次相见都更容易被看见。
+              把每一次生日整理成安静清楚的星历，让祝福、提醒和相见都有一个好看的位置。
             </p>
+            <div className="hero-meta-row" aria-label="生日概览">
+              <span>{birthdays.loading ? "读取中" : `${totalBirthdays} 位`}</span>
+              <span>{today.length > 0 ? `今日 ${today.length}` : "今日无生日"}</span>
+              <span>{upcomingDays} 天星历</span>
+            </div>
           </div>
           <div className="today-panel">
             <TodaySummary dateInfo={todayInfo.data} dateLoading={todayInfo.loading} />
@@ -549,7 +557,7 @@ function StarStats({
 }) {
   const items = [
     {
-      label: "星图记录",
+      label: "生日库",
       value: loading ? "..." : `${total}`,
       hint: "公开生日"
     },
@@ -559,7 +567,7 @@ function StarStats({
       hint: "当天生日"
     },
     {
-      label: "下一颗星",
+      label: "下一位",
       value: loading ? "..." : next?.name ?? "暂无",
       hint: next?.occurrence ? `${next.occurrence.daysUntil} 天后` : "继续等待"
     },
@@ -639,6 +647,9 @@ function StarStageCard({
           <span>北斗星图</span>
         </div>
         <strong>{loading ? "读取星图" : next?.name ?? "生日星图"}</strong>
+        <small>
+          {next?.occurrence ? `${formatCountdown(next.occurrence.daysUntil)} · ${next.occurrenceDateText}` : "等待下一次点亮"}
+        </small>
       </div>
     </article>
   );
@@ -678,58 +689,60 @@ function BirthdaysPage() {
   return (
     <div className="page-flow">
       <PageTitle title="全部生日" meta={birthdays.loading ? "读取中" : `共 ${totalCount} 人`} />
-      <div className="public-filter-head">
-        <label className="search-field">
-          <Search size={18} aria-hidden />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索姓名、分组、标签"
-          />
-        </label>
-        <button
-          className="secondary-button filter-toggle"
-          type="button"
-          onClick={() => setFiltersOpen((current) => !current)}
-        >
-          <ListFilter size={17} aria-hidden />
-          筛选
-        </button>
-      </div>
-      <div className={`filter-drawer ${filtersOpen ? "open" : ""}`}>
-        <RangeTabs value={range} onChange={setRange} />
-        <div className="filter-bar">
-          <CustomSelect
-            ariaLabel="生日月份"
-            value={month}
-            onChange={setMonth}
-            options={[
-              { value: "all", label: "全部月份" },
-              ...Array.from({ length: 12 }, (_, index) => {
-                const value = String(index + 1);
-                return { value, label: `${value} 月` };
-              })
-            ]}
-          />
-          <CustomSelect
-            ariaLabel="生日类型"
-            value={calendarType}
-            onChange={setCalendarType}
-            options={[
-              { value: "all", label: "全部类型" },
-              { value: "gregorian", label: "公历" },
-              { value: "lunar", label: "农历" }
-            ]}
-          />
-          {hasActiveFilters ? (
-            <button className="filter-clear-button" type="button" onClick={resetPublicFilters}>
-              <X size={15} aria-hidden />
-              清除筛选
-            </button>
-          ) : null}
+      <section className="directory-controls" aria-label="生日筛选和视图">
+        <div className="public-filter-head">
+          <label className="search-field">
+            <Search size={18} aria-hidden />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="搜索姓名、分组、标签"
+            />
+          </label>
+          <button
+            className="secondary-button filter-toggle"
+            type="button"
+            onClick={() => setFiltersOpen((current) => !current)}
+          >
+            <ListFilter size={17} aria-hidden />
+            筛选
+          </button>
         </div>
-      </div>
-      <PublicViewSwitch value={viewMode} onChange={setViewMode} />
+        <div className={`filter-drawer ${filtersOpen ? "open" : ""}`}>
+          <RangeTabs value={range} onChange={setRange} />
+          <div className="filter-bar">
+            <CustomSelect
+              ariaLabel="生日月份"
+              value={month}
+              onChange={setMonth}
+              options={[
+                { value: "all", label: "全部月份" },
+                ...Array.from({ length: 12 }, (_, index) => {
+                  const value = String(index + 1);
+                  return { value, label: `${value} 月` };
+                })
+              ]}
+            />
+            <CustomSelect
+              ariaLabel="生日类型"
+              value={calendarType}
+              onChange={setCalendarType}
+              options={[
+                { value: "all", label: "全部类型" },
+                { value: "gregorian", label: "公历" },
+                { value: "lunar", label: "农历" }
+              ]}
+            />
+            {hasActiveFilters ? (
+              <button className="filter-clear-button" type="button" onClick={resetPublicFilters}>
+                <X size={15} aria-hidden />
+                清除筛选
+              </button>
+            ) : null}
+          </div>
+        </div>
+        <PublicViewSwitch value={viewMode} onChange={setViewMode} />
+      </section>
       {birthdays.error ? <Notice tone="danger">{birthdays.error}</Notice> : null}
       {viewMode === "calendar" ? (
         <BirthdayCalendarView birthdays={filtered} loading={birthdays.loading} />
@@ -1331,6 +1344,11 @@ function AdminBirthdaysPage() {
       {error || birthdays.error ? (
         <Notice tone="danger">{error || birthdays.error}</Notice>
       ) : null}
+      <AdminStatusRail
+        summary={summary}
+        filtered={filteredRecords.length}
+        loading={birthdays.loading}
+      />
       <div className="admin-workspace">
         <section className="admin-section table-section">
           <SectionTitle
@@ -2982,6 +3000,34 @@ function AdminRecordScope({
         <span key={item}>{item}</span>
       ))}
     </div>
+  );
+}
+
+function AdminStatusRail({
+  summary,
+  filtered,
+  loading
+}: {
+  summary: AdminBirthdaySummary;
+  filtered: number;
+  loading: boolean;
+}) {
+  const items = [
+    { label: "库内", value: loading ? "..." : summary.total },
+    { label: "公开", value: loading ? "..." : summary.total - summary.hidden },
+    { label: "当前", value: loading ? "..." : filtered },
+    { label: "隐藏", value: loading ? "..." : summary.hidden },
+    { label: "复核", value: loading ? "..." : summary.duplicateRecordCount + summary.lunarAttention }
+  ];
+  return (
+    <section className="admin-status-rail" aria-label="生日库状态">
+      {items.map((item) => (
+        <div key={item.label}>
+          <span>{item.label}</span>
+          <strong>{item.value}</strong>
+        </div>
+      ))}
+    </section>
   );
 }
 
