@@ -379,8 +379,6 @@ function HomePage() {
   const siteName = settings.data?.siteName ?? "星星生日墙";
   const upcomingDays = settings.data?.defaultUpcomingDays ?? 30;
   const today = birthdays.data?.filter((item) => item.occurrence?.daysUntil === 0) ?? [];
-  const nextBirthday = birthdays.data?.find((item) => (item.occurrence?.daysUntil ?? -1) > 0);
-  const totalBirthdays = birthdays.data?.length ?? 0;
   const starBirthdays = birthdays.data?.slice(0, 7) ?? [];
   const greetingTemplates =
     settings.data?.birthdayGreetingTemplates ?? DEFAULT_SITE_SETTINGS.birthdayGreetingTemplates;
@@ -432,42 +430,39 @@ function HomePage() {
             <p className="hero-subtitle">
               把每一次生日整理成安静清楚的星历，让祝福、提醒和相见都有一个好看的位置。
             </p>
-            <div className="hero-meta-row" aria-label="生日概览">
-              <span>{birthdays.loading ? "读取中" : `${totalBirthdays} 位`}</span>
-              <span>{today.length > 0 ? `今日 ${today.length}` : "今日无生日"}</span>
-              <span>{upcomingDays} 天星历</span>
-            </div>
           </div>
           <div className="today-panel">
             <TodaySummary dateInfo={todayInfo.data} dateLoading={todayInfo.loading} />
-            <div className="panel-heading">
-              <span>今日生日</span>
-              {today.length > 0 ? (
-                <button className="icon-text-button" type="button" onClick={handleCopyToday}>
-                  <Copy size={16} aria-hidden />
-                  {copyMessage || "复制祝福"}
-                </button>
-              ) : (
-                <Sparkles size={18} aria-hidden />
-              )}
-            </div>
-            {birthdays.loading ? (
-              <InlineLoading />
-            ) : today.length > 0 ? (
-              <div className="today-list">
-                {today.map((item) => (
-                  <BirthdaySpotlight key={item.id} birthday={item} />
-                ))}
+            <section className="today-birthday-panel" aria-label="今日生日">
+              <div className="panel-heading">
+                <span>今日生日</span>
+                {today.length > 0 ? (
+                  <button className="icon-text-button" type="button" onClick={handleCopyToday}>
+                    <Copy size={16} aria-hidden />
+                    {copyMessage || "复制祝福"}
+                  </button>
+                ) : (
+                  <Sparkles size={18} aria-hidden />
+                )}
               </div>
-            ) : (
-              <EmptyState title="今天暂时没有记录" />
-            )}
-            {today.length > 0 ? (
-              <BirthdayGreetingBox
-                greeting={greeting}
-                onShuffle={() => setGreetingIndex((current) => current + 1)}
-              />
-            ) : null}
+              {birthdays.loading ? (
+                <InlineLoading />
+              ) : today.length > 0 ? (
+                <div className="today-list">
+                  {today.map((item) => (
+                    <BirthdaySpotlight key={item.id} birthday={item} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState title="今天暂时没有记录" />
+              )}
+              {today.length > 0 ? (
+                <BirthdayGreetingBox
+                  greeting={greeting}
+                  onShuffle={() => setGreetingIndex((current) => current + 1)}
+                />
+              ) : null}
+            </section>
           </div>
         </div>
         <div className="home-right-column">
@@ -476,20 +471,12 @@ function HomePage() {
             birthdays={starBirthdays}
             activeWindowDays={upcomingDays}
           />
-          <StarStats
-            total={totalBirthdays}
-            today={today.length}
-            next={nextBirthday}
-            upcomingCount={upcoming.length}
-            upcomingDays={upcomingDays}
-            loading={birthdays.loading}
-          />
         </div>
       </section>
 
       {birthdays.error ? <Notice tone="danger">{birthdays.error}</Notice> : null}
 
-      <section className="section-block">
+      <section className="section-block upcoming-section">
         <SectionTitle
           title={`接下来 ${upcomingDays} 天`}
           action={
@@ -540,57 +527,6 @@ function TodaySummary({
   );
 }
 
-function StarStats({
-  total,
-  today,
-  next,
-  upcomingCount,
-  upcomingDays,
-  loading
-}: {
-  total: number;
-  today: number;
-  next?: PublicBirthday;
-  upcomingCount: number;
-  upcomingDays: number;
-  loading: boolean;
-}) {
-  const items = [
-    {
-      label: "生日库",
-      value: loading ? "..." : `${total}`,
-      hint: "公开生日"
-    },
-    {
-      label: "今日生日",
-      value: loading ? "..." : `${today}`,
-      hint: "当天生日"
-    },
-    {
-      label: "下一位",
-      value: loading ? "..." : next?.name ?? "暂无",
-      hint: next?.occurrence ? `${next.occurrence.daysUntil} 天后` : "继续等待"
-    },
-    {
-      label: `${upcomingDays}天内`,
-      value: loading ? "..." : `${upcomingCount}`,
-      hint: "即将到来"
-    }
-  ];
-
-  return (
-    <section className="star-stats" aria-label="星图统计">
-      {items.map((item) => (
-        <article key={item.label}>
-          <span>{item.label}</span>
-          <strong>{item.value}</strong>
-          <small>{item.hint}</small>
-        </article>
-      ))}
-    </section>
-  );
-}
-
 function StarStageCard({
   activeWindowDays,
   loading,
@@ -601,7 +537,6 @@ function StarStageCard({
   birthdays: PublicBirthday[];
 }) {
   const next = birthdays[0];
-  const roster = birthdays.slice(0, 4);
   const isLit = (birthday?: PublicBirthday) => {
     const daysUntil = birthday?.occurrence?.daysUntil;
     return typeof daysUntil === "number" && daysUntil >= 0 && daysUntil <= activeWindowDays;
@@ -651,27 +586,6 @@ function StarStageCard({
         <small>
           {next?.occurrence ? `${formatCountdown(next.occurrence.daysUntil)} · ${next.occurrenceDateText}` : "等待下一次点亮"}
         </small>
-        {roster.length > 0 ? (
-          <ul className="stage-roster" aria-label="星图生日">
-            {roster.map((birthday) => {
-              const days = birthday.occurrence?.daysUntil;
-              return (
-                <li
-                  className={[
-                    isLit(birthday) ? "active" : "",
-                    days === 0 ? "today" : ""
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  key={birthday.id}
-                >
-                  <span>{birthday.name}</span>
-                  <small>{formatCountdown(days)}</small>
-                </li>
-              );
-            })}
-          </ul>
-        ) : null}
       </div>
     </article>
   );
@@ -2464,6 +2378,7 @@ function BirthdayCalendarView({
                   className={[
                     "calendar-day",
                     cell.day ? "" : "empty",
+                    cell.isToday ? "is-today" : "",
                     cell.birthdays.length > 0 ? "has-birthday" : "",
                     cell.birthdays.some((birthday) => birthday.occurrence?.daysUntil === 0)
                       ? "today-birthday"
@@ -2562,6 +2477,7 @@ function birthdayDateText(birthday: Pick<PublicBirthday, "calendarLabel" | "orig
 type BirthdayCalendarCell = {
   key: string;
   day?: number;
+  isToday?: boolean;
   birthdays: PublicBirthday[];
 };
 
@@ -2620,6 +2536,7 @@ function buildCalendarCells(
   month: number,
   byDay: Map<number, PublicBirthday[]>
 ): BirthdayCalendarCell[] {
+  const today = new Date();
   const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
   const dayCount = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const cells: BirthdayCalendarCell[] = [];
@@ -2630,6 +2547,10 @@ function buildCalendarCells(
     cells.push({
       key: String(day),
       day,
+      isToday:
+        today.getFullYear() === year &&
+        today.getMonth() + 1 === month &&
+        today.getDate() === day,
       birthdays: byDay.get(day) ?? []
     });
   }

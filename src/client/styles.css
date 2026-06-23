@@ -4538,3 +4538,505 @@ body::before {
     padding-bottom: 0;
   }
 }
+
+/* Focused cleanup after visual review */
+.home-hero {
+  grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.62fr);
+}
+
+.home-right-column {
+  align-content: start;
+}
+
+.star-stage-card {
+  min-height: 324px;
+}
+
+.stage-copy {
+  background: linear-gradient(180deg, transparent 28%, rgba(6, 20, 21, 0.82) 80%);
+}
+
+.calendar-day {
+  position: relative;
+}
+
+.calendar-day.is-today {
+  background:
+    linear-gradient(180deg, rgba(154, 114, 30, 0.16), transparent 72%),
+    rgba(var(--surface-soft-rgb), 0.96);
+  border-color: rgba(154, 114, 30, 0.48);
+  box-shadow:
+    inset 0 0 0 1px rgba(154, 114, 30, 0.28),
+    0 0 0 2px rgba(154, 114, 30, 0.06);
+}
+
+.calendar-day.is-today .calendar-day-number {
+  color: var(--ink);
+  font-weight: 950;
+}
+
+.calendar-day.is-today.has-birthday,
+.calendar-day.is-today.today-birthday {
+  background:
+    linear-gradient(180deg, rgba(154, 114, 30, 0.16), transparent 68%),
+    rgba(var(--surface-soft-rgb), 0.96);
+}
+
+.admin-filter-bar {
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(128px, 150px)) minmax(94px, auto);
+  gap: 10px;
+}
+
+.admin-filter-bar > .secondary-button {
+  justify-self: end;
+  min-width: 94px;
+}
+
+@media (max-width: 1280px) {
+  .admin-filter-bar {
+    grid-template-columns: minmax(240px, 1fr) repeat(2, minmax(132px, 1fr));
+  }
+
+  .admin-filter-bar > .secondary-button {
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 960px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .star-stage-card {
+    min-height: 244px;
+  }
+}
+
+@media (max-width: 740px) {
+  .star-stage-card {
+    min-height: 156px;
+  }
+
+  .admin-filter-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-filter-bar .search-field {
+  flex: 1 1 240px;
+  min-width: min(100%, 220px);
+}
+
+.admin-filter-bar .custom-select {
+  flex: 1 1 132px;
+  max-width: 160px;
+  min-width: 128px;
+}
+
+.admin-filter-bar > .secondary-button {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+@media (max-width: 740px) {
+  .admin-filter-bar .search-field,
+  .admin-filter-bar .custom-select,
+  .admin-filter-bar > .secondary-button {
+    flex-basis: 100%;
+    max-width: none;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .admin-filter-bar > .secondary-button {
+    margin-left: 0;
+  }
+}
+
+/* Homepage redesign: almanac cover */
+.home-hero {
+  isolation: isolate;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.66fr);
+  gap: 28px;
+  min-height: 580px;
+  padding: 36px 0 34px;
+}
+
+.home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 18px -20px 24px;
+  z-index: -1;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  background: rgba(var(--surface-rgb), 0.24);
+  pointer-events: none;
+}
+
+.home-left-column {
+  align-content: stretch;
+  gap: 18px;
+}
+
+.hero-copy {
+  min-height: 0;
+  padding: 34px 0 28px 28px;
+}
+
+.hero-copy::before {
+  top: 34px;
+  bottom: 28px;
+}
+
+.star-hero-copy::after {
+  width: min(520px, 74%);
+  margin-top: 28px;
+}
+
+.hero-kicker {
+  margin-bottom: 20px;
+}
+
+.hero-copy h1 {
+  max-width: 760px;
+  margin-bottom: 18px;
+  font-size: clamp(38px, 4.8vw, 64px);
+  line-height: 1;
+}
+
+.hero-subtitle {
+  max-width: 680px;
+  color: color-mix(in srgb, var(--ink) 82%, var(--muted));
+  font-size: 18px;
+  line-height: 1.78;
+}
+
+.today-panel {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.84fr) minmax(260px, 1fr);
+  gap: 0;
+  align-items: stretch;
+  min-height: 204px;
+  padding: 20px 0;
+  border-width: 1px 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.today-panel::after {
+  content: "";
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  bottom: 18px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(154, 114, 30, 0.24), transparent);
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.today-panel .today-summary {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  min-height: 100%;
+  padding: 18px;
+  border-width: 0 1px 0 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.today-birthday-panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  min-height: 100%;
+  padding: 18px;
+}
+
+.today-panel .today-date-head,
+.today-panel .panel-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: auto;
+  color: var(--sage-dark);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.today-panel .date-chip {
+  background: transparent;
+  border-radius: 0;
+  color: var(--sage-dark);
+  padding: 0;
+}
+
+.today-panel .today-date-head small {
+  color: var(--muted);
+}
+
+.today-birthday-panel .panel-heading,
+.today-birthday-panel .today-list,
+.today-birthday-panel .empty-state,
+.today-birthday-panel .greeting-box {
+  grid-area: auto;
+}
+
+.today-birthday-panel .today-list,
+.today-birthday-panel .empty-state {
+  min-height: 92px;
+}
+
+.today-birthday-panel .empty-state {
+  align-content: center;
+  border-style: dashed;
+  background: rgba(var(--surface-rgb), 0.28);
+}
+
+.home-right-column {
+  display: flex;
+  min-height: 0;
+}
+
+.home-right-column .star-stage-card {
+  flex: 1;
+  min-height: 100%;
+}
+
+.star-stage-card {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.dipper-map {
+  top: 36px;
+  width: min(92%, 620px);
+  height: 270px;
+}
+
+.stage-copy {
+  padding: 34px;
+}
+
+.stage-copy-top span {
+  color: var(--accent-contrast);
+}
+
+.stage-copy strong {
+  font-size: clamp(34px, 3.4vw, 48px);
+}
+
+.upcoming-section {
+  margin-top: 4px;
+  border-top: 1px solid var(--hairline);
+  padding-top: 28px;
+}
+
+.upcoming-section .section-title {
+  align-items: baseline;
+}
+
+.upcoming-section .section-title h2 {
+  font-size: 28px;
+}
+
+.upcoming-section .birthday-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.upcoming-section .birthday-card {
+  min-height: 126px;
+  border: 0;
+  border-right: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  display: grid;
+  grid-template-areas:
+    "name status"
+    "date date";
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 10px 12px;
+  padding: 18px 18px;
+}
+
+.upcoming-section .birthday-card::after {
+  display: none;
+}
+
+.upcoming-section .birthday-card .card-topline {
+  grid-area: status;
+  align-self: start;
+}
+
+.upcoming-section .birthday-card .card-name {
+  grid-area: name;
+}
+
+.upcoming-section .birthday-card .date-pair {
+  grid-area: date;
+  margin: 0;
+}
+
+.upcoming-section .birthday-card .note-line,
+.upcoming-section .birthday-card .meta-line {
+  display: none;
+}
+
+.upcoming-section .birthday-card:last-child {
+  border-right: 0;
+}
+
+.upcoming-section .birthday-card:hover {
+  background: rgba(var(--surface-rgb), 0.32);
+  box-shadow: none;
+  transform: none;
+}
+
+.upcoming-section .card-name h3 {
+  font-size: 24px;
+}
+
+@media (max-width: 1100px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .home-hero::before {
+    inset: 18px 0 24px;
+  }
+
+  .home-right-column .star-stage-card {
+    min-height: 340px;
+  }
+
+  .dipper-map {
+    height: 190px;
+  }
+
+  .upcoming-section .birthday-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  }
+}
+
+@media (max-width: 740px) {
+  .home-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 0 18px;
+  }
+
+  .home-left-column {
+    display: contents;
+  }
+
+  .home-hero::before {
+    inset: 8px -10px 12px;
+    background: rgba(var(--surface-rgb), 0.24);
+  }
+
+  .hero-copy {
+    order: 1;
+    padding: 14px 0 10px;
+  }
+
+  .hero-copy h1 {
+    font-size: 34px;
+    line-height: 1.04;
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+    line-height: 1.62;
+  }
+
+  .today-panel {
+    order: 3;
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 12px 0;
+  }
+
+  .today-panel .today-summary {
+    min-height: 0;
+    padding: 12px 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .today-birthday-panel {
+    padding: 12px 0;
+  }
+
+  .home-right-column .star-stage-card {
+    min-height: 172px;
+  }
+
+  .home-right-column {
+    order: 2;
+  }
+
+  .dipper-map {
+    height: 116px;
+    top: 12px;
+  }
+
+  .stage-copy {
+    padding: 15px;
+  }
+
+  .stage-copy strong {
+    font-size: 26px;
+  }
+
+  .upcoming-section {
+    padding-top: 20px;
+  }
+
+  .upcoming-section .birthday-grid {
+    display: block;
+    border: 1px solid var(--hairline);
+    border-width: 1px 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden;
+  }
+
+  .upcoming-section .birthday-card {
+    min-height: 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    display: grid;
+    grid-template-areas: "name date status";
+    grid-template-columns: minmax(74px, 0.82fr) minmax(0, 1.38fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .upcoming-section .birthday-card:last-child {
+    border-bottom: 0;
+  }
+}
