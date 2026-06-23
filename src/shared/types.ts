@@ -48,6 +48,22 @@ export type BirthdayWriteOptions = {
   allowDuplicate?: boolean;
 };
 
+export type BirthdayBatchInput =
+  | {
+      ids: string[];
+      action: "show" | "hide" | "delete" | "clearGroup" | "clearTags";
+    }
+  | {
+      ids: string[];
+      action: "setGroup";
+      group: string;
+    }
+  | {
+      ids: string[];
+      action: "addTags" | "removeTags";
+      tags: string[];
+    };
+
 export type BirthdayOccurrence = {
   date: LocalDate;
   sourceYear: number;

@@ -1,6 +1,7 @@
 import { API_BASE } from "../shared/types.js";
 import type {
   AdminOperationLog,
+  BirthdayBatchInput,
   BirthdayInput,
   BirthdayWriteOptions,
   BirthdayView,
@@ -123,10 +124,10 @@ export const api = {
       method: "POST",
       json: { visible }
     }),
-  batchBirthdays: (ids: string[], action: "show" | "hide" | "delete") =>
+  batchBirthdays: (input: BirthdayBatchInput) =>
     request<{ birthdays: BirthdayView[]; count: number }>("/admin/birthdays/batch", {
       method: "POST",
-      json: { ids, action }
+      json: input
     }),
   adminOperationLogs: (limit = 80) =>
     request<{ logs: AdminOperationLog[] }>(`/admin/operation-logs?limit=${limit}`),

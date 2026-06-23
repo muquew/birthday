@@ -285,6 +285,103 @@ export function batchDeleteBirthdays(
   return records;
 }
 
+export function batchSetBirthdayGroup(
+  ids: string[],
+  group: string | undefined,
+  actor?: AdminUser
+): BirthdayRecord[] {
+  const nextGroup = group?.trim() || undefined;
+  const records = existingBirthdaysForIds(ids);
+  const changedRecords = records.filter((record) => record.group !== nextGroup);
+  if (changedRecords.length === 0) {
+    return [];
+  }
+
+  const db = getDb();
+  const now = new Date().toISOString();
+  const statement = db.prepare(
+    "UPDATE birthday_people SET person_group = ?, updated_at = ?, updated_by = ? WHERE id = ?"
+  );
+  transaction(db, () => {
+    for (const record of changedRecords) {
+      statement.run(nextGroup ?? null, now, actor?.username ?? null, record.id);
+    }
+  });
+
+  recordOperationLog({
+    action: nextGroup ? "batch_set_group" : "batch_clear_group",
+    entityType: "birthday_batch",
+    actor,
+    detail: {
+      count: changedRecords.length,
+      names: changedRecords.slice(0, 8).map((record) => record.name),
+      group: nextGroup
+    }
+  });
+
+  return changedRecords
+    .map((record) => getBirthday(record.id))
+    .filter((record): record is BirthdayRecord => Boolean(record));
+}
+
+export function batchUpdateBirthdayTags(
+  ids: string[],
+  tags: string[],
+  mode: "add" | "remove" | "clear",
+  actor?: AdminUser
+): BirthdayRecord[] {
+  const targetTags = normalizeTags(tags);
+  const removeTags = new Set(targetTags);
+  const records = existingBirthdaysForIds(ids);
+  const changedRecords = records
+    .map((record) => {
+      const nextTags =
+        mode === "clear"
+          ? []
+          : mode === "add"
+            ? normalizeTags([...record.tags, ...targetTags])
+            : record.tags.filter((tag) => !removeTags.has(tag));
+      return { record, nextTags };
+    })
+    .filter(({ record, nextTags }) => !sameStringArray(record.tags, nextTags));
+
+  if (changedRecords.length === 0) {
+    return [];
+  }
+
+  const db = getDb();
+  const now = new Date().toISOString();
+  const statement = db.prepare(
+    "UPDATE birthday_people SET tags_json = ?, updated_at = ?, updated_by = ? WHERE id = ?"
+  );
+  transaction(db, () => {
+    for (const { record, nextTags } of changedRecords) {
+      statement.run(JSON.stringify(nextTags), now, actor?.username ?? null, record.id);
+    }
+  });
+
+  const action =
+    mode === "clear"
+      ? "batch_clear_tags"
+      : mode === "add"
+        ? "batch_add_tags"
+        : "batch_remove_tags";
+  recordOperationLog({
+    action,
+    entityType: "birthday_batch",
+    actor,
+    detail: {
+      count: changedRecords.length,
+      names: changedRecords.slice(0, 8).map(({ record }) => record.name),
+      tags: mode === "clear" ? undefined : targetTags
+    }
+  });
+
+  return changedRecords
+    .map(({ record }) => getBirthday(record.id))
+    .filter((record): record is BirthdayRecord => Boolean(record));
+}
+
 export function appendBirthdays(
   inputs: BirthdayInput[],
   actor?: AdminUser,
@@ -560,6 +657,14 @@ function parseTags(value: string): string[] {
   } catch {
     return [];
   }
+}
+
+function normalizeTags(tags: string[]): string[] {
+  return Array.from(new Set(tags.map((tag) => tag.trim()).filter(Boolean)));
+}
+
+function sameStringArray(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function serializeLogDetail(detail: unknown): string | undefined {

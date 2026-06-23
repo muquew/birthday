@@ -54,6 +54,7 @@ import {
 } from "react-router-dom";
 import type {
   AdminOperationLog,
+  BirthdayBatchInput,
   BirthdayInput,
   BirthdayWriteOptions,
   BirthdayView,
@@ -91,6 +92,19 @@ type AuthState = {
 type RangeFilter = "all" | "today" | "7" | "30" | "90";
 type AdminListView = "records" | "groups" | "tags";
 type PublicBirthdayViewMode = "list" | "calendar";
+type AdminBatchRequest =
+  | {
+      action: "show" | "hide" | "delete" | "clearGroup" | "clearTags";
+    }
+  | {
+      action: "setGroup";
+      group: string;
+    }
+  | {
+      action: "addTags" | "removeTags";
+      tags: string[];
+    };
+type BatchTagMode = "add" | "remove";
 type SelectOption<T extends string> = {
   value: T;
   label: string;
@@ -1201,22 +1215,23 @@ function AdminBirthdaysPage() {
     });
   };
 
-  const handleBatch = async (action: "show" | "hide" | "delete") => {
+  const handleBatch = async (request: AdminBatchRequest) => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) {
       return;
     }
-    if (action === "delete" && !window.confirm(`确认删除已选 ${ids.length} 条生日记录吗？`)) {
+    if (!confirmAdminBatchRequest(request, ids.length)) {
       return;
     }
     setError("");
     setMessage("");
     try {
-      const result = await api.batchBirthdays(ids, action);
+      const result = await api.batchBirthdays({ ids, ...request } as BirthdayBatchInput);
       await refresh();
-      setSelectedIds(new Set());
-      const label = action === "show" ? "公开" : action === "hide" ? "隐藏" : "删除";
-      setMessage(`已批量${label} ${result.count} 条记录`);
+      if (request.action === "show" || request.action === "hide" || request.action === "delete") {
+        setSelectedIds(new Set());
+      }
+      setMessage(adminBatchResultMessage(request, result.count));
     } catch (err) {
       setError(err instanceof Error ? err.message : "批量操作失败");
     }
@@ -1259,6 +1274,14 @@ function AdminBirthdaysPage() {
     visibilityFilter !== "all" ||
     rangeFilter !== "all";
   const canResetAdminView = hasActiveAdminFilters || viewMode !== "records";
+  const groupOptions = useMemo(
+    () => uniqueSortedValues(records.map((item) => item.group).filter(Boolean)),
+    [records]
+  );
+  const tagOptions = useMemo(
+    () => uniqueSortedValues(records.flatMap((item) => item.tags)),
+    [records]
+  );
 
   return (
     <div className="admin-flow">
@@ -1342,9 +1365,16 @@ function AdminBirthdaysPage() {
           </div>
           <AdminBatchToolbar
             selectedCount={selectedIds.size}
-            onShow={() => void handleBatch("show")}
-            onHide={() => void handleBatch("hide")}
-            onDelete={() => void handleBatch("delete")}
+            groupOptions={groupOptions}
+            tagOptions={tagOptions}
+            onShow={() => void handleBatch({ action: "show" })}
+            onHide={() => void handleBatch({ action: "hide" })}
+            onDelete={() => void handleBatch({ action: "delete" })}
+            onSetGroup={(group) => void handleBatch({ action: "setGroup", group })}
+            onClearGroup={() => void handleBatch({ action: "clearGroup" })}
+            onAddTags={(tags) => void handleBatch({ action: "addTags", tags })}
+            onRemoveTags={(tags) => void handleBatch({ action: "removeTags", tags })}
+            onClearTags={() => void handleBatch({ action: "clearTags" })}
             onClear={() => setSelectedIds(new Set())}
           />
           <AdminViewTabs value={viewMode} onChange={setViewMode} />
@@ -1515,40 +1545,187 @@ function auditRecordMeta(birthday: BirthdayView): string {
 
 function AdminBatchToolbar({
   selectedCount,
+  groupOptions,
+  tagOptions,
   onShow,
   onHide,
   onDelete,
+  onSetGroup,
+  onClearGroup,
+  onAddTags,
+  onRemoveTags,
+  onClearTags,
   onClear
 }: {
   selectedCount: number;
+  groupOptions: string[];
+  tagOptions: string[];
   onShow: () => void;
   onHide: () => void;
   onDelete: () => void;
+  onSetGroup: (group: string) => void;
+  onClearGroup: () => void;
+  onAddTags: (tags: string[]) => void;
+  onRemoveTags: (tags: string[]) => void;
+  onClearTags: () => void;
   onClear: () => void;
 }) {
+  const [organizeOpen, setOrganizeOpen] = useState(false);
+  const [groupValue, setGroupValue] = useState("");
+  const [tagValue, setTagValue] = useState("");
+  const [tagMode, setTagMode] = useState<BatchTagMode>("add");
+  const parsedTags = useMemo(() => parseAdminTagInput(tagValue), [tagValue]);
+  const selected = selectedCount > 0;
+
+  useEffect(() => {
+    if (!selected) {
+      setOrganizeOpen(false);
+    }
+  }, [selected]);
+
+  const appendTagValue = (tag: string) => {
+    setTagValue((current) => {
+      const tags = parseAdminTagInput(current);
+      return tags.includes(tag) ? current : [...tags, tag].join("|");
+    });
+  };
+
+  const applyGroup = () => {
+    const group = groupValue.trim();
+    if (group) {
+      onSetGroup(group);
+    }
+  };
+
+  const applyTags = () => {
+    if (parsedTags.length === 0) {
+      return;
+    }
+    if (tagMode === "add") {
+      onAddTags(parsedTags);
+      return;
+    }
+    onRemoveTags(parsedTags);
+  };
+
   return (
-    <div className={`batch-toolbar ${selectedCount > 0 ? "active" : ""}`}>
-      <span>{selectedCount > 0 ? `已选 ${selectedCount} 条` : "勾选记录后可批量处理"}</span>
+    <div className={`batch-toolbar ${selected ? "active" : ""}`}>
+      <div className="batch-summary">
+        <strong>{selected ? `已选 ${selectedCount} 条` : "批量操作"}</strong>
+        <span>{selected ? "可调整公开状态、分组和标签" : "勾选记录后可批量处理"}</span>
+      </div>
       <div className="batch-actions">
-        <button className="secondary-button" type="button" onClick={onShow} disabled={selectedCount === 0}>
+        <button className="secondary-button" type="button" onClick={onShow} disabled={!selected}>
           <Eye size={16} aria-hidden />
           公开
         </button>
-        <button className="secondary-button" type="button" onClick={onHide} disabled={selectedCount === 0}>
+        <button className="secondary-button" type="button" onClick={onHide} disabled={!selected}>
           <EyeOff size={16} aria-hidden />
           隐藏
         </button>
-        <button className="secondary-button danger-text" type="button" onClick={onDelete} disabled={selectedCount === 0}>
+        <button
+          aria-expanded={organizeOpen}
+          className="secondary-button"
+          type="button"
+          onClick={() => setOrganizeOpen((current) => !current)}
+          disabled={!selected}
+        >
+          <Tags size={16} aria-hidden />
+          整理
+        </button>
+        <button className="secondary-button danger-text" type="button" onClick={onDelete} disabled={!selected}>
           <Trash2 size={16} aria-hidden />
           删除
         </button>
-        {selectedCount > 0 ? (
+        {selected ? (
           <button className="ghost-button" type="button" onClick={onClear}>
             <X size={16} aria-hidden />
-            清空
+            取消选择
           </button>
         ) : null}
       </div>
+      {organizeOpen && selected ? (
+        <div className="batch-organize-panel">
+          <div className="batch-organize-block">
+            <div className="batch-organize-head">
+              <Users size={16} aria-hidden />
+              <div>
+                <strong>分组</strong>
+                <small>设置分组会覆盖已选记录原有分组</small>
+              </div>
+            </div>
+            <div className="batch-input-row">
+              <input
+                value={groupValue}
+                onChange={(event) => setGroupValue(event.target.value)}
+                placeholder="输入分组名称"
+              />
+              <button className="secondary-button" type="button" onClick={applyGroup} disabled={!groupValue.trim()}>
+                设置分组
+              </button>
+              <button className="ghost-button danger-text" type="button" onClick={onClearGroup}>
+                清除分组
+              </button>
+            </div>
+            {groupOptions.length > 0 ? (
+              <div className="batch-choice-row" aria-label="已有分组">
+                {groupOptions.slice(0, 8).map((group) => (
+                  <button key={group} type="button" onClick={() => setGroupValue(group)}>
+                    {group}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <div className="batch-organize-block">
+            <div className="batch-organize-head">
+              <Tags size={16} aria-hidden />
+              <div>
+                <strong>标签</strong>
+                <small>添加会保留原标签并去重，移除只删除指定标签</small>
+              </div>
+            </div>
+            <div className="batch-tag-mode" role="group" aria-label="批量标签模式">
+              <button
+                className={tagMode === "add" ? "active" : ""}
+                type="button"
+                onClick={() => setTagMode("add")}
+              >
+                添加标签
+              </button>
+              <button
+                className={tagMode === "remove" ? "active" : ""}
+                type="button"
+                onClick={() => setTagMode("remove")}
+              >
+                移除标签
+              </button>
+            </div>
+            <div className="batch-input-row">
+              <input
+                value={tagValue}
+                onChange={(event) => setTagValue(event.target.value)}
+                placeholder="多个标签用 |、;、逗号或换行分隔"
+              />
+              <button className="secondary-button" type="button" onClick={applyTags} disabled={parsedTags.length === 0}>
+                {tagMode === "add" ? "添加" : "移除"}
+              </button>
+              <button className="ghost-button danger-text" type="button" onClick={onClearTags}>
+                清空标签
+              </button>
+            </div>
+            {tagOptions.length > 0 ? (
+              <div className="batch-choice-row" aria-label="已有标签">
+                {tagOptions.slice(0, 10).map((tag) => (
+                  <button key={tag} type="button" onClick={() => appendTagValue(tag)}>
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1714,7 +1891,7 @@ function ImportExportPage() {
     }
     setError("");
     try {
-      const result = await api.batchBirthdays(lastImportUndo.ids, "delete");
+      const result = await api.batchBirthdays({ ids: lastImportUndo.ids, action: "delete" });
       setLastImportUndo(undefined);
       setMessage(`已撤回 ${result.count} 条记录`);
     } catch (err) {
@@ -3086,6 +3263,67 @@ function buildFacetRows(records: BirthdayView[], kind: "group" | "tag"): FacetRo
   return Array.from(rows.values()).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
 }
 
+function uniqueSortedValues(values: Array<string | undefined>): string[] {
+  return Array.from(new Set(values.map((value) => value?.trim()).filter(Boolean))).sort((left, right) =>
+    left.localeCompare(right, "zh-CN")
+  );
+}
+
+function parseAdminTagInput(value: string): string[] {
+  return Array.from(
+    new Set(
+      value
+        .split(/[;|,，、\n]/)
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function confirmAdminBatchRequest(request: AdminBatchRequest, count: number): boolean {
+  if (request.action === "delete") {
+    return window.confirm(`确认删除已选 ${count} 条生日记录吗？`);
+  }
+  if (request.action === "setGroup") {
+    return window.confirm(`确认把已选 ${count} 条记录设置为「${request.group}」分组吗？这会覆盖原分组。`);
+  }
+  if (request.action === "clearGroup") {
+    return window.confirm(`确认清除已选 ${count} 条记录的分组吗？`);
+  }
+  if (request.action === "clearTags") {
+    return window.confirm(`确认清空已选 ${count} 条记录的全部标签吗？`);
+  }
+  return true;
+}
+
+function adminBatchResultMessage(request: AdminBatchRequest, count: number): string {
+  if (count === 0) {
+    return "所选记录无需更新";
+  }
+  return `已批量${adminBatchActionText(request)} ${count} 条记录`;
+}
+
+function adminBatchActionText(request: AdminBatchRequest): string {
+  switch (request.action) {
+    case "show":
+      return "公开";
+    case "hide":
+      return "隐藏";
+    case "delete":
+      return "删除";
+    case "setGroup":
+      return `设置分组「${request.group}」`;
+    case "clearGroup":
+      return "清除分组";
+    case "addTags":
+      return `添加标签「${request.tags.join("、")}」`;
+    case "removeTags":
+      return `移除标签「${request.tags.join("、")}」`;
+    case "clearTags":
+      return "清空标签";
+  }
+}
+
 function operationActionLabel(action: string): string {
   const labels: Record<string, string> = {
     create_birthday: "新增生日",
@@ -3096,6 +3334,11 @@ function operationActionLabel(action: string): string {
     batch_show_birthday: "批量公开",
     batch_hide_birthday: "批量隐藏",
     batch_delete_birthday: "批量删除",
+    batch_set_group: "批量设置分组",
+    batch_clear_group: "批量清除分组",
+    batch_add_tags: "批量添加标签",
+    batch_remove_tags: "批量移除标签",
+    batch_clear_tags: "批量清空标签",
     replace_birthdays: "替换生日库",
     import_csv_birthdays: "CSV 导入",
     import_json_append: "JSON 追加",
@@ -3126,10 +3369,14 @@ function formatLogDetail(detail?: string): string {
       defaultUpcomingDays?: number;
       previousName?: string;
       changedFields?: string[];
+      group?: string;
+      tags?: string[];
     };
     const parts = [
       parsed.changedFields?.length ? `修改：${parsed.changedFields.join("、")}` : undefined,
       parsed.count !== undefined ? `${parsed.count} 条` : undefined,
+      parsed.group ? `分组：${parsed.group}` : undefined,
+      parsed.tags?.length ? `标签：${parsed.tags.join("、")}` : undefined,
       parsed.names?.length ? parsed.names.join("、") : undefined,
       parsed.templates !== undefined ? `${parsed.templates} 条祝福模板` : undefined,
       parsed.defaultUpcomingDays !== undefined ? `近期 ${parsed.defaultUpcomingDays} 天` : undefined,

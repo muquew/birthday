@@ -5,7 +5,9 @@ import { z, ZodError } from "zod";
 import { login, logout, getCurrentAdmin, requireAdmin } from "./auth.js";
 import {
   batchDeleteBirthdays,
+  batchSetBirthdayGroup,
   batchSetBirthdayVisibility,
+  batchUpdateBirthdayTags,
   appendBirthdays,
   createBirthday,
   deleteBirthday,
@@ -38,7 +40,12 @@ import type {
   JsonImportMode,
   SiteSettings
 } from "../shared/types.js";
-import { birthdayInputSchema, loginSchema, siteSettingsSchema } from "../shared/validation.js";
+import {
+  birthdayBatchSchema,
+  birthdayInputSchema,
+  loginSchema,
+  siteSettingsSchema
+} from "../shared/validation.js";
 
 type ImportPreviewSeed = {
   rowNumber: number;
@@ -244,15 +251,33 @@ function createAdminRouter() {
 
   router.post("/birthdays/batch", (req, res, next) => {
     try {
-      const parsed = z
-        .object({
-          ids: z.array(z.string().min(1)).min(1).max(500),
-          action: z.enum(["show", "hide", "delete"])
-        })
-        .parse(req.body);
+      const parsed = birthdayBatchSchema.parse(req.body);
       if (parsed.action === "delete") {
         const deleted = batchDeleteBirthdays(parsed.ids, req.adminUser);
         res.json({ birthdays: deleted.map(adminView), count: deleted.length });
+        return;
+      }
+      if (parsed.action === "setGroup" || parsed.action === "clearGroup") {
+        const birthdays = batchSetBirthdayGroup(
+          parsed.ids,
+          parsed.action === "setGroup" ? parsed.group : undefined,
+          req.adminUser
+        );
+        res.json({ birthdays: birthdays.map(adminView), count: birthdays.length });
+        return;
+      }
+      if (
+        parsed.action === "addTags" ||
+        parsed.action === "removeTags" ||
+        parsed.action === "clearTags"
+      ) {
+        const birthdays = batchUpdateBirthdayTags(
+          parsed.ids,
+          parsed.action === "clearTags" ? [] : parsed.tags,
+          parsed.action === "addTags" ? "add" : parsed.action === "removeTags" ? "remove" : "clear",
+          req.adminUser
+        );
+        res.json({ birthdays: birthdays.map(adminView), count: birthdays.length });
         return;
       }
       const birthdays = batchSetBirthdayVisibility(

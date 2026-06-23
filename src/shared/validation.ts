@@ -100,6 +100,51 @@ export const birthdayInputSchema = z
 
 export const birthdayUpdateSchema = birthdayInputSchema;
 
+const batchIdsSchema = z.array(z.string().trim().min(1)).min(1).max(500);
+const batchTagsSchema = z
+  .array(z.string().trim().min(1).max(32))
+  .min(1, "标签不能为空")
+  .max(50, "一次最多处理 50 个标签")
+  .transform((tags) => Array.from(new Set(tags)));
+
+export const birthdayBatchSchema = z.discriminatedUnion("action", [
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("show")
+  }),
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("hide")
+  }),
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("delete")
+  }),
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("setGroup"),
+    group: z.string().trim().min(1, "分组不能为空").max(80, "分组过长")
+  }),
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("clearGroup")
+  }),
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("addTags"),
+    tags: batchTagsSchema
+  }),
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("removeTags"),
+    tags: batchTagsSchema
+  }),
+  z.object({
+    ids: batchIdsSchema,
+    action: z.literal("clearTags")
+  })
+]);
+
 export const loginSchema = z.object({
   username: z.string().trim().min(1),
   password: z.string().min(1)

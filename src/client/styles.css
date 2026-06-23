@@ -1784,18 +1784,29 @@ p {
 }
 
 .batch-toolbar {
-  align-items: center;
+  align-items: start;
   background: rgba(47, 111, 103, 0.07);
   border: 1px solid rgba(47, 111, 103, 0.16);
   border-radius: 8px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
-  justify-content: space-between;
   margin: 12px 0;
   padding: 10px 12px;
 }
 
-.batch-toolbar > span {
+.batch-summary {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.batch-summary strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.batch-summary span {
   color: var(--muted);
   font-size: 13px;
   font-weight: 900;
@@ -1811,6 +1822,110 @@ p {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.batch-organize-panel {
+  border-top: 1px dashed rgba(115, 93, 58, 0.22);
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 12px;
+}
+
+.batch-organize-block {
+  background: rgba(var(--surface-rgb), 0.54);
+  border: 1px solid rgba(47, 111, 103, 0.12);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.batch-organize-head {
+  align-items: start;
+  color: var(--sage-dark);
+  display: flex;
+  gap: 8px;
+}
+
+.batch-organize-head div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.batch-organize-head strong {
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.batch-organize-head small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.batch-input-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.batch-input-row input {
+  min-height: 40px;
+}
+
+.batch-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.batch-choice-row button {
+  background: rgba(47, 111, 103, 0.07);
+  border: 1px solid rgba(47, 111, 103, 0.14);
+  border-radius: 999px;
+  color: var(--sage-dark);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 28px;
+  padding: 4px 10px;
+}
+
+.batch-choice-row button:hover {
+  background: rgba(47, 111, 103, 0.12);
+}
+
+.batch-tag-mode {
+  background: rgba(var(--surface-soft-rgb), 0.88);
+  border: 1px solid rgba(47, 111, 103, 0.14);
+  border-radius: 8px;
+  display: inline-grid;
+  gap: 4px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-self: start;
+  padding: 4px;
+}
+
+.batch-tag-mode button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 30px;
+  padding: 0 10px;
+}
+
+.batch-tag-mode button.active {
+  background: var(--sage-dark);
+  color: var(--accent-contrast);
 }
 
 .danger-text {
@@ -6134,6 +6249,27 @@ body::before {
 @media (max-width: 740px) {
   .site-shell .filter-bar .filter-reset-button {
     margin-left: 0;
+    width: 100%;
+  }
+
+  .batch-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .batch-actions {
+    justify-content: stretch;
+  }
+
+  .batch-organize-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .batch-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .batch-tag-mode {
+    justify-self: stretch;
     width: 100%;
   }
 }

@@ -232,6 +232,129 @@ describe.sequential("admin API integration", () => {
     ]);
   });
 
+  it("batch manages groups and tags with precise change counts", async () => {
+    const first = await requestJson<{ birthday: { id: string } }>("/admin/birthdays", {
+      method: "POST",
+      body: {
+        name: "批量整理一",
+        calendarType: "gregorian",
+        month: 10,
+        day: 1,
+        group: "旧组",
+        tags: ["旧标签"]
+      }
+    });
+    const second = await requestJson<{ birthday: { id: string } }>("/admin/birthdays", {
+      method: "POST",
+      body: {
+        name: "批量整理二",
+        calendarType: "lunar",
+        month: 10,
+        day: 2,
+        tags: ["旧标签", "会移除"]
+      }
+    });
+    const ids = [first.body.birthday.id, second.body.birthday.id];
+
+    const setGroup = await requestJson<{
+      count: number;
+      birthdays: Array<{ group?: string; updatedBy?: string }>;
+    }>("/admin/birthdays/batch", {
+      method: "POST",
+      body: {
+        ids,
+        action: "setGroup",
+        group: "星星组"
+      }
+    });
+    expect(setGroup.status).toBe(200);
+    expect(setGroup.body.count).toBe(2);
+    expect(setGroup.body.birthdays.map((birthday) => birthday.group)).toEqual(["星星组", "星星组"]);
+    expect(setGroup.body.birthdays.every((birthday) => birthday.updatedBy === "admin")).toBe(true);
+
+    const addTags = await requestJson<{
+      count: number;
+      birthdays: Array<{ name: string; tags: string[] }>;
+    }>("/admin/birthdays/batch", {
+      method: "POST",
+      body: {
+        ids,
+        action: "addTags",
+        tags: ["星星", "旧标签", "星星"]
+      }
+    });
+    expect(addTags.status).toBe(200);
+    expect(addTags.body.count).toBe(2);
+    expect(addTags.body.birthdays.find((birthday) => birthday.name === "批量整理一")?.tags).toEqual([
+      "旧标签",
+      "星星"
+    ]);
+    expect(addTags.body.birthdays.find((birthday) => birthday.name === "批量整理二")?.tags).toEqual([
+      "旧标签",
+      "会移除",
+      "星星"
+    ]);
+
+    const removeTags = await requestJson<{
+      count: number;
+      birthdays: Array<{ name: string; tags: string[] }>;
+    }>("/admin/birthdays/batch", {
+      method: "POST",
+      body: {
+        ids,
+        action: "removeTags",
+        tags: ["会移除"]
+      }
+    });
+    expect(removeTags.status).toBe(200);
+    expect(removeTags.body.count).toBe(1);
+    expect(removeTags.body.birthdays[0].name).toBe("批量整理二");
+    expect(removeTags.body.birthdays[0].tags).toEqual(["旧标签", "星星"]);
+
+    const clearGroup = await requestJson<{
+      count: number;
+      birthdays: Array<{ group?: string }>;
+    }>("/admin/birthdays/batch", {
+      method: "POST",
+      body: {
+        ids,
+        action: "clearGroup"
+      }
+    });
+    expect(clearGroup.status).toBe(200);
+    expect(clearGroup.body.count).toBe(2);
+    expect(clearGroup.body.birthdays.every((birthday) => birthday.group === undefined)).toBe(true);
+
+    const clearTags = await requestJson<{
+      count: number;
+      birthdays: Array<{ tags: string[] }>;
+    }>("/admin/birthdays/batch", {
+      method: "POST",
+      body: {
+        ids,
+        action: "clearTags"
+      }
+    });
+    expect(clearTags.status).toBe(200);
+    expect(clearTags.body.count).toBe(2);
+    expect(clearTags.body.birthdays.every((birthday) => birthday.tags.length === 0)).toBe(true);
+
+    const logs = await requestJson<{ logs: Array<{ action: string; detail?: string }> }>(
+      "/admin/operation-logs?limit=20"
+    );
+    expect(logs.status).toBe(200);
+    expect(logs.body.logs.map((log) => log.action)).toEqual(
+      expect.arrayContaining([
+        "batch_set_group",
+        "batch_add_tags",
+        "batch_remove_tags",
+        "batch_clear_group",
+        "batch_clear_tags"
+      ])
+    );
+    expect(logs.body.logs.find((log) => log.action === "batch_add_tags")?.detail).toContain("星星");
+  });
+
   it("normalizes legacy import calendar labels and birthday text", async () => {
     const csvPreview = await requestJson<{
       preview: {
