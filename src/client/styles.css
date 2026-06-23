@@ -9392,7 +9392,54 @@ body::before {
   }
 
   .site-shell .upcoming-section .birthday-grid {
-    padding-bottom: 2px;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-right: 0;
+    overflow: visible;
+    padding: 0;
+    scroll-snap-type: none;
+  }
+
+  .site-shell .upcoming-section .birthday-grid::after {
+    content: none;
+  }
+
+  .site-shell .upcoming-section .birthday-card {
+    align-items: stretch;
+    display: grid;
+    flex: initial;
+    gap: 4px 8px;
+    grid-template-areas:
+      "name status"
+      "date date";
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 66px;
+    padding: 9px 10px;
+    scroll-snap-align: unset;
+    width: 100%;
+  }
+
+  .site-shell .upcoming-section .birthday-card:nth-of-type(odd):last-of-type {
+    grid-column: 1 / -1;
+  }
+
+  .site-shell .upcoming-section .card-name h3 {
+    font-size: 18px;
+  }
+
+  .site-shell .upcoming-section .date-pair {
+    align-self: end;
+    min-width: 0;
+  }
+
+  .site-shell .upcoming-section .date-pair span:first-child {
+    font-size: 12px;
+  }
+
+  .site-shell .upcoming-section .countdown {
+    max-width: none;
+    padding: 4px 7px;
   }
 
   .site-shell .quick-months {
