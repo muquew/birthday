@@ -606,9 +606,6 @@ function StarStageCard({
         <span className="stage-glow" />
       </div>
       <div className="stage-copy">
-        <div className="stage-copy-top">
-          <span>北斗星图</span>
-        </div>
         <strong>{loading ? "读取星图" : "北斗七星"}</strong>
       </div>
     </article>
