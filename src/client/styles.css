@@ -9340,3 +9340,89 @@ body::before {
     padding: 12px;
   }
 }
+
+/* Mobile touch-up: top breathing room, compact upcoming rail, steadier month jumps. */
+@media (max-width: 740px) {
+  .site-shell .public-header {
+    align-items: center;
+    border-radius: 18px;
+    margin-top: 8px;
+    min-height: 58px;
+    padding: 7px 10px;
+  }
+
+  .site-shell .brand {
+    line-height: 1.18;
+  }
+
+  .site-shell > main {
+    padding-top: 8px;
+  }
+
+  .site-shell .page-title {
+    padding-top: 22px;
+  }
+
+  .site-shell .page-title h1 {
+    line-height: 1.14;
+  }
+
+  .site-shell .home-page-flow {
+    gap: 12px;
+  }
+
+  .site-shell .home-hero {
+    padding-top: 14px;
+  }
+
+  .site-shell .upcoming-section {
+    gap: 6px;
+    margin-top: -2px;
+    padding-bottom: 8px;
+  }
+
+  .site-shell .upcoming-section .section-title {
+    min-height: 0;
+    padding-bottom: 0;
+  }
+
+  .site-shell .upcoming-section .section-title h2 {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  .site-shell .upcoming-section .birthday-grid {
+    padding-bottom: 2px;
+  }
+
+  .site-shell .quick-months {
+    margin-top: 0;
+  }
+
+  .site-shell .home-page-flow .quick-months {
+    display: none;
+  }
+
+  .site-shell .month-lane {
+    scroll-margin-top: 86px;
+  }
+
+  .site-shell .month-rail {
+    gap: 2px;
+    right: 2px;
+    width: 34px;
+  }
+
+  .site-shell .month-rail a {
+    min-height: 30px;
+    min-width: 34px;
+  }
+
+  .site-shell .month-rail-line {
+    width: 14px;
+  }
+
+  .site-shell .month-rail a.active .month-rail-line {
+    width: 18px;
+  }
+}

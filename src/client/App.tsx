@@ -749,13 +749,34 @@ function publicViewModeFromParam(value: string | null): PublicBirthdayViewMode {
 function MonthsPage() {
   const birthdays = usePublicBirthdays();
   const [activeMonth, setActiveMonth] = useState(() => new Date().getMonth() + 1);
+  const monthSelectionGuardUntil = useRef(0);
+
+  const scrollToMonth = (month: number) => {
+    const element = document.getElementById(`month-${month}`);
+    if (!element) {
+      return;
+    }
+    const isMobile = window.matchMedia("(max-width: 740px)").matches;
+    const offset = isMobile ? 86 : 24;
+    const top = window.scrollY + element.getBoundingClientRect().top - offset;
+    monthSelectionGuardUntil.current = Date.now() + 1100;
+    setActiveMonth(month);
+    window.scrollTo({
+      behavior: "smooth",
+      top: Math.max(0, top)
+    });
+  };
 
   useEffect(() => {
     let frame = 0;
 
     const updateActiveMonth = () => {
       frame = 0;
-      const targetY = window.innerHeight * 0.38;
+      if (Date.now() < monthSelectionGuardUntil.current) {
+        return;
+      }
+      const isMobile = window.matchMedia("(max-width: 740px)").matches;
+      const targetY = window.innerHeight * (isMobile ? 0.24 : 0.38);
       let nextActive = 1;
       let nearestDistance = Number.POSITIVE_INFINITY;
 
@@ -807,11 +828,7 @@ function MonthsPage() {
     const rect = rail.getBoundingClientRect();
     const offset = Math.min(Math.max(event.clientY - rect.top, 0), rect.height - 1);
     const month = Math.min(12, Math.max(1, Math.floor((offset / rect.height) * 12) + 1));
-    setActiveMonth(month);
-    document.getElementById(`month-${month}`)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+    scrollToMonth(month);
     event.preventDefault();
   };
   const handleMonthRailPointerDown = (event: ReactPointerEvent<HTMLElement>) => {
@@ -856,7 +873,10 @@ function MonthsPage() {
               className={activeMonth === group.month ? "active" : undefined}
               href={`#month-${group.month}`}
               key={group.month}
-              onClick={() => setActiveMonth(group.month)}
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToMonth(group.month);
+              }}
             >
               <span className="month-rail-line" />
               <span className="month-rail-label">{group.month}月</span>
