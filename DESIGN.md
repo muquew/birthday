@@ -2,15 +2,32 @@
 name: "星星生日墙"
 description: "温暖、清楚、方便维护的社群生日墙"
 colors:
-  classic-bg: "#f6edde"
-  classic-bg-2: "#efe0c8"
-  classic-ink: "#101714"
-  classic-muted: "#625b50"
+  classic-bg: "#f4ead9"
+  classic-bg-2: "#e7d8bd"
+  classic-surface: "#fff8ec"
+  classic-surface-soft: "#fbf0df"
+  classic-ink: "#0c1514"
+  classic-muted: "#655d50"
+  classic-line: "#d6c2a3"
   gold: "#a97816"
-  teal: "#0c645e"
+  heritage-gold: "#9f741d"
+  teal: "#176b62"
+  teal-dark: "#073f3d"
   rose: "#bd5848"
+  warm-cream: "#fff9e8"
   night: "#07100f"
+  stage-night: "#031314"
+  stage-aqua: "#76d6c9"
   dark-ink: "#f7ecdc"
+  warm-dust: "rgba(159, 116, 29, 0.08)"
+  teal-dust: "rgba(23, 107, 98, 0.08)"
+  star-speck: "rgba(255, 247, 163, 0.84)"
+  star-grid: "rgba(255, 255, 255, 0.07)"
+  dipper-line: "rgba(223, 178, 78, 0.34)"
+  dipper-star: "rgba(255, 249, 232, 0.34)"
+  dipper-star-stroke: "rgba(255, 249, 232, 0.35)"
+  dipper-star-preview: "rgba(255, 249, 232, 0.62)"
+  mobile-nav-shadow: "rgba(38, 22, 11, 0.18)"
 typography:
   display:
     fontFamily: '"Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif'
@@ -18,7 +35,7 @@ typography:
     lineHeight: 1.04
     letterSpacing: "0"
   body:
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif'
     fontSize: "16px"
     fontWeight: 500
     lineHeight: 1.6
@@ -28,9 +45,16 @@ typography:
     fontWeight: 900
     lineHeight: 1.2
 rounded:
+  hairline: "2px"
+  line: "3px"
+  micro: "4px"
+  compact: "8px"
   control: "12px"
   panel: "14px"
   mobile-panel: "16px"
+  large-panel: "18px"
+  header: "22px"
+  pill: "999px"
 spacing:
   xs: "4px"
   sm: "8px"
