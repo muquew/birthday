@@ -418,7 +418,7 @@ function HomePage() {
   };
 
   return (
-    <div className="page-flow">
+    <div className="page-flow home-page-flow">
       <section className="home-hero">
         <div className="home-left-column">
           <div className="hero-copy star-hero-copy">
@@ -485,7 +485,7 @@ function HomePage() {
             </Link>
           }
         />
-        <BirthdayGrid birthdays={upcoming} loading={birthdays.loading} />
+        <BirthdayGrid birthdays={upcoming} fillRowColumns={4} loading={birthdays.loading} />
       </section>
 
       <section className="quick-months" aria-label="月份快速入口">
@@ -545,6 +545,8 @@ function StarStageCard({
   return (
     <article className="star-stage-card">
       <div className="stage-sky">
+        <span className="stage-rings" aria-hidden="true" />
+        <span className="stage-horizon" aria-hidden="true" />
         <svg className="dipper-map" viewBox="0 0 150 94" role="img" aria-label="北斗七星生日图">
           {DIPPER_LINES.map(([from, to]) => (
             <line
@@ -559,6 +561,9 @@ function StarStageCard({
           {DIPPER_POINTS.map((point, index) => {
             const birthday = birthdays[index];
             const lit = isLit(birthday);
+            const labelX = point.x + (index <= 1 ? -6 : 5);
+            const labelY = point.y + (index === 6 ? -6 : index === 0 ? 2 : -5);
+            const labelAnchor = index <= 1 ? "end" : "start";
             return (
               <g key={`${point.x}-${point.y}`}>
                 <circle
@@ -572,6 +577,16 @@ function StarStageCard({
                 <title>
                   {birthday ? `${birthday.name}，${formatCountdown(birthday.occurrence?.daysUntil)}` : "等待生日记录"}
                 </title>
+                {birthday ? (
+                  <text
+                    className={`dipper-label ${lit ? "active" : ""}`}
+                    textAnchor={labelAnchor}
+                    x={labelX}
+                    y={labelY}
+                  >
+                    {birthday.name}
+                  </text>
+                ) : null}
               </g>
             );
           })}
@@ -623,7 +638,7 @@ function BirthdaysPage() {
   };
 
   return (
-    <div className="page-flow">
+    <div className="page-flow directory-page-flow">
       <PageTitle title="全部生日" meta={birthdays.loading ? "读取中" : `共 ${totalCount} 人`} />
       <section className="directory-controls" aria-label="生日筛选和视图">
         <div className="public-filter-head">
@@ -670,8 +685,8 @@ function BirthdaysPage() {
               ]}
             />
             {hasActiveFilters ? (
-              <button className="filter-clear-button" type="button" onClick={resetPublicFilters}>
-                <X size={15} aria-hidden />
+              <button className="secondary-button filter-reset-button" type="button" onClick={resetPublicFilters}>
+                <RotateCcw size={16} aria-hidden />
                 清除筛选
               </button>
             ) : null}
@@ -783,7 +798,7 @@ function MonthsPage() {
   }, [birthdays.data]);
 
   return (
-    <div className="page-flow">
+    <div className="page-flow months-page-flow">
       <PageTitle title="按下次日期查看" />
       {birthdays.error ? <Notice tone="danger">{birthdays.error}</Notice> : null}
       <div className="months-layout">
@@ -1018,32 +1033,6 @@ function ThemeSelect({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function FilterSummary({
-  visible,
-  total,
-  loading,
-  hasActiveFilters,
-  onReset
-}: {
-  visible: number;
-  total: number;
-  loading: boolean;
-  hasActiveFilters: boolean;
-  onReset: () => void;
-}) {
-  return (
-    <div className="filter-summary" aria-live="polite">
-      <span>{loading ? "正在读取生日" : `显示 ${visible} / ${total}`}</span>
-      {hasActiveFilters ? (
-        <button type="button" onClick={onReset}>
-          <X size={15} aria-hidden />
-          清除筛选
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
 function LoginPage() {
   const auth = useAuth();
   const navigate = useNavigate();
@@ -1264,6 +1253,12 @@ function AdminBirthdaysPage() {
     records,
     visibilityFilter
   ]);
+  const hasActiveAdminFilters =
+    query.trim() !== "" ||
+    calendarFilter !== "all" ||
+    visibilityFilter !== "all" ||
+    rangeFilter !== "all";
+  const canResetAdminView = hasActiveAdminFilters || viewMode !== "records";
 
   return (
     <div className="admin-flow">
@@ -1334,6 +1329,7 @@ function AdminBirthdaysPage() {
             />
             <button
               className="secondary-button"
+              disabled={!canResetAdminView}
               type="button"
               onClick={() => {
                 resetFilters();
@@ -1344,18 +1340,6 @@ function AdminBirthdaysPage() {
               重置
             </button>
           </div>
-          <FilterSummary
-            visible={filteredRecords.length}
-            total={records.length}
-            loading={birthdays.loading}
-            hasActiveFilters={
-              query.trim() !== "" ||
-              calendarFilter !== "all" ||
-              visibilityFilter !== "all" ||
-              rangeFilter !== "all"
-            }
-            onReset={resetFilters}
-          />
           <AdminBatchToolbar
             selectedCount={selectedIds.size}
             onShow={() => void handleBatch("show")}
@@ -2304,9 +2288,11 @@ function RecordStoragePanel({ birthday }: { birthday: BirthdayView }) {
 
 function BirthdayGrid({
   birthdays,
+  fillRowColumns = 0,
   loading
 }: {
   birthdays: PublicBirthday[];
+  fillRowColumns?: number;
   loading: boolean;
 }) {
   if (loading) {
@@ -2321,10 +2307,15 @@ function BirthdayGrid({
   if (birthdays.length === 0) {
     return <EmptyState title="没有匹配的生日" />;
   }
+  const placeholderCount =
+    fillRowColumns > 1 ? (fillRowColumns - (birthdays.length % fillRowColumns)) % fillRowColumns : 0;
   return (
     <div className="birthday-grid">
       {birthdays.map((birthday) => (
         <BirthdayCard key={birthday.id} birthday={birthday} />
+      ))}
+      {Array.from({ length: placeholderCount }, (_, index) => (
+        <div className="birthday-card-placeholder" aria-hidden="true" key={`placeholder-${index}`} />
       ))}
     </div>
   );
