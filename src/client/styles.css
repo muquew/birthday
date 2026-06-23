@@ -4032,15 +4032,15 @@ textarea {
 /* Visual polish pass: celestial almanac */
 :root,
 :root[data-theme="classic"] {
-  --paper: #eef2ee;
-  --paper-strong: #e3ebe5;
-  --surface: #fffef9;
-  --surface-rgb: 255, 254, 249;
-  --surface-soft: #f8faf4;
-  --surface-soft-rgb: 248, 250, 244;
+  --paper: #f7efe2;
+  --paper-strong: #eadcc8;
+  --surface: #fffaf2;
+  --surface-rgb: 255, 250, 242;
+  --surface-soft: #fcf4e7;
+  --surface-soft-rgb: 252, 244, 231;
   --ink: #101917;
-  --muted: #596760;
-  --line: #c7d3cb;
+  --muted: #6a6358;
+  --line: #dccdb6;
   --sage: #1b746b;
   --sage-dark: #0c4d49;
   --coral: #bd5848;
@@ -4048,13 +4048,13 @@ textarea {
   --blue: #285f73;
   --night: #061415;
   --accent-contrast: #f6d67c;
-  --body-grid-a: rgba(12, 77, 73, 0.075);
-  --body-grid-b: rgba(40, 95, 115, 0.045);
-  --hairline: rgba(25, 55, 48, 0.16);
+  --body-grid-a: rgba(154, 114, 30, 0.1);
+  --body-grid-b: rgba(12, 77, 73, 0.052);
+  --hairline: rgba(112, 84, 42, 0.18);
   --panel: rgba(var(--surface-rgb), 0.84);
   --panel-strong: rgba(var(--surface-rgb), 0.96);
-  --shadow: 0 30px 70px rgba(18, 41, 36, 0.13);
-  --shadow-soft: 0 12px 34px rgba(18, 41, 36, 0.08);
+  --shadow: 0 30px 70px rgba(61, 45, 25, 0.13);
+  --shadow-soft: 0 12px 34px rgba(61, 45, 25, 0.08);
 }
 
 :root[data-theme="bright"] {
