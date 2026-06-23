@@ -9982,3 +9982,47 @@ body::before {
     var(--exhibit-paper);
   border-color: rgba(229, 150, 132, 0.24);
 }
+
+/* Mobile breathing correction after the exhibition pass. */
+@media (max-width: 740px) {
+  .site-shell .upcoming-section .birthday-card {
+    min-height: 76px;
+    padding: 12px 13px;
+  }
+
+  .site-shell .upcoming-section .birthday-card::before {
+    left: 13px;
+    right: 13px;
+    top: 10px;
+  }
+
+  .site-shell .directory-page-flow .birthday-card {
+    padding: 10px 12px;
+  }
+
+  .site-shell .directory-page-flow .birthday-card.today-birthday {
+    padding-left: 12px;
+  }
+
+  .site-shell .months-page-flow .compact-birthday {
+    padding: 8px 10px;
+  }
+
+  .site-shell .months-page-flow .compact-birthday.today-birthday {
+    padding-left: 10px;
+  }
+
+  .site-shell .today-birthday-panel .today-list,
+  .site-shell .today-birthday-panel .empty-state,
+  .site-shell .today-birthday-panel .greeting-box {
+    margin-inline: 2px;
+  }
+
+  .site-shell .birthday-calendar-month {
+    padding: 14px;
+  }
+
+  .site-shell .calendar-day {
+    padding: 5px;
+  }
+}
