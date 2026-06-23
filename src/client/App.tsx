@@ -32,9 +32,7 @@ import {
 } from "lucide-react";
 import {
   createContext,
-  type DependencyList,
   type FormEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
   useContext,
@@ -61,7 +59,6 @@ import type {
   BirthdayView,
   CalendarType,
   DataAuditIssue,
-  DataAuditReport,
   ImportPreview,
   JsonImportMode,
   SiteSettings
@@ -72,15 +69,47 @@ import {
   adminExportUrl,
   type AdminUser,
   type PublicBirthday,
-  type PublicSettings,
   type TodayDateInfo
 } from "./api.js";
-
-type LoadState<T> = {
-  data?: T;
-  loading: boolean;
-  error?: string;
-};
+import {
+  CustomSelect,
+  PublicViewSwitch,
+  RangeTabs
+} from "./components/controls.js";
+import {
+  useAdminBirthdayData,
+  useAdminDataAudit,
+  useAdminOperationLogs,
+  useAdminSettings,
+  usePublicBirthdays,
+  usePublicSettings,
+  useTodayInfo
+} from "./data-hooks.js";
+import {
+  DIPPER_LINES,
+  DIPPER_POINTS,
+  THEME_STORAGE_KEY,
+  emptyForm,
+  themeOptions,
+  type AdminBatchRequest,
+  type AdminBirthdaySummary,
+  type AdminListView,
+  type AppTheme,
+  type BatchTagMode,
+  type BirthdayCalendarCell,
+  type BirthdayCalendarMonth,
+  type BirthdayFormState,
+  type DuplicateFormInfo,
+  type FacetRow,
+  type PublicBirthdayViewMode,
+  type RangeFilter,
+  type ThemeState
+} from "./model.js";
+import {
+  birthdayDuplicateKey,
+  duplicateKeySet,
+  normalizedPersonName
+} from "./utils.js";
 
 type AuthState = {
   user?: AdminUser;
@@ -90,82 +119,8 @@ type AuthState = {
   logout: () => Promise<void>;
 };
 
-type RangeFilter = "all" | "today" | "7" | "30" | "90";
-type AdminListView = "records" | "groups" | "tags";
-type PublicBirthdayViewMode = "list" | "calendar";
-type AdminBatchRequest =
-  | {
-      action: "show" | "hide" | "delete" | "clearGroup" | "clearTags";
-    }
-  | {
-      action: "setGroup";
-      group: string;
-    }
-  | {
-      action: "addTags" | "removeTags";
-      tags: string[];
-    };
-type BatchTagMode = "add" | "remove";
-type SelectOption<T extends string> = {
-  value: T;
-  label: string;
-};
-type AppTheme = "classic" | "bright" | "dark";
-
-type ThemeState = {
-  theme: AppTheme;
-  setTheme: (theme: AppTheme) => void;
-};
-
-type AdminBirthdaySummary = {
-  total: number;
-  hidden: number;
-  lunarAttention: number;
-  duplicateKeyCount: number;
-  duplicateRecordCount: number;
-};
-
 const AuthContext = createContext<AuthState | undefined>(undefined);
 const ThemeContext = createContext<ThemeState | undefined>(undefined);
-
-const THEME_STORAGE_KEY = "xingxing-theme";
-const themeOptions: Array<SelectOption<AppTheme>> = [
-  { value: "classic", label: "经典暖色" },
-  { value: "bright", label: "清透亮色" },
-  { value: "dark", label: "夜间深色" }
-];
-const DIPPER_POINTS = [
-  { x: 128, y: 20 },
-  { x: 132, y: 52 },
-  { x: 100, y: 68 },
-  { x: 88, y: 42 },
-  { x: 64, y: 48 },
-  { x: 40, y: 54 },
-  { x: 20, y: 76 }
-] as const;
-const DIPPER_LINES = [
-  [6, 5],
-  [5, 4],
-  [4, 3],
-  [3, 2],
-  [2, 1],
-  [1, 0]
-] as const;
-
-const emptyForm: BirthdayFormState = {
-  name: "",
-  calendarType: "gregorian",
-  year: "",
-  month: "1",
-  day: "1",
-  isLeapMonth: false,
-  leapMonthPolicy: "normalMonthIfNoLeap",
-  displayAge: false,
-  group: "",
-  tags: "",
-  note: "",
-  visible: true
-};
 
 export function App() {
   return (
@@ -896,176 +851,6 @@ function MonthsPage() {
           ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function RangeTabs({
-  value,
-  onChange
-}: {
-  value: RangeFilter;
-  onChange: (value: RangeFilter) => void;
-}) {
-  const options: Array<{ value: RangeFilter; label: string }> = [
-    { value: "all", label: "全部" },
-    { value: "today", label: "今天" },
-    { value: "30", label: "30天" },
-    { value: "90", label: "90天" }
-  ];
-  return (
-    <div className="range-tabs" aria-label="生日范围">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          className={value === option.value ? "active" : ""}
-          type="button"
-          onClick={() => onChange(option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function PublicViewSwitch({
-  value,
-  onChange
-}: {
-  value: PublicBirthdayViewMode;
-  onChange: (value: PublicBirthdayViewMode) => void;
-}) {
-  const options: Array<{ value: PublicBirthdayViewMode; label: string; icon: ReactNode }> = [
-    { value: "list", label: "列表", icon: <ListFilter size={16} aria-hidden /> },
-    { value: "calendar", label: "日历", icon: <CalendarDays size={16} aria-hidden /> }
-  ];
-  return (
-    <div className="public-view-switch" role="tablist" aria-label="全部生日视图">
-      {options.map((option) => (
-        <button
-          aria-selected={value === option.value}
-          className={value === option.value ? "active" : ""}
-          key={option.value}
-          role="tab"
-          type="button"
-          onClick={() => onChange(option.value)}
-        >
-          {option.icon}
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function CustomSelect<T extends string>({
-  ariaLabel,
-  value,
-  onChange,
-  options,
-  className
-}: {
-  ariaLabel: string;
-  value: T;
-  onChange: (value: T) => void;
-  options: Array<SelectOption<T>>;
-  className?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const selected = options.find((option) => option.value === value) ?? options[0];
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("pointerdown", closeOnOutsidePointer);
-    return () => document.removeEventListener("pointerdown", closeOnOutsidePointer);
-  }, [open]);
-
-  const moveOptionFocus = (event: ReactKeyboardEvent<HTMLDivElement>, direction: 1 | -1) => {
-    const buttons = Array.from(
-      rootRef.current?.querySelectorAll<HTMLButtonElement>(".custom-select-option") ?? []
-    );
-    if (buttons.length === 0) {
-      return;
-    }
-    const currentIndex = buttons.findIndex((button) => button === document.activeElement);
-    const nextIndex =
-      currentIndex === -1
-        ? options.findIndex((option) => option.value === value)
-        : currentIndex + direction;
-    buttons[(nextIndex + buttons.length) % buttons.length]?.focus();
-    event.preventDefault();
-  };
-
-  const openFromKeyboard = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
-    if (["ArrowDown", "Enter", " "].includes(event.key)) {
-      setOpen(true);
-      event.preventDefault();
-      window.requestAnimationFrame(() => {
-        rootRef.current?.querySelector<HTMLButtonElement>("[aria-selected='true']")?.focus();
-      });
-    }
-  };
-
-  return (
-    <div className={`custom-select ${className ?? ""}`} ref={rootRef}>
-      <button
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        aria-label={ariaLabel}
-        className="custom-select-trigger"
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        onKeyDown={openFromKeyboard}
-      >
-        <span>{selected.label}</span>
-        <ChevronRight className="custom-select-arrow" size={16} aria-hidden />
-      </button>
-      {open ? (
-        <div
-          className="custom-select-menu"
-          role="listbox"
-          aria-label={ariaLabel}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              setOpen(false);
-              rootRef.current?.querySelector<HTMLButtonElement>(".custom-select-trigger")?.focus();
-              event.preventDefault();
-            }
-            if (event.key === "ArrowDown") {
-              moveOptionFocus(event, 1);
-            }
-            if (event.key === "ArrowUp") {
-              moveOptionFocus(event, -1);
-            }
-          }}
-        >
-          {options.map((option) => (
-            <button
-              aria-selected={option.value === value}
-              className="custom-select-option"
-              key={option.value}
-              role="option"
-              type="button"
-              onClick={() => {
-                onChange(option.value);
-                setOpen(false);
-              }}
-            >
-              <span>{option.label}</span>
-              {option.value === value ? <Check size={15} aria-hidden /> : null}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -2706,20 +2491,6 @@ function birthdayDateText(birthday: Pick<PublicBirthday, "calendarLabel" | "orig
   return `${birthday.calendarLabel} ${birthday.originalDateText.replace(/^\d{1,4}年/, "")}`;
 }
 
-type BirthdayCalendarCell = {
-  key: string;
-  day?: number;
-  isToday?: boolean;
-  birthdays: PublicBirthday[];
-};
-
-type BirthdayCalendarMonth = {
-  year: number;
-  month: number;
-  count: number;
-  cells: BirthdayCalendarCell[];
-};
-
 function buildBirthdayCalendarMonths(birthdays: PublicBirthday[]): BirthdayCalendarMonth[] {
   const groups = new Map<string, PublicBirthday[]>();
   for (const birthday of birthdays) {
@@ -3015,111 +2786,6 @@ function previewCalendarType(value: unknown): string {
   return previewValue(value);
 }
 
-function useLoad<T>(load: () => Promise<T>, deps: DependencyList = []): LoadState<T> {
-  const [state, setState] = useState<LoadState<T>>({ loading: true });
-  useEffect(() => {
-    let active = true;
-    load()
-      .then((data) => active && setState({ loading: false, data }))
-      .catch(
-        (error) =>
-          active &&
-          setState({
-            loading: false,
-            error: error instanceof Error ? error.message : "读取失败"
-          })
-      );
-    return () => {
-      active = false;
-    };
-  }, deps);
-  return state;
-}
-
-function usePublicBirthdays(): LoadState<PublicBirthday[]> {
-  return useLoad(() => api.publicBirthdays().then((result) => result.birthdays));
-}
-
-function useTodayInfo(): LoadState<TodayDateInfo> {
-  return useLoad(() => api.publicToday().then((result) => result.today));
-}
-
-function usePublicSettings(): LoadState<PublicSettings> {
-  return useLoad(() => api.publicSettings());
-}
-
-function useAdminBirthdayData() {
-  const [records, setRecords] = useState<BirthdayView[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | undefined>();
-
-  const load = async (options: { keepLoading?: boolean } = {}) => {
-    if (!options.keepLoading) {
-      setLoading(true);
-    }
-    try {
-      const result = await api.adminBirthdays();
-      setRecords(result.birthdays);
-      setError(undefined);
-      return result.birthdays;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "读取失败";
-      setError(message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let active = true;
-    api
-      .adminBirthdays()
-      .then((result) => {
-        if (active) {
-          setRecords(result.birthdays);
-          setError(undefined);
-        }
-      })
-      .catch((err) => {
-        if (active) {
-          setError(err instanceof Error ? err.message : "读取失败");
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const summary = useMemo(() => summarizeAdminBirthdays(records), [records]);
-
-  return {
-    data: records,
-    records,
-    loading,
-    error,
-    refresh: () => load({ keepLoading: true }),
-    summary
-  };
-}
-
-function useAdminOperationLogs(limit = 80): LoadState<AdminOperationLog[]> {
-  return useLoad(() => api.adminOperationLogs(limit).then((result) => result.logs), [limit]);
-}
-
-function useAdminDataAudit(): LoadState<DataAuditReport> {
-  return useLoad(() => api.adminDataAudit().then((result) => result.audit));
-}
-
-function useAdminSettings(): LoadState<SiteSettings> {
-  return useLoad(() => api.adminSettings().then((result) => result.settings));
-}
-
 function PageTitle({ eyebrow, title, meta }: { eyebrow?: string; title: string; meta?: string }) {
   return (
     <header className="page-title">
@@ -3242,28 +2908,6 @@ function LoadingScreen({ label }: { label: string }) {
 function Notice({ children, tone }: { children: ReactNode; tone: "danger" | "success" }) {
   return <div className={`notice ${tone}`}>{children}</div>;
 }
-
-function summarizeAdminBirthdays(records: BirthdayView[]): AdminBirthdaySummary {
-  const duplicateKeys = duplicateKeySet(records);
-  return {
-    total: records.length,
-    hidden: records.filter((item) => !item.visible).length,
-    lunarAttention: records.filter((item) => item.calendarType === "lunar" && item.isLeapMonth)
-      .length,
-    duplicateKeyCount: duplicateKeys.size,
-    duplicateRecordCount: records.filter((item) => duplicateKeys.has(birthdayDuplicateKey(item)))
-      .length
-  };
-}
-
-type FacetRow = {
-  name: string;
-  count: number;
-  visible: number;
-  hidden: number;
-  upcoming30: number;
-  examples: string[];
-};
 
 function buildFacetRows(records: BirthdayView[], kind: "group" | "tag"): FacetRow[] {
   const rows = new Map<string, FacetRow>();
@@ -3524,34 +3168,6 @@ function templatesFromTextarea(value: string): string[] {
     .filter(Boolean);
 }
 
-function duplicateKeySet(records: BirthdayView[]): Set<string> {
-  const counts = new Map<string, number>();
-  for (const item of records) {
-    const key = birthdayDuplicateKey(item);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  return new Set(
-    Array.from(counts.entries())
-      .filter(([, count]) => count > 1)
-      .map(([key]) => key)
-  );
-}
-
-function birthdayDuplicateKey(item: Pick<BirthdayView, "name" | "calendarType" | "isLeapMonth" | "month" | "day">): string {
-  return [
-    normalizedPersonName(item.name),
-    item.calendarType,
-    item.isLeapMonth ? "leap" : "normal",
-    item.month,
-    item.day
-  ].join("|");
-}
-
-type DuplicateFormInfo = {
-  sameName: BirthdayView[];
-  exact: BirthdayView[];
-};
-
 function duplicateInfoForForm(
   form: BirthdayFormState,
   records: BirthdayView[],
@@ -3585,10 +3201,6 @@ function birthdayDuplicateKeyFromForm(form: BirthdayFormState): string | undefin
     month,
     day
   ].join("|");
-}
-
-function normalizedPersonName(value: string): string {
-  return value.trim().replace(/\s+/g, "").toLowerCase();
 }
 
 function duplicateRecordSummary(record: BirthdayView): string {
@@ -3634,21 +3246,6 @@ function csvTemplate(): string {
     "闰月示例,农历,闰6月1日,,,,true,normalMonthIfNoLeap,false,示例,闰月,无闰月时按普通月,true"
   ].join("\n");
 }
-
-type BirthdayFormState = {
-  name: string;
-  calendarType: CalendarType;
-  year: string;
-  month: string;
-  day: string;
-  isLeapMonth: boolean;
-  leapMonthPolicy: "onlyLeapMonth" | "normalMonthIfNoLeap";
-  displayAge: boolean;
-  group: string;
-  tags: string;
-  note: string;
-  visible: boolean;
-};
 
 function formFromBirthday(birthday: BirthdayView): BirthdayFormState {
   return {
