@@ -10542,6 +10542,24 @@ body::before {
     margin-top: 2px;
   }
 
+  .site-shell .upcoming-section .birthday-card + .birthday-card::after {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--public-line) 82%, transparent),
+      color-mix(in srgb, var(--public-line) 48%, transparent) 72%,
+      transparent
+    );
+    content: "";
+    display: block;
+    height: 1px;
+    left: 14px;
+    margin: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 8px;
+    top: -1px;
+  }
+
   .site-shell .upcoming-section .birthday-card::before {
     background: var(--sage-dark);
     border: 2px solid var(--public-panel);
