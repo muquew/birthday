@@ -8866,3 +8866,111 @@ body::before {
     white-space: nowrap;
   }
 }
+
+/* Visual review pass: target sizes and calmer rhythm */
+.site-shell .nav-tabs a,
+.site-shell .icon-text-button,
+.site-shell .public-view-switch button,
+.site-shell .range-tabs button {
+  min-height: 40px;
+}
+
+.site-shell .public-view-switch button,
+.site-shell .range-tabs button {
+  padding-block: 8px;
+}
+
+.site-shell .upcoming-section .birthday-card-placeholder {
+  background:
+    linear-gradient(90deg, rgba(var(--surface-rgb), 0.38), rgba(var(--surface-rgb), 0.12)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(169, 120, 22, 0.08) 0,
+      rgba(169, 120, 22, 0.08) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  border-color: rgba(169, 120, 22, 0.12);
+  opacity: 0.56;
+}
+
+.site-shell .month-lane {
+  min-height: 168px;
+}
+
+.site-shell .month-rail a {
+  min-height: 40px;
+}
+
+.admin-shell .admin-view-tabs button,
+.admin-shell .ghost-button {
+  min-height: 40px;
+}
+
+.admin-shell .birthday-admin-table .icon-button {
+  min-width: 36px;
+}
+
+.audit-record-action {
+  align-items: center;
+  border: 1px solid rgba(47, 111, 103, 0.16);
+  border-radius: 6px;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 36px;
+  min-width: 52px;
+  padding: 6px 10px;
+}
+
+@media (max-width: 740px) {
+  .site-shell {
+    padding-bottom: 56px;
+  }
+
+  .site-shell .mobile-tabbar {
+    backdrop-filter: none;
+    bottom: auto;
+    left: auto;
+    margin: 10px auto 18px;
+    position: static;
+    right: auto;
+    width: 100%;
+  }
+
+  .site-shell .icon-text-button,
+  .site-shell .public-view-switch button,
+  .site-shell .range-tabs button,
+  .site-shell .filter-toggle {
+    min-height: 44px;
+  }
+
+  .site-shell .home-page-flow {
+    gap: 18px;
+  }
+
+  .site-shell .upcoming-section {
+    padding-bottom: 8px;
+  }
+
+  .site-shell .upcoming-section .birthday-card-placeholder {
+    display: none;
+  }
+
+  .site-shell .quick-months {
+    margin-top: 4px;
+  }
+
+  .site-shell .month-board {
+    padding-bottom: calc(98px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .site-shell .month-lane {
+    box-shadow: 0 8px 24px rgba(67, 48, 22, 0.08);
+  }
+
+  .admin-shell .admin-view-tabs button,
+  .admin-shell .ghost-button,
+  .audit-record-action {
+    min-height: 44px;
+  }
+}

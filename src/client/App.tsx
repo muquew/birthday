@@ -318,6 +318,9 @@ function PublicLayout() {
           <ThemeSelect compact />
         </div>
       </header>
+      <nav className="mobile-tabbar" aria-label="移动端公共导航">
+        {publicNav}
+      </nav>
       <main>
         <Outlet />
       </main>
@@ -327,9 +330,6 @@ function PublicLayout() {
           <small>{correctionContact}</small>
         </footer>
       ) : null}
-      <nav className="mobile-tabbar" aria-label="移动端公共导航">
-        {publicNav}
-      </nav>
     </div>
   );
 }
@@ -623,12 +623,20 @@ function StarStageCard({
 
 function BirthdaysPage() {
   const birthdays = usePublicBirthdays();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const [month, setMonth] = useState("all");
   const [calendarType, setCalendarType] = useState<"all" | CalendarType>("all");
   const [range, setRange] = useState<RangeFilter>("all");
-  const [viewMode, setViewMode] = useState<PublicBirthdayViewMode>("list");
+  const [viewMode, setViewMode] = useState<PublicBirthdayViewMode>(() =>
+    publicViewModeFromParam(searchParams.get("view"))
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const nextViewMode = publicViewModeFromParam(searchParams.get("view"));
+    setViewMode((current) => (current === nextViewMode ? current : nextViewMode));
+  }, [searchParams]);
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -650,6 +658,21 @@ function BirthdaysPage() {
     setMonth("all");
     setCalendarType("all");
     setRange("all");
+  };
+  const handleViewModeChange = (nextViewMode: PublicBirthdayViewMode) => {
+    setViewMode(nextViewMode);
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (nextViewMode === "calendar") {
+          next.set("view", "calendar");
+        } else {
+          next.delete("view");
+        }
+        return next;
+      },
+      { replace: true }
+    );
   };
 
   return (
@@ -707,7 +730,7 @@ function BirthdaysPage() {
             ) : null}
           </div>
         </div>
-        <PublicViewSwitch value={viewMode} onChange={setViewMode} />
+        <PublicViewSwitch value={viewMode} onChange={handleViewModeChange} />
       </section>
       {birthdays.error ? <Notice tone="danger">{birthdays.error}</Notice> : null}
       {viewMode === "calendar" ? (
@@ -717,6 +740,10 @@ function BirthdaysPage() {
       )}
     </div>
   );
+}
+
+function publicViewModeFromParam(value: string | null): PublicBirthdayViewMode {
+  return value === "calendar" ? "calendar" : "list";
 }
 
 function MonthsPage() {
