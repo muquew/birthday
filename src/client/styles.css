@@ -10496,7 +10496,6 @@ body::before {
     background:
       radial-gradient(circle at 12px 18px, rgba(31, 81, 76, 0.18), transparent 7px),
       linear-gradient(90deg, rgba(158, 113, 37, 0.09), transparent 22px),
-      repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0 42px, rgba(77, 61, 35, 0.045) 42px 43px),
       linear-gradient(180deg, rgba(var(--surface-rgb), 0.88), rgba(var(--surface-soft-rgb), 0.56));
     border: 1px solid var(--public-line);
     border-radius: 18px;
@@ -10525,7 +10524,6 @@ body::before {
   .site-shell .upcoming-section .birthday-card:nth-of-type(odd):last-of-type {
     background: transparent;
     border: 0;
-    border-bottom: 1px solid rgba(77, 61, 35, 0.14);
     border-radius: 0;
     box-shadow: none;
     display: grid;
@@ -10538,6 +10536,10 @@ body::before {
     padding: 14px 2px 14px 16px;
     position: relative;
     width: 100%;
+  }
+
+  .site-shell .upcoming-section .birthday-card + .birthday-card {
+    margin-top: 2px;
   }
 
   .site-shell .upcoming-section .birthday-card::before {
@@ -11421,7 +11423,6 @@ body::before {
     background:
       radial-gradient(circle at 12px 18px, var(--theme-rule-a), transparent 7px),
       linear-gradient(90deg, var(--theme-ambient-b), transparent 22px),
-      repeating-linear-gradient(180deg, rgba(var(--surface-rgb), 0.14) 0 42px, var(--hairline) 42px 43px),
       linear-gradient(180deg, var(--theme-card-a), var(--theme-card-b));
     border-color: var(--hairline);
     box-shadow:
