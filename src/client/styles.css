@@ -9184,3 +9184,159 @@ body::before {
     min-height: 44px;
   }
 }
+
+/* Mobile spacing calibration: keep the bottom nav, tighten content rhythm. */
+@media (max-width: 740px) {
+  .site-shell > main {
+    padding-bottom: 18px;
+  }
+
+  .site-shell .page-flow,
+  .site-shell .home-page-flow,
+  .site-shell .directory-page-flow,
+  .site-shell .months-page-flow {
+    gap: 16px;
+  }
+
+  .site-shell .page-title {
+    padding: 18px 0 2px;
+  }
+
+  .site-shell .page-title h1 {
+    font-size: 34px;
+    line-height: 1.08;
+  }
+
+  .site-shell .directory-controls {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .site-shell .directory-page-flow .birthday-card {
+    min-height: 60px;
+    padding: 8px 0;
+  }
+
+  .site-shell .directory-page-flow .countdown {
+    max-width: none;
+    min-width: 56px;
+    text-align: center;
+  }
+
+  .site-shell .directory-page-flow .birthday-card .countdown {
+    max-width: 68px;
+    min-width: 60px;
+    padding-inline: 8px;
+  }
+
+  .site-shell .birthday-calendar-board {
+    gap: 12px;
+  }
+
+  .site-shell .birthday-calendar-month {
+    border-radius: 14px;
+    gap: 9px;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .site-shell .birthday-calendar-month header {
+    padding-bottom: 8px;
+  }
+
+  .site-shell .birthday-calendar-month header strong {
+    font-size: 28px;
+  }
+
+  .site-shell .calendar-weekdays,
+  .site-shell .calendar-days {
+    gap: 4px;
+  }
+
+  .site-shell .calendar-day {
+    border-radius: 8px;
+    gap: 2px;
+    min-height: 43px;
+    padding: 4px;
+  }
+
+  .site-shell .calendar-day-number {
+    font-size: 11px;
+  }
+
+  .site-shell .calendar-day small,
+  .site-shell .calendar-day em {
+    font-size: 9px;
+  }
+
+  .site-shell .month-board {
+    gap: 8px;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    padding-right: 40px;
+  }
+
+  .site-shell .month-lane {
+    align-items: start;
+    border-radius: 13px;
+    box-shadow: 0 6px 18px rgba(67, 48, 22, 0.06);
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 48px minmax(0, 1fr);
+    min-height: 72px;
+    padding: 10px 12px;
+  }
+
+  .site-shell .month-lane header {
+    border-bottom: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-shell .month-lane header span {
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .site-shell .month-lane header small {
+    font-size: 12px;
+  }
+
+  .site-shell .month-lane-list {
+    align-content: start;
+    gap: 0;
+    min-height: 0;
+  }
+
+  .site-shell .month-lane-list > .muted {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+  }
+
+  .site-shell .months-page-flow .compact-birthday {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(64px, 0.8fr) minmax(0, 1.2fr);
+    min-height: 42px;
+    padding: 6px 0;
+  }
+
+  .site-shell .months-page-flow .compact-birthday strong,
+  .site-shell .months-page-flow .compact-birthday span,
+  .site-shell .months-page-flow .compact-birthday small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-shell .admin-status-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+  }
+
+  .admin-shell .admin-status-rail div {
+    min-width: 0;
+    padding: 12px;
+  }
+}
