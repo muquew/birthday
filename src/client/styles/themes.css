@@ -904,3 +904,412 @@
     box-shadow: none;
   }
 }
+
+/* Theme typography: each theme owns its text ramp, not just its background. */
+:root,
+:root[data-theme="classic"] {
+  --text-strong: #0b1514;
+  --text-body: #20231f;
+  --text-soft: #5f584c;
+  --text-faint: #7a7063;
+  --text-accent: #073f3d;
+  --text-link: #0a5d57;
+  --text-warm: #876115;
+  --text-attention: #9f382e;
+  --text-inverse: #fff8ec;
+  --inverse-surface: #061312;
+  --inverse-text: #fff4cf;
+  --button-primary-bg: #073f3d;
+  --button-primary-text: #fff8ec;
+  --accent-chip-bg: rgba(23, 107, 98, 0.1);
+  --attention-chip-bg: rgba(180, 79, 64, 0.1);
+  --warning-chip-bg: rgba(159, 116, 29, 0.13);
+  --control-bg: rgba(255, 248, 236, 0.76);
+  --control-bg-strong: rgba(255, 248, 236, 0.94);
+  --control-hover: rgba(23, 107, 98, 0.08);
+  --control-border: rgba(95, 69, 29, 0.22);
+  --ink: var(--text-strong);
+  --muted: var(--text-soft);
+  --sage-dark: var(--text-accent);
+  --coral: var(--text-attention);
+  --gold: var(--text-warm);
+}
+
+:root[data-theme="bright"] {
+  --text-strong: #07151d;
+  --text-body: #172a34;
+  --text-soft: #4a6270;
+  --text-faint: #667d88;
+  --text-accent: #174f61;
+  --text-link: #1c6579;
+  --text-warm: #756120;
+  --text-attention: #a9473e;
+  --text-inverse: #f7fbff;
+  --inverse-surface: #071f2a;
+  --inverse-text: #fff1bd;
+  --button-primary-bg: #174f61;
+  --button-primary-text: #f7fbff;
+  --accent-chip-bg: rgba(49, 95, 138, 0.1);
+  --attention-chip-bg: rgba(185, 93, 80, 0.1);
+  --warning-chip-bg: rgba(142, 118, 46, 0.13);
+  --control-bg: rgba(249, 252, 255, 0.72);
+  --control-bg-strong: rgba(249, 252, 255, 0.94);
+  --control-hover: rgba(49, 95, 138, 0.08);
+  --control-border: rgba(49, 95, 138, 0.2);
+  --ink: var(--text-strong);
+  --muted: var(--text-soft);
+  --sage-dark: var(--text-accent);
+  --coral: var(--text-attention);
+  --gold: var(--text-warm);
+}
+
+:root[data-theme="jade"] {
+  --text-strong: #0b1a11;
+  --text-body: #18301f;
+  --text-soft: #526653;
+  --text-faint: #6d8068;
+  --text-accent: #164d37;
+  --text-link: #216846;
+  --text-warm: #7e641c;
+  --text-attention: #a44439;
+  --text-inverse: #f8fff4;
+  --inverse-surface: #082116;
+  --inverse-text: #f7df95;
+  --button-primary-bg: #164d37;
+  --button-primary-text: #f8fff4;
+  --accent-chip-bg: rgba(47, 118, 84, 0.11);
+  --attention-chip-bg: rgba(185, 94, 79, 0.1);
+  --warning-chip-bg: rgba(155, 122, 43, 0.14);
+  --control-bg: rgba(251, 255, 248, 0.72);
+  --control-bg-strong: rgba(251, 255, 248, 0.94);
+  --control-hover: rgba(47, 118, 84, 0.09);
+  --control-border: rgba(47, 118, 84, 0.21);
+  --ink: var(--text-strong);
+  --muted: var(--text-soft);
+  --sage-dark: var(--text-accent);
+  --coral: var(--text-attention);
+  --gold: var(--text-warm);
+}
+
+:root[data-theme="rose"] {
+  --text-strong: #241513;
+  --text-body: #3a221f;
+  --text-soft: #705b55;
+  --text-faint: #8a746d;
+  --text-accent: #6e343d;
+  --text-link: #8a4048;
+  --text-warm: #8b5d1a;
+  --text-attention: #a9473c;
+  --text-inverse: #fff7f2;
+  --inverse-surface: #2b1719;
+  --inverse-text: #ffe1a7;
+  --button-primary-bg: #6e343d;
+  --button-primary-text: #fff7f2;
+  --accent-chip-bg: rgba(158, 81, 83, 0.11);
+  --attention-chip-bg: rgba(195, 93, 79, 0.11);
+  --warning-chip-bg: rgba(165, 115, 37, 0.13);
+  --control-bg: rgba(255, 250, 247, 0.74);
+  --control-bg-strong: rgba(255, 250, 247, 0.95);
+  --control-hover: rgba(158, 81, 83, 0.08);
+  --control-border: rgba(158, 81, 83, 0.2);
+  --ink: var(--text-strong);
+  --muted: var(--text-soft);
+  --sage-dark: var(--text-accent);
+  --coral: var(--text-attention);
+  --gold: var(--text-warm);
+}
+
+:root[data-theme="dark"] {
+  --text-strong: #fff3e4;
+  --text-body: #eee4d5;
+  --text-soft: #c6bcad;
+  --text-faint: #9baaa2;
+  --text-accent: #a5e3d8;
+  --text-link: #b4f0e4;
+  --text-warm: #e0b85f;
+  --text-attention: #ff9178;
+  --text-inverse: #061010;
+  --inverse-surface: #050d0d;
+  --inverse-text: #ffe6a8;
+  --button-primary-bg: #a5e3d8;
+  --button-primary-text: #061010;
+  --accent-chip-bg: rgba(118, 216, 201, 0.13);
+  --attention-chip-bg: rgba(231, 122, 98, 0.13);
+  --warning-chip-bg: rgba(224, 184, 95, 0.13);
+  --control-bg: rgba(27, 42, 40, 0.78);
+  --control-bg-strong: rgba(34, 51, 49, 0.92);
+  --control-hover: rgba(118, 216, 201, 0.12);
+  --control-border: rgba(142, 222, 209, 0.2);
+  --ink: var(--text-strong);
+  --muted: var(--text-soft);
+  --sage-dark: var(--text-accent);
+  --coral: var(--text-attention);
+  --gold: var(--text-warm);
+}
+
+body,
+.site-shell,
+.admin-shell,
+.login-page,
+.loading-screen {
+  color: var(--text-body);
+}
+
+.site-shell h1,
+.site-shell h2,
+.site-shell h3,
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.login-panel h1,
+.brand,
+.admin-brand,
+.today-date-main strong,
+.spotlight-card strong,
+.birthday-card h3,
+.card-name h3,
+.compact-birthday strong,
+.date-pair span:first-child,
+.compact-date span,
+.batch-summary strong,
+.batch-organize-head strong,
+.storage-field dd,
+.form-preview strong,
+.operation-log-item strong,
+.audit-card-head strong,
+.audit-record strong,
+.import-preview-stat strong {
+  color: var(--text-strong);
+}
+
+.hero-subtitle,
+.hero-kicker small,
+.public-footer,
+.public-footer small,
+.today-date-head small,
+.today-date-main span,
+.spotlight-card span,
+.spotlight-card small,
+.star-stats span,
+.star-stats small,
+.card-name small,
+.date-pair,
+.date-pair span + span,
+.note-line,
+.page-title-meta,
+.calendar-weekdays span,
+.birthday-calendar-month header span,
+.birthday-calendar-month header small,
+.calendar-day-number,
+.compact-birthday span,
+.compact-birthday small,
+.compact-date small,
+.muted,
+.login-panel label,
+.birthday-form label,
+.field-label,
+.log-title-note,
+.operation-log-item small,
+.operation-log-item em,
+.audit-card p,
+.audit-record span,
+.audit-record small,
+.audit-more,
+.storage-field dt,
+.field-hint,
+.duplicate-notice small,
+.duplicate-notice span,
+.edit-context span,
+.edit-context small,
+.record-storage-panel summary small,
+.batch-summary span,
+.batch-organize-head small,
+.admin-table th,
+.admin-table td small,
+.file-name,
+.undo-import-bar span,
+.import-preview-stat span,
+.empty-state,
+.custom-select-empty {
+  color: var(--text-soft);
+}
+
+.brand svg,
+.admin-brand svg,
+.eyebrow,
+.hero-kicker,
+.panel-heading,
+.text-link,
+.theme-control,
+.public-footer span,
+.nav-tabs a.active,
+.nav-tabs a:hover,
+.admin-nav a.active,
+.admin-nav a:hover,
+.secondary-button,
+.filter-clear-button,
+.custom-select-arrow,
+.custom-select-option[aria-selected="true"],
+.calendar-day small,
+.calendar-day em,
+.birthday-calendar-month header strong,
+.month-lane header,
+.greeting-box span,
+.admin-record-count,
+.operation-log-item span,
+.audit-summary-card strong,
+.audit-record-action,
+.form-preview span,
+.duplicate-notice strong,
+.edit-context,
+.record-storage-panel summary span,
+.batch-organize-head,
+.batch-choice-row button,
+.facet-item strong,
+.icon-button,
+.icon-text-button {
+  color: var(--text-accent);
+}
+
+.countdown,
+.icon-button.danger,
+.danger-text,
+.notice.danger,
+.table-error,
+.audit-card.bad .audit-card-head span,
+.form-preview.error,
+.table-warn,
+.audit-card.warn .audit-card-head span,
+.import-preview-stat.warn strong {
+  color: var(--text-attention);
+}
+
+.table-ok,
+.notice.success,
+.import-preview-stat.ok strong {
+  color: var(--success);
+}
+
+.table-warn,
+.import-preview-stat.warn strong,
+.audit-card.warn .audit-card-head span {
+  color: var(--text-warm);
+}
+
+input,
+select,
+textarea,
+.custom-select-trigger,
+.custom-select-option,
+.facet-item {
+  color: var(--text-body);
+}
+
+input,
+select,
+textarea,
+.custom-select-trigger,
+.custom-select-menu,
+.range-tabs,
+.public-view-switch,
+.admin-view-tabs,
+.secondary-button,
+.icon-button,
+.icon-text-button,
+.theme-select .custom-select-trigger {
+  background: var(--control-bg);
+  border-color: var(--control-border);
+}
+
+.ghost-button {
+  background: transparent;
+  border-color: transparent;
+}
+
+.custom-select-menu,
+.public-header,
+.mobile-tabbar {
+  background-color: var(--control-bg-strong);
+}
+
+.secondary-button:hover,
+.ghost-button:hover,
+.icon-button:hover,
+.icon-text-button:hover,
+.custom-select-trigger:hover,
+.range-tabs button:hover,
+.public-view-switch button:hover,
+.admin-view-tabs button:hover {
+  background: var(--control-hover);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
+.primary-button,
+.file-picker,
+.row-select-control .row-select-checkbox:checked + .row-select-mark,
+.batch-tag-mode button.active {
+  background: var(--button-primary-bg);
+  border-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.primary-button:hover,
+.file-picker:hover {
+  background: color-mix(in srgb, var(--button-primary-bg) 88%, var(--text-strong));
+}
+
+.date-chip,
+.range-tabs button.active,
+.public-view-switch button.active,
+.admin-view-tabs button.active {
+  background: var(--inverse-surface);
+  color: var(--inverse-text);
+}
+
+.range-tabs button,
+.public-view-switch button,
+.admin-view-tabs button,
+.nav-tabs a,
+.admin-nav a,
+.ghost-button,
+.month-rail a,
+.batch-tag-mode button {
+  color: var(--text-soft);
+}
+
+.meta-line span,
+.custom-select-option[aria-selected="true"],
+.custom-select-option:hover,
+.icon-text-button:hover,
+.month-rail a:hover,
+.month-rail a:focus-visible,
+.month-rail a.active,
+.admin-record-count,
+.edit-context,
+.record-storage-panel,
+.batch-toolbar,
+.batch-choice-row button,
+.facet-item:hover {
+  background-color: var(--accent-chip-bg);
+}
+
+.birthday-card.today-birthday,
+.spotlight-card.today-birthday,
+.compact-birthday.today-birthday {
+  background:
+    linear-gradient(90deg, var(--attention-chip-bg), transparent 56%),
+    rgba(var(--surface-soft-rgb), 0.96);
+}
+
+.batch-toolbar.active,
+.audit-summary-card.warn,
+.undo-import-bar,
+.import-options-bar,
+.duplicate-notice {
+  background: var(--warning-chip-bg);
+}
